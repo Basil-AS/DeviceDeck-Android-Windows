@@ -9,33 +9,25 @@ import com.spizganed.quickbuds.bluetooth.PacketLogger
 import com.spizganed.quickbuds.protocol.Capabilities
 import com.spizganed.quickbuds.protocol.ModelCatalog
 import com.spizganed.quickbuds.protocol.OppoPacketFramer
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 
 /**
- * The problem report, filled by [ReportActivity]: JSON to the report Worker (report-worker/). The desktop app does
- * the same (desktop/src/report.rs).
+ * Locally prepared and scrubbed feedback content. Android opens a browser issue draft; it does not upload the log.
  */
 object ProblemReport {
-
-    private const val WORKER = "https://quickbuds-report.spizganed.workers.dev/report"
 
     /** One report. [categories] are [CATEGORIES] values; [log] is null when the person turned it off. */
     class Report(val model: String, val categories: List<String>, val description: String, val log: String?, val crash: Boolean)
 
-    /** The Category options, in the Worker's own words (it drops any other value, report-worker/src/index.js). */
+    /** Feedback categories presented in the Android issue form. */
     val CATEGORIES = listOf("UI", "Lag", "Connection", "Feature not working", "Battery", "Other")
 
-    /** The log's first line: phone, Android, QuickBuds, buds model and firmware. Exported logs start with it too. */
+    /** The log's first line: phone, Android, DeviceDeck, buds model and firmware. Exported logs start with it too. */
     fun header(c: Context): String {
         val p = c.getSharedPreferences(ThemeRes.PREFS_NAME, Context.MODE_PRIVATE)
         val model = ModelCatalog.current(c)?.name ?: p.getString(ModelCatalog.KEY_DEVICE_NAME, null) ?: "unknown buds"
         val id = p.getString(Capabilities.KEY_PRODUCT_ID, null) ?: "?"
         val fw = p.getString(BudsConnectionManager.KEY_FIRMWARE, null) ?: "?"
-        return "QuickBuds ${UpdateChecker.installed(c)} | ${Build.MANUFACTURER} ${Build.MODEL} | " +
+        return "DeviceDeck ${UpdateChecker.installed(c)} | ${Build.MANUFACTURER} ${Build.MODEL} | " +
             "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) | $model ($id) firmware $fw"
     }
 
@@ -120,44 +112,7 @@ object ProblemReport {
         r.log?.let { "Log:\n$it" }
     ).joinToString("\n\n")
 
-    /**
-     * Posts [r] to the Worker. Network thread only. Returns (sent, the Worker's answer text when it refused the report).
-     */
-    fun send(c: Context, r: Report): Pair<Boolean, String?> {
-        val json = JSONObject()
-            .put("app", "QuickBuds ${UpdateChecker.installed(c)} Android")
-            .put("model", r.model)
-            .put("categories", JSONArray(r.categories))
-            .put("description", r.description)
-            .put("log", r.log ?: JSONObject.NULL)
-            .put("crash", r.crash)
-            .put("id", UsagePing.appId(c))
-        return try {
-            val (code, text) = post(WORKER, json.toString())
-            if (code != 200) PacketLogger.log("REPORT: worker answered $code")
-            val message = runCatching { JSONObject(text).getString("message") }.getOrNull()
-            (code == 200) to message.takeIf { code != 200 }
-        } catch (e: IOException) {
-            PacketLogger.error("report send", e)
-            false to null
-        }
-    }
+    /** DeviceDeck does not upload reports to third-party servers. The UI opens its public issue tracker. */
+    fun send(c: Context, r: Report): Pair<Boolean, String?> = false to "Open a GitHub issue to share feedback."
 
-    /** The answer code and body. Throws [IOException] without a connection. */
-    private fun post(url: String, body: String): Pair<Int, String> {
-        val conn = URL(url).openConnection() as HttpURLConnection
-        try {
-            conn.requestMethod = "POST"
-            conn.doOutput = true
-            conn.connectTimeout = 15_000
-            conn.readTimeout = 15_000
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-            conn.outputStream.use { it.write(body.toByteArray()) }
-            val code = conn.responseCode
-            val text = (if (code < 400) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
-            return code to text
-        } finally {
-            conn.disconnect()
-        }
-    }
 }

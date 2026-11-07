@@ -7,7 +7,7 @@ Two ways, from easy to thorough:
 
 | | Needs | Sees |
 |---|---|---|
-| **1. The app's own log** | Only the app | Everything QuickBuds sends and receives |
+| **1. The app's own log** | Only the app | Everything DeviceDeck sends and receives |
 | **2. Bluetooth HCI snoop log** | Developer options, adb, Wireshark / tshark | Everything on the Bluetooth link, **HeyMelody's traffic included** |
 
 Start with 1. Use 2 to learn what HeyMelody sends for a setting. Use it also when a frame
@@ -15,17 +15,17 @@ never shows in the app's log.
 
 ## 1. The app's own log
 
-1. Open QuickBuds and connect. Wait a few seconds for the connect burst to finish.
+1. Open DeviceDeck and connect. Wait a few seconds for the connect burst to finish.
 2. Dev tools › **Clear**, so the export holds one clean session.
 3. Do each action: a setting in the app, or a gesture on the buds. **Wait at least 3 seconds**
    before the next action. Write down what you did and the time.
 4. Repeat the round once, so a one-off frame gets a chance to show again.
-5. Dev tools › **Export**. The file lands in `Download/QuickBuds/`.
+5. Dev tools › **Export**. The file lands in `Download/DeviceDeck/`.
 
 The Dev tools log has Simple and Detailed views. Packets the app cannot decode show in amber with
 their whole payload. Bytes it cannot frame show as `DISCARDED RX`.
 
-On Windows and Linux, Dev tools works the same. Export saves to `Downloads/QuickBuds/`. The file has
+On Windows and Linux, Dev tools works the same. Export saves to `Downloads/DeviceDeck/`. The file has
 raw `TX` and `RX` lines and connection notes, without the named lines below.
 
 With adb, skip the export. The app writes the same lines to a file (a 2 x 512 KB ring) and to logcat:
@@ -33,7 +33,7 @@ With adb, skip the export. The app writes the same lines to a file (a 2 x 512 KB
 ```bash
 adb pull /sdcard/Android/data/com.spizganed.quickbuds/files/packets.log
 adb pull /sdcard/Android/data/com.spizganed.quickbuds/files/packets.old.log   # the older half
-adb logcat -d -s QuickBuds-Packets:D   # instant, but other apps can rotate it out in minutes
+adb logcat -d -s DeviceDeck-Packets:D   # instant, but other apps can rotate it out in minutes
 ```
 
 ### Lines worth knowing
@@ -65,9 +65,9 @@ Check it with `adb shell dumpsys bluetooth_manager | grep -i snoop`: `FULL` mean
 
 ### Capture HeyMelody
 
-The buds serve one control app at a time, so QuickBuds has to let go first.
+The buds serve one control app at a time, so DeviceDeck has to let go first.
 
-1. Stop QuickBuds from Quick Settings › **Active apps** › Stop. (`am force-stop` is not enough: the
+1. Stop DeviceDeck from Quick Settings › **Active apps** › Stop. (`am force-stop` is not enough: the
    app reconnects when the audio link comes back.)
 2. Open HeyMelody and let it connect.
 3. Change **one** setting at a time, with a few seconds between changes. Write down each change, its
@@ -88,7 +88,7 @@ issue. Share only the filtered frames below, then delete the zip and the phone's
 
 ### Pull out the frames
 
-Every QuickBuds / HeyMelody frame starts with `AA` (PROTOCOL.md §2):
+Every DeviceDeck / HeyMelody frame starts with `AA` (PROTOCOL.md §2):
 
 ```bash
 tshark -r btsnoop_hci.log -Y "btrfcomm && data.data[0] == aa" \
@@ -122,7 +122,7 @@ and the time. That is enough to add a command to PROTOCOL.md.
 
 ## Send a snoop log for a connect problem
 
-Use this section when QuickBuds does not connect, for example in issue #18. You need only the phone.
+Use this section when DeviceDeck does not connect, for example in issue #18. You need only the phone.
 Prefer to send the log in private. Step 4 gives the reason.
 
 ### 1. Turn on the snoop log with the phone
@@ -139,7 +139,7 @@ option in another place. Search Developer options for "snoop" if you cannot find
 
 1. Disconnect other Bluetooth devices: the car, the watch, and other headphones. The log then holds
    as little other traffic as possible.
-2. Open QuickBuds and connect the earbuds one time.
+2. Open DeviceDeck and connect the earbuds one time.
 3. Wait for the connection, or for the failure. Dev tools › **Simple** shows "Could not connect to
    the buds", and **Detailed** shows "All connection methods failed".
 4. Write down the time of the test.
@@ -166,8 +166,7 @@ data from other connected Bluetooth devices. Send it in private, unless you acce
 
 ### 5. Where to send the file
 
-Send the `btsnoop_hci.log` file in a direct message to the developer on the QuickBuds Discord
-server: https://discord.gg/pvsnEf9TrZ.
+Attach the filtered capture to your GitHub issue. The raw log includes Bluetooth addresses and traffic from other devices; share it privately through a temporary link only if needed.
 
 If you accept that everyone sees this data, you can do one of these:
 
@@ -205,8 +204,8 @@ If you send the raw `btsnoop_hci.log` file in private, the developer can do the 
 
 ## Send a snoop log for a missing feature
 
-Use this section when HeyMelody or realme Link has a setting that QuickBuds does not have.
-Use it also when a QuickBuds switch does nothing on your earbuds. You need an Android phone.
+Use this section when HeyMelody or realme Link has a setting that DeviceDeck does not have.
+Use it also when a DeviceDeck switch does nothing on your earbuds. You need an Android phone.
 A PC cannot make this log: HeyMelody and realme Link run only on a phone.
 An iPhone cannot make it with these steps either.
 A snoop log shows the exact command that the vendor app sends. Without it, the developer must guess.
@@ -216,13 +215,13 @@ A guessed command fails silently on the earbuds.
 
 1. Turn on the snoop log. Follow [Turn on the snoop log with the phone](#1-turn-on-the-snoop-log-with-the-phone).
 2. Install HeyMelody or realme Link, the app that has the setting.
-3. Stop QuickBuds: Quick Settings › **Active apps** › Stop. The earbuds talk to one app at a time.
+3. Stop DeviceDeck: Quick Settings › **Active apps** › Stop. The earbuds talk to one app at a time.
 
 ### Record the setting
 
 1. Disconnect other Bluetooth devices: the car, the watch, and other headphones.
 2. Open the vendor app and let it connect to the earbuds.
-3. Change only the setting that QuickBuds lacks. Turn it on, wait 5 s, turn it off, wait 5 s, turn it on.
+3. Change only the setting that DeviceDeck lacks. Turn it on, wait 5 s, turn it off, wait 5 s, turn it on.
 4. For a setting with more than 2 values, select each value. Wait 5 s between changes.
 5. Write down each change and its time.
 6. Record the screen of the vendor app during the test. Or take a screenshot of each step, with a number and a label.
@@ -232,9 +231,9 @@ A guessed command fails silently on the earbuds.
 
 1. Get the `btsnoop_hci.log` file. Follow [Get the log file without a PC](#3-get-the-log-file-without-a-pc).
 2. Read [Protect your privacy](#4-protect-your-privacy).
-3. Open a [Missing feature issue](https://github.com/spizganed/QuickBuds/issues/new?template=missing-feature.yml).
+3. Open a [Missing feature issue](https://github.com/Basil-AS/DeviceDeck-Android-Windows/issues/new?template=missing-feature.yml).
    Attach the log, the recording or screenshots, and your notes. To keep the log private, send it as in
-   [Where to send the file](#5-where-to-send-the-file) and write "sent on Discord" in the issue.
+   [Where to send the file](#5-where-to-send-the-file) and note in the issue that you shared it privately.
 
 One log for one setting is enough. You can record several settings in one log.
 Then write down the time of each change.

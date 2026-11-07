@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">QuickBuds</string>
+    <string name="app_name" translatable="false">DeviceDeck</string>
 
     <!-- Device title shown before the buds report their name. -->
     <string name="default_device_name" translatable="false">OnePlus Buds 4</string>
 
     <!-- Widget picker label. Without a label on the provider receiver some launchers
          show a blank or unnamed entry, or fail the entry outright. -->
-    <string name="widget_name" translatable="false">QuickBuds</string>
+    <string name="widget_name" translatable="false">DeviceDeck</string>
 
     <!-- Main screen header actions (icon buttons) -->
     <string name="action_dev_tools">Dev tools</string>
@@ -91,7 +91,7 @@
     <string name="earbuds_section_about">About earbuds</string>
     <string name="row_firmware_title">Firmware version</string>
     <string name="firmware_dialog_title">Firmware updates</string>
-    <string name="firmware_dialog_body">QuickBuds does not update the earbuds\' firmware: a failed update can leave them unusable. Update them from HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck does not update the earbuds\' firmware: a failed update can leave them unusable. Update them from HeyMelody.</string>
     <string name="settings_title">Settings</string>
     <string name="row_wear_title">Wear detection</string>
     <string name="row_wear_sub">Pause when you take the earbuds out</string>
@@ -111,7 +111,7 @@
     <string name="row_game_eq_title">Game equalizer</string>
     <string name="row_game_eq_sub">Switches the buds to their game sound while a game is open</string>
     <string name="game_eq_access_title">Usage access needed</string>
-    <string name="game_eq_access_sub">Tap to allow QuickBuds to see which app is open</string>
+    <string name="game_eq_access_sub">Tap to allow DeviceDeck to see which app is open</string>
     <string name="row_game_sound_title">Game sound effects</string>
     <string name="row_game_sound_sub">Enhanced sound when a game starts</string>
     <string name="spatial_fixed">Fixed</string>
@@ -232,11 +232,11 @@
     <string name="update_notes">What\'s new</string>
     <string name="update_no_notes">No release notes.</string>
     <string name="update_permission_title">Allow installing updates</string>
-    <string name="update_permission_body">Android needs your permission to install updates from QuickBuds.</string>
+    <string name="update_permission_body">Android needs your permission to install updates from DeviceDeck.</string>
     <string name="update_permission_action">Open settings</string>
     <string name="update_auto_title">Check for updates</string>
     <string name="update_auto_sub">Every 6 hours, and when the app opens</string>
-    <string name="update_found_title">QuickBuds %1$s is available</string>
+    <string name="update_found_title">DeviceDeck %1$s is available</string>
     <string name="update_found_body">You have %1$s. Download it now?</string>
     <string name="update_found_view">View</string>
     <string name="update_later">Later</string>
@@ -327,12 +327,12 @@
     <!-- Misc -->
     <string name="dialog_close">Close</string>
     <string name="dialog_cancel">Cancel</string>
-    <string name="crash_title">QuickBuds crashed last time</string>
-    <string name="crash_saved_to">Saved to:\nDownload/QuickBuds/\n\nThis message appears once. Copy or share it if you want to keep it.</string>
+    <string name="crash_title">DeviceDeck crashed last time</string>
+    <string name="crash_saved_to">Saved to:\nDownload/DeviceDeck/\n\nThis message appears once. Copy or share it if you want to keep it.</string>
     <string name="crash_share">Share</string>
     <string name="crash_share_title">Share crash report</string>
     <string name="perm_title">Bluetooth permission needed</string>
-    <string name="perm_body">QuickBuds needs the Nearby devices permission to talk to your earbuds. Allow it in Settings, then reopen the app.</string>
+    <string name="perm_body">DeviceDeck needs the Nearby devices permission to talk to your earbuds. Allow it in Settings, then reopen the app.</string>
     <string name="perm_action">Open settings</string>
     <string name="disconnect_title">Disconnect %1$s?</string>
     <string name="disconnect_body">Audio will stop playing on this phone.</string>
@@ -362,7 +362,7 @@
     <string name="settings_background_title">Background service</string>
     <string name="settings_background_sub">Stay connected with the app closed</string>
     <string name="settings_background_warn_title">Turn off the background service?</string>
-    <string name="settings_background_warn_body">QuickBuds will only stay connected while the app is open. The widget will not work properly and the earbuds will not reconnect by themselves.</string>
+    <string name="settings_background_warn_body">DeviceDeck will only stay connected while the app is open. The widget will not work properly and the earbuds will not reconnect by themselves.</string>
     <string name="settings_background_warn_action">Turn off</string>
     <string name="settings_devtools_title">Dev tools button</string>
     <string name="settings_devtools_sub">Show dev tools in the header</string>
@@ -375,7 +375,7 @@
     <string name="about_kofi_desc">Support on Ko-fi</string>
     <string name="about_github_desc">Source code on GitHub</string>
     <string name="about_license_title">License</string>
-    <string name="about_license_body">QuickBuds is free software under the GNU General Public License v3.0. It builds on the open reverse-engineering work of OppoPodsManager, OppoPods and Pods-Protocol-Reverse-Engineering; the full credits are on GitHub.</string>
+    <string name="about_license_body">DeviceDeck is free software under the GNU General Public License v3.0. It builds on the open reverse-engineering work of OppoPodsManager, OppoPods and Pods-Protocol-Reverse-Engineering; the full credits are on GitHub.</string>
     <string name="about_github" translatable="false">GitHub</string>
     <string name="theme_builtin">Themes</string>
     <string name="theme_auto">Match system</string>
@@ -433,17 +433,17 @@
     <string name="widget_style_title">Style</string>
     <string name="widget_background_title">Widget background</string>
     <string name="widget_background_sub">Off: the widget sits on your wallpaper</string>
-    <string name="widget_open_app">Open QuickBuds</string>
+    <string name="widget_open_app">Open DeviceDeck</string>
     <string name="widget_cycle">Noise cycle</string>
     <string name="tile_on">On</string>
     <string name="tile_off">Off</string>
     <string name="cycle_intro">Pick at least 2 modes. A tap on the Noise control tile or the Noise cycle button moves to the next mode, in this order.</string>
     <string name="settings_cycle_sub">Modes for the tile and the widget button</string>
     <string name="settings_tile_title">Quick Settings tile</string>
-    <string name="widget_cycle_name">QuickBuds noise cycle</string>
-    <string name="widget_tap_opens_title">Tap opens QuickBuds</string>
+    <string name="widget_cycle_name">DeviceDeck noise cycle</string>
+    <string name="widget_tap_opens_title">Tap opens DeviceDeck</string>
     <string name="widget_tap_opens_sub">A tap on the widget opens the app</string>
-    <string name="widget_style_classic" translatable="false">QuickBuds</string>
+    <string name="widget_style_classic" translatable="false">DeviceDeck</string>
     <string name="widget_style_nothing" translatable="false">Pixel art</string>
     <string name="widget_style_material" translatable="false">Material</string>
     <string name="widget_style_glass" translatable="false">Glass</string>
@@ -452,7 +452,7 @@
     <string name="widget_mode_anc_high">ANC High</string>
     <string name="widget_mode_anc_smart">ANC Smart</string>
     <string name="widget_low_latency">Low latency</string>
-    <string name="widget_battery_name">QuickBuds battery</string>
+    <string name="widget_battery_name">DeviceDeck battery</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_sub">App language</string>
     <string name="language_system">System default</string>
@@ -542,8 +542,8 @@
     <string name="dual_preferred">Preferred device</string>
     <string name="dual_preferred_auto">Automatic</string>
     <string name="dual_preferred_sub">When it is in range, the earbuds connect to it first.</string>
-    <string name="widget_pages_name">QuickBuds battery and controls</string>
-    <string name="widget_controls_name">QuickBuds controls</string>
+    <string name="widget_pages_name">DeviceDeck battery and controls</string>
+    <string name="widget_controls_name">DeviceDeck controls</string>
     <string name="widget_settings_title">Widget settings</string>
     <string name="widget_setup_title">Widget buttons</string>
     <string name="widget_setup_hint">Pick up to 4 buttons. The widget shows them in this order.</string>
@@ -567,7 +567,7 @@
     <string name="problem_sending">Sending…</string>
     <string name="problem_sent">Feedback sent. Thank you!</string>
     <string name="problem_failed">Could not send the feedback. Check the internet connection and try again.</string>
-    <string name="problem_unsupported">QuickBuds supports OnePlus, OPPO and realme earbuds only. Pick your model from the list.</string>
+    <string name="problem_unsupported">DeviceDeck supports OnePlus, OPPO and realme earbuds only. Pick your model from the list.</string>
     <string name="problem_supported_list">See all supported earbuds</string>
     <string name="problem_log_empty">The log is empty: your buds did not connect yet. Connect your buds first, then send your feedback.</string>
     <string name="problem_capture_hint">A feature does not work or is missing? The app log is not enough. Open a GitHub issue with a Bluetooth snoop log of HeyMelody or realme Link and a screen recording.</string>
@@ -577,7 +577,7 @@
     <string name="capture_ask_open">Open a GitHub issue</string>
     <string name="test_title">Test my earbuds</string>
     <string name="test_sub">Try each feature and send the result</string>
-    <string name="test_ask_body">QuickBuds is not confirmed on these earbuds yet. A short test shows what works. Nothing is sent until you tap Send.</string>
+    <string name="test_ask_body">DeviceDeck is not confirmed on these earbuds yet. A short test shows what works. Nothing is sent until you tap Send.</string>
     <string name="test_ask_later">Not now</string>
     <string name="test_intro">Start reconnects the earbuds and clears the log. Then open each feature with Try it now, try it, come back and mark it.</string>
     <string name="test_start">Start</string>
@@ -616,13 +616,13 @@
     <string name="test_broken_hint">What happened? One line is enough.</string>
     <string name="test_mark_all">Mark every feature to send the result.</string>
     <string name="about_privacy_title">Privacy</string>
-    <string name="about_privacy_body">Once a day QuickBuds sends its platform, its version number (for example \"Android 5.2.1\") and a random install ID to count active users. The ID ties to no device, account or address, and the app sends no earbud data. Reports carry the same ID and are sent only when you send them.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Reset install ID</string>
-    <string name="welcome_title">Welcome to QuickBuds</string>
-    <string name="welcome_body">A few steps set QuickBuds up. You can change every choice later in Settings.</string>
+    <string name="welcome_title">Welcome to DeviceDeck</string>
+    <string name="welcome_body">A few steps set DeviceDeck up. You can change every choice later in Settings.</string>
     <string name="welcome_done">Done</string>
     <string name="setup_perm_title">Permissions</string>
-    <string name="setup_perm_body">QuickBuds needs Bluetooth to talk to your earbuds. Android requires a notification for the background service, so please allow Notifications too.</string>
+    <string name="setup_perm_body">DeviceDeck needs Bluetooth to talk to your earbuds. Android requires a notification for the background service, so please allow Notifications too.</string>
     <string name="setup_perm_bt">Bluetooth</string>
     <string name="setup_perm_notif">Notifications</string>
     <string name="setup_allow">Allow</string>
@@ -645,7 +645,7 @@
     <string name="setup_battery_title">Battery optimization</string>
     <string name="setup_battery_sub">Lets the background service keep running</string>
     <string name="setup_widgets_title">Widgets</string>
-    <string name="setup_widgets_body">Put QuickBuds on your home screen. If a button does nothing, long-press the home screen and open Widgets.</string>
+    <string name="setup_widgets_body">Put DeviceDeck on your home screen. If a button does nothing, long-press the home screen and open Widgets.</string>
     <string name="setup_widgets_add">Add</string>
     <string name="setup_feedback_title">Feedback and tests</string>
     <string name="setup_feedback_body">Tell the developer what works and what does not. Nothing is sent until you tap Send. Both tools are in Settings.</string>
@@ -654,7 +654,7 @@
     <string name="setup_earbuds_connected">Connected</string>
     <string name="setup_earbuds_disconnected">Not connected</string>
     <string name="setup_ready_title">You are ready</string>
-    <string name="setup_ready_body">Connect your earbuds and open QuickBuds. Every choice here stays in Settings.</string>
+    <string name="setup_ready_body">Connect your earbuds and open DeviceDeck. Every choice here stays in Settings.</string>
     <string name="settings_issues_title">Known issues</string>
     <string name="settings_issues_sub">Limits of your earbuds and phone</string>
     <string name="issues_none">No known issues for your earbuds and phone.</string>
@@ -672,23 +672,23 @@
     <string name="issue_samsung_codec_title">No codec choice on Samsung phones</string>
     <string name="issue_samsung_codec_body">Samsung phones do not show the codec choice in Bluetooth settings. High-quality audio may do nothing.</string>
     <string name="issue_oneplus_title">The system can block the connection</string>
-    <string name="oneplus_hint">On OnePlus, OPPO and realme phones, the system\'s own earbud settings can hold the earbuds\' link and block QuickBuds. If QuickBuds does not connect, use the earbud settings in Settings › Bluetooth › your earbuds.</string>
+    <string name="oneplus_hint">On OnePlus, OPPO and realme phones, the system\'s own earbud settings can hold the earbuds\' link and block DeviceDeck. If DeviceDeck does not connect, use the earbud settings in Settings › Bluetooth › your earbuds.</string>
     <string name="issue_hires_spatial_title">High-quality audio and 3D audio</string>
     <string name="issue_hires_spatial_body">The earbuds run only one of them. Turning one on turns the other off.</string>
-    <string name="setup_issues_body">Settings lists the limits of your earbuds and phone. QuickBuds also tells you once when your model has any.</string>
+    <string name="setup_issues_body">Settings lists the limits of your earbuds and phone. DeviceDeck also tells you once when your model has any.</string>
     <string name="reply_title">Reply from the developer</string>
-    <string name="about_discord" translatable="false">Discord</string>
-    <string name="about_discord_desc">Chat with the developer on Discord</string>
-    <string name="about_privacy_reply">The ID also lets the developer answer a report you sent. The answer comes with the daily count.</string>
+    <string name="about_discord" translatable="false">Community discussions</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="connect_try_failed">Could not connect (try %1$d of %2$d)</string>
     <string name="connect_gave_up">Could not connect after %1$d tries. Tap Connect to try again.</string>
     <string name="connect_held_by_other">Another device or app holds the earbuds. Disconnect them there or close that app, then tap Connect.</string>
-    <string name="tray_open">Open QuickBuds</string>
+    <string name="tray_open">Open DeviceDeck</string>
     <string name="tray_quit">Quit</string>
-    <string name="support_kofi_title">Enjoying QuickBuds?</string>
-    <string name="support_kofi_body">QuickBuds is free and made by one person. If it helps you, a small tip on Ko-fi keeps it going.</string>
+    <string name="support_kofi_title">Enjoying DeviceDeck?</string>
+    <string name="support_kofi_body">DeviceDeck is free and made by one person. If it helps you, a small tip on Ko-fi keeps it going.</string>
     <string name="support_kofi_action">Support on Ko-fi</string>
-    <string name="support_github_title">Like QuickBuds?</string>
+    <string name="support_github_title">Like DeviceDeck?</string>
     <string name="support_github_body">A star on GitHub helps other earbud owners find the app.</string>
     <string name="support_github_action">Star on GitHub</string>
     <string name="support_later">Later</string>

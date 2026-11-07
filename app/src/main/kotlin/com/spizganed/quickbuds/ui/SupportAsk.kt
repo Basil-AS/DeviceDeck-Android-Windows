@@ -7,14 +7,14 @@ import android.net.Uri
 import com.spizganed.quickbuds.R
 
 /**
- * Two optional cards ask for support: Ko-fi, then a GitHub star. Each shows as a bottom sheet with Support, Later and
+ * An optional card asks the user to visit the DeviceDeck project page. It shows as a bottom sheet with Support, Later and
  * "Do not ask again". A card is due after [MIN_DAYS] days of use or [MIN_CONNECTIONS] good connections. It shows only
  * while the buds are connected and idle, at most one card a day. Showing a card sets its next date at once, so a sheet
  * the user dismisses counts as "Later". "Later" and a dismissal bring the card back after [LATER_DAYS] days.
  */
 object SupportAsk {
 
-    enum class Card { KOFI, GITHUB }
+    enum class Card { GITHUB }
 
     const val MIN_DAYS = 14
     const val MIN_CONNECTIONS = 10
@@ -55,10 +55,8 @@ object SupportAsk {
         val card = pick(installed, p.getInt(KEY_CONNECTIONS, 0), now, p.getLong(KEY_LAST_DAY, -1L),
             { p.getLong(keyNext(it), 0L) }, { p.getBoolean(keyOff(it), false) }) ?: return
         p.edit().putLong(KEY_LAST_DAY, now / DAY_MS).putLong(keyNext(card), now + LATER_DAYS * DAY_MS).apply()
-        val (title, body, action, url) = when (card) {
-            Card.KOFI -> Quad(R.string.support_kofi_title, R.string.support_kofi_body, R.string.support_kofi_action, AboutActivity.KOFI_URL)
-            Card.GITHUB -> Quad(R.string.support_github_title, R.string.support_github_body, R.string.support_github_action, AboutActivity.GITHUB_URL)
-        }
+        val (title, body, action, url) = Quad(R.string.support_github_title, R.string.support_github_body,
+            R.string.support_github_action, AboutActivity.GITHUB_URL)
         val sheet = BottomSheetDialog(activity)
         sheet.title(activity.getString(title)).message(activity.getString(body))
             .items(listOf(BottomSheetDialog.Item(activity.getString(R.string.support_never), false) {

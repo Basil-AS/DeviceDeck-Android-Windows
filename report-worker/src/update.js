@@ -2,7 +2,7 @@
 // 60 requests per hour that GitHub gives one IP. The answer stays in the edge cache for 5 minutes.
 // The edge cache has no daily limit. KV holds only the last good answer, and a write happens only when it changes.
 // GitHub failure: the last good answer still goes out, marked x-cache: stale. No such answer: 502.
-const RELEASE = "https://api.github.com/repos/spizganed/QuickBuds/releases/latest";
+const RELEASE = "https://api.github.com/repos/Basil-AS/DeviceDeck-Android-Windows/releases/latest";
 const CACHE_KEY = "https://quickbuds-report.invalid/release/latest"; // fresh answer, edge cache
 const STALE = "release:stale"; // last good answer, KV, no expiry
 const TTL = 300;

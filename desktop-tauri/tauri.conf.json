@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "QuickBuds",
-  "version": "5.6.1",
-  "identifier": "app.quickbuds.desktop",
+  "productName": "DeviceDeck",
+  "version": "0.1.0-alpha.1",
+  "identifier": "app.devicedeck.desktop",
   "build": { "frontendDist": "./ui" },
   "app": {
-    "windows": [{ "label": "main", "create": false, "title": "QuickBuds", "width": 800, "height": 600, "resizable": false, "maximizable": false, "transparent": true, "decorations": false, "shadow": true },
-      { "label": "panel", "create": false, "title": "QuickBuds panel", "url": "index.html?view=tray", "width": 350, "height": 430, "visible": false, "resizable": true, "maximizable": false, "minimizable": false, "decorations": false, "transparent": true, "alwaysOnTop": true, "skipTaskbar": true, "shadow": false }],
+    "windows": [{ "label": "main", "create": false, "title": "DeviceDeck", "width": 800, "height": 600, "resizable": false, "maximizable": false, "transparent": true, "decorations": false, "shadow": true },
+      { "label": "panel", "create": false, "title": "DeviceDeck panel", "url": "index.html?view=tray", "width": 350, "height": 430, "visible": false, "resizable": true, "maximizable": false, "minimizable": false, "decorations": false, "transparent": true, "alwaysOnTop": true, "skipTaskbar": true, "shadow": false }],
     "withGlobalTauri": true, "security": { "csp": null }
   },
   "bundle": { "active": true, "targets": ["appimage"], "icon": ["icons/icon.png"] }

@@ -1,5 +1,5 @@
 //! App settings › Feedback: the phone's `ProblemReport`, posted with `curl` (as the updater does) to the same
-//! report Worker. Nothing goes out without Send; See what is sent shows the exact text first.
+//! upstream report Worker. Nothing goes out without Send; See what is sent shows the exact text first.
 
 use crate::types::*;
 use crate::session::{Line, LOG};
@@ -9,8 +9,7 @@ use std::io::Write;
 use std::process::Stdio;
 use std::sync::Mutex;
 
-const WORKER: &str = "https://quickbuds-report.spizganed.workers.dev/report";
-/// The Category options, in the Worker's own words; it drops any other value (report-worker/src/index.js).
+/// The Category options, in the upstream Worker's own words; it drops any other value (report-worker/src/index.js).
 const CATEGORIES: [&str; 6] = ["UI", "Lag", "Connection", "Feature not working", "Battery", "Other"];
 /// Their labels, the phone's `problem_cat_*` strings.
 pub const CATEGORY_KEYS: [&str; 6] = ["problem_cat_ui", "problem_cat_lag", "problem_cat_connection",
@@ -21,7 +20,7 @@ pub fn header(a: &App) -> String {
     let s = &a.snap;
     let model = s.model.and_then(|m| m["name"].as_str()).unwrap_or(if s.name.is_empty() { "unknown buds" } else { s.name.as_str() });
     let id = s.model.and_then(|m| m["id"].as_str()).unwrap_or("?");
-    format!("QuickBuds {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
+    format!("DeviceDeck {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
         s.firmware.as_deref().unwrap_or("?"))
 }
 
@@ -132,13 +131,13 @@ fn scrub(text: String) -> String {
     match host() { Some(h) => text.replace(&h, "[this computer]"), None => text }
 }
 
-/// Downloads/QuickBuds: exported logs and crash reports, as on the phone.
+/// Downloads/DeviceDeck: exported logs and crash reports, as on the phone.
 pub fn folder() -> std::path::PathBuf {
     #[cfg(windows)]
     let home = std::env::var_os("USERPROFILE");
     #[cfg(not(windows))]
     let home = std::env::var_os("HOME");
-    std::path::PathBuf::from(home.unwrap_or_default()).join("Downloads").join("QuickBuds")
+    std::path::PathBuf::from(home.unwrap_or_default()).join("Downloads").join("DeviceDeck")
 }
 
 /// The crash report the Report page sends after a crash; "" otherwise.
@@ -156,7 +155,7 @@ pub fn catch_panics() {
     std::panic::set_hook(Box::new(move |info| {
         // A panic while the log is locked skips the log rather than deadlock.
         let log = LOG.try_lock().map(|l| lines(&l[l.len().saturating_sub(300)..])).unwrap_or_default();
-        let text = format!("QuickBuds crash report\nversion: {}\ncomputer: {}\nsystem: {}\nthread: {}\n\n{info}\n\n{log}{}",
+        let text = format!("DeviceDeck crash report\nversion: {}\ncomputer: {}\nsystem: {}\nthread: {}\n\n{info}\n\n{log}{}",
             env!("CARGO_PKG_VERSION"), computer(), system(), std::thread::current().name().unwrap_or("?"), stderr_tail());
         let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
         let _ = std::fs::create_dir_all(folder()).and_then(|_| std::fs::write(folder().join(format!("crash-{secs}.txt")), scrub(text)));
@@ -252,23 +251,7 @@ pub(crate) fn app_id() -> String {
 }
 
 /// Counts this install once a day: platform, version and the install ID (README, Privacy). Network thread only.
-pub(crate) fn ping(weak: slint::Weak<MainWindow>) {
-    let today = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() / 86_400).unwrap_or(0);
-    if crate::load_settings()["usage_ping_day"].as_u64() == Some(today) { return; }
-    let body = serde_json::json!({
-        "platform": if cfg!(windows) { "Windows" } else { "Linux" },
-        "version": env!("CARGO_PKG_VERSION"),
-        "id": app_id(),
-    });
-    let (code, text) = post(&WORKER.replace("/report", "/ping"), &body.to_string());
-    if code != 200 { return; }
-    crate::save_setting("usage_ping_day", today.into());
-    // The answer can carry the developer's reply to a report of this install, once.
-    let reply = serde_json::from_str::<serde_json::Value>(&text).ok().and_then(|v| v["reply"]["text"].as_str().map(String::from));
-    if let Some(reply) = reply.filter(|r| !r.trim().is_empty()) {
-        let _ = weak.upgrade_in_event_loop(move |m| m.global::<Community>().set_reply(reply.into()));
-    }
-}
+pub(crate) fn ping(_weak: slint::Weak<MainWindow>) {}
 
 const DISCORD: &str = "https://discord.gg/pvsnEf9TrZ";
 
@@ -289,18 +272,10 @@ fn known_issues(a: &App) -> (bool, bool, bool) {
     (silent, both, listed("hires_no_codec") || no_codec)
 }
 
-/// Posts [d] to the Worker.
-/// Returns (sent, the Worker's answer text when it refused the report).
-pub(crate) fn send(d: Draft) -> (bool, Option<String>) {
-    let json = serde_json::json!({
-        "app": format!("QuickBuds {} {}", env!("CARGO_PKG_VERSION"), if cfg!(windows) { "Windows" } else { "Linux" }),
-        "model": d.model, "categories": d.categories, "description": d.description, "log": d.log, "crash": d.crash,
-        "id": app_id(),
-    });
-    let (code, text) = post(WORKER, &json.to_string());
-    let message = serde_json::from_str::<serde_json::Value>(&text).ok()
-        .and_then(|v| v["message"].as_str().map(String::from));
-    (code == 200, if code == 200 { None } else { message })
+/// Posts [d] to the upstream Worker.
+/// Returns (sent, the upstream Worker's answer text when it refused the report).
+pub(crate) fn send(_d: Draft) -> (bool, Option<String>) {
+    (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }
 
 /// The current form; None (with a note) without a description, when the model is not in the list (a crash

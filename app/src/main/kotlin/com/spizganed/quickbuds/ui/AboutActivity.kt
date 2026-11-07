@@ -12,8 +12,7 @@ import android.widget.TextView
 import com.spizganed.quickbuds.R
 
 /**
- * About: icon, name, version and tagline, a GitHub button and a Ko-fi one (both open the
- * phone's default browser; no Ko-fi button while [KOFI_URL] is null), and the license with a pointer to the credits.
+ * About: app identity, GitHub/community links, license and privacy information.
  */
 class AboutActivity : Activity() {
 
@@ -54,7 +53,7 @@ class AboutActivity : Activity() {
             setPadding(dp(8f), dp(14f), dp(8f), 0)
         })
 
-        // GitHub and Ko-fi, side by side.
+        // Project and community links.
         fun linkButton(icon: Int, label: Int, desc: Int, url: String) = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -110,18 +109,7 @@ class AboutActivity : Activity() {
                 setTextColor(p.textSecondary)
                 setLineSpacing(0f, 1.15f)
             })
-            addView(TextView(this@AboutActivity).apply {
-                setText(R.string.about_privacy_reset)
-                textSize = 15f
-                typeface = ThemeRes.medium(context)
-                setTextColor(p.accent)
-                setPadding(0, dp(14f), 0, 0)
-                setOnClickListener {
-                    UsagePing.resetId(this@AboutActivity)
-                    isEnabled = false
-                    alpha = 0.4f
-                }
-            })
+
         })
 
         setContentView(ScrollView(this).apply {
@@ -136,9 +124,9 @@ class AboutActivity : Activity() {
     }
 
     companion object {
-        const val GITHUB_URL = "https://github.com/spizganed/QuickBuds"
-        const val DISCORD_URL = "https://discord.gg/pvsnEf9TrZ"
+        const val GITHUB_URL = "https://github.com/Basil-AS/DeviceDeck-Android-Windows"
+        const val DISCORD_URL = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions"
         /** Null hides the button (it was hidden until the page existed). */
-        val KOFI_URL: String? = "https://ko-fi.com/spizganed"
+        val KOFI_URL: String? = null
     }
 }

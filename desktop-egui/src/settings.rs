@@ -77,11 +77,6 @@ pub fn show(app: &mut App, ui: &mut Ui, body: Rect) -> f32 {
     if toggled { save_setting("dev_tools_button", (!devtools).into()); }
     y += h + 8.0;
 
-    let ping = flag("usage_ping", true);
-    let (h, _, toggled) = ui::row_card(ui, "ping", x0, y, w, Some(icons::INFO), t(&tr, "settings_ping_title"), t(&tr, "settings_ping_sub"), Trail::Switch(ping), true);
-    if toggled { save_setting("usage_ping", (!ping).into()); }
-    y += h + 8.0;
-
     let (h, clicked, _) = ui::row_card(ui, "setup", x0, y, w, Some(icons::INFO), t(&tr, "settings_setup_title"), "", Trail::Chevron, true);
     if clicked { app.setup.page = 0; app.page = Page::Setup; }
     y += h;

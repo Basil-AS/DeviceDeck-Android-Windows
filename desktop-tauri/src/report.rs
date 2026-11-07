@@ -1,4 +1,4 @@
-//! The report path for Feedback and Test my earbuds: header, scrubbed packet log, preview, Worker post.
+//! The report path for Feedback and Test my earbuds: header, scrubbed packet log, preview, local issue export.
 
 //! Ported from `desktop/src/report.rs` (the Slint file also holds the Slint screen).
 
@@ -14,8 +14,7 @@ use std::process::Stdio;
 
 
 
-const WORKER: &str = "https://quickbuds-report.spizganed.workers.dev/report";
-/// The Category options, in the Worker's own words; it drops any other value (report-worker/src/index.js).
+/// The Category options, in the upstream Worker's own words; it drops any other value (report-worker/src/index.js).
 pub const CATEGORIES: [&str; 6] = ["UI", "Lag", "Connection", "Feature not working", "Battery", "Other"];
 /// Their labels, the phone's `problem_cat_*` strings.
 pub const CATEGORY_KEYS: [&str; 6] = ["problem_cat_ui", "problem_cat_lag", "problem_cat_connection",
@@ -25,7 +24,7 @@ pub const CATEGORY_KEYS: [&str; 6] = ["problem_cat_ui", "problem_cat_lag", "prob
 pub fn header(s: &Snapshot) -> String {
     let model = s.model.and_then(|m| m["name"].as_str()).unwrap_or(if s.name.is_empty() { "unknown buds" } else { s.name.as_str() });
     let id = s.model.and_then(|m| m["id"].as_str()).unwrap_or("?");
-    format!("QuickBuds {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
+    format!("DeviceDeck {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
         s.firmware.as_deref().unwrap_or("?"))
 }
 
@@ -165,18 +164,10 @@ pub fn app_id() -> String {
 }
 
 
-/// Posts [d] to the Worker.
-/// Returns (sent, the Worker's answer text when it refused the report).
-pub fn send(d: Draft) -> (bool, Option<String>) {
-    let json = serde_json::json!({
-        "app": format!("QuickBuds {} {}", env!("CARGO_PKG_VERSION"), if cfg!(windows) { "Windows" } else { "Linux" }),
-        "model": d.model, "categories": d.categories, "description": d.description, "log": d.log, "crash": d.crash,
-        "id": app_id(),
-    });
-    let (code, text) = post(WORKER, &json.to_string());
-    let message = serde_json::from_str::<serde_json::Value>(&text).ok()
-        .and_then(|v| v["message"].as_str().map(String::from));
-    (code == 200, if code == 200 { None } else { message })
+/// Posts [d] to the upstream Worker.
+/// Returns (sent, the upstream Worker's answer text when it refused the report).
+pub fn send(_d: Draft) -> (bool, Option<String>) {
+    (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }
 
 /// A model name from the list, any case.
@@ -184,5 +175,5 @@ pub fn known(model: &str) -> bool {
     models().iter().any(|m| m["name"].as_str().is_some_and(|n| n.eq_ignore_ascii_case(model)))
 }
 
-/// Posts [body] to the Worker route `report` or `ping`.
-pub fn post_to(route: &str, body: &str) -> (u16, String) { post(&WORKER.replace("/report", &format!("/{route}")), body) }
+/// Posts [body] to the upstream Worker route `report` or `ping`.
+pub fn post_to(_route: &str, _body: &str) -> (u16, String) { (0, String::new()) }

@@ -210,12 +210,6 @@ pub fn show(app: &mut App, ui: &mut Ui, body: Rect) -> f32 {
             y = heading(p, x0, y, w, t(&tr, "about_privacy_title"), t(&tr, "about_privacy_body")) + 12.0;
             phone::paragraph(p, Rect::from_min_size(Pos2::new(x0, y), Vec2::new(w, 60.0)), t(&tr, "about_privacy_reply"), 14.0, white(0.74), false);
             y += 68.0;
-            let ping = load_settings()["usage_ping"].as_bool().unwrap_or(true);
-            let r = Rect::from_min_size(Pos2::new(x0, y), Vec2::new(w, 59.8));
-            glass::flat_at(p, r, 16.0, 1.0);
-            if phone::row_at(p, "setup-ping", r, phone::Row::new(t(&tr, "settings_ping_title"), t(&tr, "settings_ping_sub"), Trail::Switch(ping), accent), true).1 {
-                save_setting("usage_ping", (!ping).into());
-            }
         }
         _ => {
             let icon = Rect::from_center_size(Pos2::new(x0 + w / 2.0, y + 66.0), Vec2::splat(120.0));

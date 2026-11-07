@@ -4,4 +4,3 @@
 
 ## Agreement
 
-- [ ] I agree to the [Contributor License Agreement](../docs/CLA.md).

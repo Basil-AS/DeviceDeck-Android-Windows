@@ -480,9 +480,6 @@ class SetupActivity : Activity() {
             setTextColor(p.textSecondary)
             setPadding(dp(4f), 0, dp(4f), dp(12f))
         })
-        body.addView(SettingRowFactory.card(this).apply {
-            addView(switchRow(R.drawable.ic_info, R.string.settings_ping_title, R.string.settings_ping_sub, UsagePing.KEY_ENABLED, true))
-        })
     }
 
     private fun finishSetup() {

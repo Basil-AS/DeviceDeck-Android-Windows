@@ -162,7 +162,7 @@ pub fn show(app: &mut App, ui: &mut Ui, body: Rect) -> f32 {
 fn disconnect_sheet(app: &mut App, ui: &mut Ui) {
     if !app.disconnect_ask { return; }
     let tr = app.tr.clone();
-    let name = if app.snap.name.is_empty() { "QuickBuds".to_string() } else { app.snap.name.clone() };
+    let name = if app.snap.name.is_empty() { "DeviceDeck".to_string() } else { app.snap.name.clone() };
     let title = t(&tr, "disconnect_title").replace("%1$s", &name);
     let mut decision = None;
     let open = crate::settings::sheets::sheet(ui.ctx(), "disconnect", &title, crate::settings::sheets::Title::Centre,
@@ -256,7 +256,7 @@ pub(crate) fn battery_at(app: &App, ui: &Ui, r: Rect) {
         let lit = matches!(s.wear[i], 3 | 7) || (s.wear[i] == 5 && blind);
         glass::text(ui, Pos2::new(cx, r.top() + WEAR_Y), Align2::CENTER_CENTER, sub, 13.0, if lit { 1.0 } else { SECONDARY });
     }
-    let name = if s.name.is_empty() { "QuickBuds" } else { s.name.as_str() };
+    let name = if s.name.is_empty() { "DeviceDeck" } else { s.name.as_str() };
     glass::text(ui, Pos2::new(r.center().x, r.top() + NAME_Y), Align2::CENTER_CENTER, name, 15.0, SECONDARY);
 }
 

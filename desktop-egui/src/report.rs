@@ -1,5 +1,5 @@
 //! The report path for Feedback and Test my earbuds: the header, the packet log with the phone's scrub, the
-//! preview text and the Worker post. The logic and the words are the ones of `desktop/src/report.rs`; the
+//! preview text and the local issue export. The logic and the words are the ones of `desktop/src/report.rs`; the
 //! Worker route is the same one. Nothing leaves the machine until Send.
 
 use crate::session::{Line, LOG};
@@ -9,7 +9,6 @@ use std::io::Write;
 use std::process::Stdio;
 use std::sync::mpsc::{channel, Receiver};
 
-const WORKER: &str = "https://quickbuds-report.spizganed.workers.dev/report";
 
 /// One report; [Draft::log] is None when the person turned it off.
 pub struct Draft {
@@ -25,7 +24,7 @@ pub fn header(app: &crate::App) -> String {
     let s = &app.snap;
     let model = s.model.and_then(|m| m["name"].as_str()).unwrap_or(if s.name.is_empty() { "unknown buds" } else { s.name.as_str() });
     let id = s.model.and_then(|m| m["id"].as_str()).unwrap_or("?");
-    format!("QuickBuds {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
+    format!("DeviceDeck {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
         s.firmware.as_deref().unwrap_or("?"))
 }
 
@@ -153,18 +152,10 @@ pub fn app_id() -> String {
     id
 }
 
-/// Posts [d] to the Worker.
-/// Returns (sent, the Worker's answer text when it refused the report).
-pub fn send(d: Draft) -> (bool, Option<String>) {
-    let json = serde_json::json!({
-        "app": format!("QuickBuds {} {}", env!("CARGO_PKG_VERSION"), if cfg!(windows) { "Windows" } else { "Linux" }),
-        "model": d.model, "categories": d.categories, "description": d.description, "log": d.log, "crash": d.crash,
-        "id": app_id(),
-    });
-    let (code, text) = post(WORKER, &json.to_string());
-    let message = serde_json::from_str::<serde_json::Value>(&text).ok()
-        .and_then(|v| v["message"].as_str().map(String::from));
-    (code == 200, if code == 200 { None } else { message })
+/// Posts [d] to the upstream Worker.
+/// Returns (sent, the upstream Worker's answer text when it refused the report).
+pub fn send(_d: Draft) -> (bool, Option<String>) {
+    (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }
 
 /// The answer of a post, ready for the frame that polls it.

@@ -282,7 +282,7 @@ function ring(g,pct,label,sub){const none=pct==null;if(none)pct=0;const len=213.
 function segm(key,items,extra=''){return `<div class="seg ${extra}" data-seg="${key}" role="radiogroup" style="--n:${items.length}"><span class="ind"></span>${items.map(([i,l],n)=>`<button class="cell press" role="radio" data-act="pick" data-k="${key}" data-v="${n}">${i?ic(i):''}${l}</button>`).join('')}</div>`;}
 const ancCard=()=>`<div class="card">${segm('anc',[['off',$t('anc_seg_off')],['anc',$t('anc_seg_anc')],['adaptive',$t('anc_seg_adapt')],['transp',$t('anc_seg_trans')]],'big')}${segm('level',[['low',$t('anc_mode_low')],['anc',$t('anc_mode_medium')],['high',$t('anc_mode_high')],['smart',$t('anc_mode_smart')]],'lvls big')}</div>`;
 const LBL={};
-const lbl=k=>({ll:$t('row_game_title'),hq:$t('row_hires_title'),sp:$t('row_spatial_title'),hp:$t('row_golden_title'),auto:$t('theme_auto'),dual:$t('dual_title'),wear:$t('wear_firmware_title'),svc:$t('desktop_autostart_title','Start with your computer'),hide:$t('settings_clear_battery_title'),devtools:$t('settings_devtools_title'),count:$t('settings_ping_title'),upd:$t('update_auto_title'),bass:$t('eq_basswave'),wind:$t('row_wind_noise_title'),fblog:$t('problem_log_title')})[k]||k;
+const lbl=k=>({ll:$t('row_game_title'),hq:$t('row_hires_title'),sp:$t('row_spatial_title'),hp:$t('row_golden_title'),auto:$t('theme_auto'),dual:$t('dual_title'),wear:$t('wear_firmware_title'),svc:$t('desktop_autostart_title','Start with your computer'),hide:$t('settings_clear_battery_title'),devtools:$t('settings_devtools_title'),upd:$t('update_auto_title'),bass:$t('eq_basswave'),wind:$t('row_wind_noise_title'),fblog:$t('problem_log_title')})[k]||k;
 const sw=k=>`<button class="sw" role="switch" data-act="toggle" data-k="${k}" aria-label="${lbl(k)}"></button>`;
 const swRow=(i,t,s,k)=>`<div class="row">${i?ic(i):''}<div class="txt"><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>${sw(k)}</div>`;
 const navRow=(i,t,s,act)=>`<button class="row press" ${act}>${ic(i)}<div class="txt"><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>${ic('chev','ch')}</button>`;
@@ -304,9 +304,9 @@ function buildWindow(){
   const nav=([id,i,k])=>{const l=$t(k);return `<button class="nav" data-act="page" data-v="${id}" title="${l}">${ic(i)}<span class="nl">${l}</span></button>`;};
   document.getElementById('win').innerHTML=`
   <div class="caps"><button class="cap" aria-label="Minimize">${ic('min')}</button><button class="cap" aria-label="Maximize">${ic('max')}</button><button class="cap x" aria-label="Close">${ic('x')}</button></div>
-  <nav class="side" aria-label="QuickBuds">
+  <nav class="side" aria-label="DeviceDeck">
     <span class="navind" aria-hidden="true"></span>
-    <div class="logo">${ic('budL')}<span class="nl">QuickBuds</span></div>
+    <div class="logo">${ic('budL')}<span class="nl">DeviceDeck</span></div>
     ${PAGES.map(nav).join('')}
     <div class="navlbl">${$t('settings_app')}</div>
     ${APPPAGES.map(nav).join('')}
@@ -314,7 +314,7 @@ function buildWindow(){
     ${nav(['dev','dev','action_dev_tools'])}
     ${nav(['feedback','chat','problem_title'])}
     ${nav(['test','earbud','test_title'])}
-    <div class="connf"><span class="cdot"></span><div class="txt"><div class="t" data-cn>QuickBuds</div><div class="s" data-cs>Disconnected</div></div>
+    <div class="connf"><span class="cdot"></span><div class="txt"><div class="t" data-cn>DeviceDeck</div><div class="s" data-cs>Disconnected</div></div>
       <button class="btn icon press" data-act="conn" data-conn aria-label="Connect or disconnect">${ic('power')}</button></div>
   </nav>
   <main class="main" id="main">
@@ -427,7 +427,6 @@ function buildWindow(){
       ${swRow('power',$t('desktop_autostart_title','Start with your computer'),$t('desktop_autostart_sub','Opens in the tray when you sign in'),'svc')}
       ${swRow('battery',$t('settings_clear_battery_title'),$t('settings_clear_battery_sub'),'hide')}
       ${swRow('dev',$t('settings_devtools_title'),$t('desktop_devtools_sub','Show Dev tools in the menu on the left'),'devtools')}
-      ${swRow('info',$t('settings_ping_title'),$t('settings_ping_sub'),'count')}
       <button class="row press" data-act="known">${ic('warn')}<div class="txt"><div class="t">${$t('settings_issues_title')}</div><div class="s">${$t('settings_issues_sub')}</div></div>${ic('chev','ch')}</button>
     </div>
   </section>
@@ -444,13 +443,13 @@ function buildWindow(){
   <section class="page" data-page="about" hidden>
     <div class="card hero"><div class="logoBig">${ic('budL')}${ic('budR')}</div>
       <div class="herot"><div class="t" style="font-size:17px;font-weight:400">${$t('app_name')} <span class="s" id="aboutVer" style="display:inline;font-size:12px;font-weight:400"></span></div><div class="s" style="font-size:12px">${$t('about_tagline')}</div></div></div>
-    <div class="btnrow"><button class="btn press" data-act="url" data-v="https://github.com/spizganed/QuickBuds">${ic('github')}GitHub</button><button class="btn press" data-act="url" data-v="https://ko-fi.com/spizganed">${ic('kofi')}Ko-fi</button><button class="btn press" data-act="url" data-v="https://discord.gg/pvsnEf9TrZ">${ic('discord')}Discord</button></div>
+    <div class="btnrow"><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows">${ic('github')}GitHub</button><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions">${ic('discord')}Discussions</button></div>
     <div id="replyBox" hidden><div class="lbl">${$t('reply_title')}</div><div class="card pad prose"></div></div>
     <div class="cols st">
       <div class="col"><div class="lbl">${$t('about_license_title')}</div><div class="card pad prose" style="flex:1">${$t('about_license_body')}</div></div>
       <div class="col"><div class="lbl">${$t('about_privacy_title')}</div><div class="card pad prose" style="flex:1">${$t('about_privacy_body')}</div></div>
     </div>
-    <div class="group"><div class="row">${ic('info')}<div class="txt"><div class="t">${$t('about_privacy_reset')}</div><div class="s">${$t('about_privacy_reply')}</div></div><button class="btn press" data-act="resetid">${$t('about_privacy_reset')}</button></div></div>
+
   </section>
   </main>
   <div class="toast" role="status" aria-live="polite"></div>`;
@@ -760,7 +759,6 @@ document.addEventListener('click',ev=>{
     if(a==='tprev'){QBLIVE.testPreview();return;}
     if(a==='tsend'){QBLIVE.send({t:'test_send'});return;}
     if(a==='url'){window.__TAURI__.core.invoke('open_url',{url:v});return;}
-    if(a==='resetid'){window.__TAURI__.core.invoke('reset_install_id');toast($t('about_privacy_reset'));return;}
   }
   if(a==='conn'){if(window.QBLIVE)QBLIVE.toggleConn();return;}
   if(a==='openwin'){setView('window');return;}
@@ -888,7 +886,7 @@ if(window.__TAURI__){
         el.animate({opacity:[1,0]},{duration:120*sp}).onfinish=()=>{el.textContent=label;el.animate({opacity:[0,1]},{duration:120*sp});};});
     fade('[data-ca]',s.status==='on'?s.t.disconnect:s.status==='connecting'?s.t.connecting:s.t.connect);
     fade('[data-cs]',s.status==='on'?s.t.on:s.status==='connecting'?s.t.connecting:s.t.off);
-    document.querySelectorAll('[data-cn]').forEach(e=>e.textContent=s.model||s.name||'QuickBuds');
+    document.querySelectorAll('[data-cn]').forEach(e=>e.textContent=s.model||s.name||'DeviceDeck');
     document.documentElement.classList.toggle('cing',s.status==='connecting');
     if(s.status==='on'&&s.anc){
       if(s.anc==='Off')S.anc=0;else if(s.anc.startsWith('ANC')){S.anc=1;const i=LV.indexOf(s.anc);if(i>=0)S.level=i;}
@@ -1106,18 +1104,18 @@ if(window.__TAURI__){
   // ---- app settings, update, feedback, test, about ----
   let AS=null;   // get_settings
   const loadSettings=()=>T.core.invoke('get_settings').then(st=>{AS=st;
-    S.count=st.usage_ping;S.hide=st.clear_battery;S.devtools=st.dev_tools_button;S.upd=st.update_auto;S.svc=st.autostart;S.lang=st.language;
+    S.hide=st.clear_battery;S.devtools=st.dev_tools_button;S.upd=st.update_auto;S.svc=st.autostart;S.lang=st.language;
     const iv=byId('updInst');if(iv)iv.textContent=st.version;
     const ab=byId('aboutVer');if(ab)ab.textContent=$t('about_version').replace('%1$s',st.version);
     const rp=byId('replyBox');if(rp){rp.hidden=!st.reply;if(st.reply)rp.querySelector('.prose').textContent=st.reply;}
     apply();});
   loadSettings();
-  // The due card (Ko-fi or a GitHub star): Support opens the page; Later and a closed dialog bring it back in 30 days.
+  // GitHub project reminder: Support opens the page; Later and close bring it back after the wait period.
   QBLIVE.supportCard=()=>T.core.invoke('support_due').then(c=>{if(!c)return;
     dialog(`<h3>${esc(c.title)}</h3><div class="s" style="text-align:center;margin:0;white-space:pre-line">${esc(c.body)}</div><div class="acts two"><button class="btn press" data-close>${esc(c.later)}</button><button class="btn pri press" id="spOk">${esc(c.action)}</button></div><div class="acts"><button class="btn press" id="spNever">${esc(c.never)}</button></div>`,
       (d,close)=>{d.querySelector('#spOk').addEventListener('click',()=>{T.core.invoke('support_off',{card:c.card});T.core.invoke('open_url',{url:c.url});close();});
         d.querySelector('#spNever').addEventListener('click',()=>{T.core.invoke('support_off',{card:c.card});close();});});});
-  const SETKEY={count:'usage_ping',hide:'clear_battery',devtools:'dev_tools_button',upd:'update_auto'};
+  const SETKEY={hide:'clear_battery',devtools:'dev_tools_button',upd:'update_auto'};
   QBLIVE.setting=(k,on)=>{if(SETKEY[k])T.core.invoke('set_setting',{key:SETKEY[k],value:on});if(k==='svc')T.core.invoke('set_autostart',{on});};
   QBLIVE.langDialog=()=>pickDialog($t('settings_language_title'),LANGS.map((l,i)=>[i,i===0?$t('language_system'):l]),AS?AS.language:0,v=>T.core.invoke('set_language',{index:+v}),'scroll');
   QBLIVE.issuesDialog=function(){const list=(this.ex&&this.ex.issues)||[];
