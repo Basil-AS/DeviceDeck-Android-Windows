@@ -1,5 +1,6 @@
 //! The app's own commands: settings, App update, Feedback, the daily count and starting with the computer.
 
+use crate::tr;
 use crate::update::{self, Release};
 use serde_json::{json, Value};
 use std::sync::Mutex;
