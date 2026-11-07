@@ -54,9 +54,12 @@ jobs:
       - name: Release names
         run: |
           ver=$(sed -n 's/.*versionName = "\(.*\)"/\1/p' app/build.gradle.kts)
+          apk=$(find app/build/outputs/apk/release -type f -name '*.apk' -print -quit)
+          aab=$(find app/build/outputs/bundle/release -type f -name '*.aab' -print -quit)
+          test -n "$ver" && test -n "$apk" && test -n "$aab"
           mkdir out
-          cp app/build/outputs/apk/release/app-release.apk "out/QuickBuds$ver.apk"
-          cp app/build/outputs/bundle/release/app-release.aab "out/QuickBuds$ver.aab"
+          cp "$apk" "out/DeviceDeck-Android-$ver.apk"
+          cp "$aab" "out/DeviceDeck-Android-$ver.aab"
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: android
