@@ -202,24 +202,16 @@ class ReportActivity : Activity() {
 
     private fun submit() {
         if (!ready()) return
-        sending = true
-        send.setText(R.string.problem_sending)
-        paintSend()
         val r = report()
-        val main = Handler(Looper.getMainLooper())
-        Thread {
-            val (ok, refused) = ProblemReport.send(this, r)
-            main.post {
-                sending = false
-                send.setText(R.string.problem_send)
-                paintSend()
-                val text = if (ok) getString(R.string.problem_sent) else refused ?: getString(R.string.problem_failed)
-                Toast.makeText(this, text, Toast.LENGTH_LONG).show()
-                // A broken or missing feature needs a snoop log in a GitHub issue.
-                if (ok && categories["Feature not working"]?.isChecked == true) CaptureAsk.show(this) { finish() }
-                else if (ok) finish()
-            }
-        }.start()
+        val body = buildString {
+            append("Model: ${r.model}\nCategories: ${r.categories.joinToString()}\n\n${r.description}\n\n")
+            append("Please attach an exported, scrubbed log if it helps reproduce the issue.")
+        }
+        val uri = Uri.parse(AboutActivity.GITHUB_URL).buildUpon().appendPath("issues").appendPath("new")
+            .appendQueryParameter("title", "Android: ${r.model}")
+            .appendQueryParameter("body", body).build()
+        runCatching { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+            .onFailure { Toast.makeText(this, "Could not open the DeviceDeck issue tracker.", Toast.LENGTH_LONG).show() }
     }
 
     companion object {

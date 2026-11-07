@@ -1,4 +1,4 @@
-//! QuickBuds for the desktop, egui port. The link thread, the protocol and the model data are the ones of `desktop`
+//! DeviceDeck for the desktop, egui port. The link thread, the protocol and the model data are the ones of `desktop`
 //! (included from there); this crate holds the Glass UI.
 #![cfg_attr(windows, windows_subsystem = "windows")]
 #![allow(dead_code)]
@@ -105,7 +105,7 @@ fn os_reduced_motion() -> bool {
 /// `settings.json` in the user's config folder, shared with the Slint app.
 fn settings_path() -> Option<std::path::PathBuf> {
     #[cfg(windows)]
-    let dir = std::env::var_os("APPDATA").map(|d| std::path::PathBuf::from(d).join("QuickBuds"));
+    let dir = std::env::var_os("APPDATA").map(|d| std::path::PathBuf::from(d).join("DeviceDeck"));
     #[cfg(not(windows))]
     let dir = std::env::var_os("XDG_CONFIG_HOME").map(std::path::PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|h| std::path::PathBuf::from(h).join(".config")))
@@ -414,10 +414,10 @@ fn main() -> eframe::Result {
             .with_maximize_button(false)
             .with_decorations(false)
             .with_transparent(true)
-            .with_title("QuickBuds")
+            .with_title("DeviceDeck")
             .with_app_id("quickbuds"),
         renderer: eframe::Renderer::Glow,
         ..Default::default()
     };
-    eframe::run_native("QuickBuds", options, Box::new(|cc| Ok(Box::new(App::new(cc)))))
+    eframe::run_native("DeviceDeck", options, Box::new(|cc| Ok(Box::new(App::new(cc)))))
 }

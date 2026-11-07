@@ -136,9 +136,9 @@ class AboutActivity : Activity() {
     }
 
     companion object {
-        const val GITHUB_URL = "https://github.com/spizganed/QuickBuds"
-        const val DISCORD_URL = "https://discord.gg/pvsnEf9TrZ"
+        const val GITHUB_URL = "https://github.com/Basil-AS/DeviceDeck-Android-Windows"
+        const val DISCORD_URL = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions"
         /** Null hides the button (it was hidden until the page existed). */
-        val KOFI_URL: String? = "https://ko-fi.com/spizganed"
+        val KOFI_URL: String? = null
     }
 }

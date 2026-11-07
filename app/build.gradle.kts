@@ -21,15 +21,17 @@ android {
     namespace = "com.spizganed.quickbuds"
     compileSdk = 37
 
+    // Keep the upstream source namespace while giving this fork an isolated install identity.
     defaultConfig {
+        applicationId = "app.devicedeck.android"
+        versionCode = 1
+        versionName = "0.1.0-alpha.1"
         minSdk = 26
         targetSdk = 37
 
         // THE ONLY PLACE the version is declared. It used to live on <application> in the manifest,
         // where Android ignores it: every PC build up to 2026-09-23 shipped with NO version, which
         // UpdateActivity (reads PackageManager) and bundletool ("Version code not found") both hit.
-        versionCode = 55
-        versionName = "5.6.1"
     }
 
     signingConfigs {

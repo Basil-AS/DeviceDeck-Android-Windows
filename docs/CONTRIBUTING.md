@@ -1,4 +1,4 @@
-# Contributing to QuickBuds
+# Contributing to DeviceDeck
 
 Thanks for helping. The most useful contribution is **a report from an owner of earbuds other than
 the OnePlus Buds 4**. The writes for every other model come from HeyMelody's and realme Link's data.
@@ -12,19 +12,19 @@ then open each feature with **Try it now**, try it, and mark the result. The **D
 lists each row that the buds' answers do not explain. The app writes one JSON line with the model, the
 replies, the rows, the marks and the unknown commands. The report carries that line, plus a fresh log
 without Bluetooth addresses. Settings › **Feedback** sends one problem with your description. For a
-longer exchange, open an [issue](https://github.com/spizganed/QuickBuds/issues) with:
+longer exchange, open an [issue](https://github.com/Basil-AS/DeviceDeck-Android-Windows/issues) with:
 
 1. The earbuds' model, and the phone or PC it runs on (model, Android / Windows / Linux version).
 2. What works and what does not. "The switch flips but nothing changes on the buds" is useful.
 3. A log: in the app, open Dev tools › **Clear**. Try the features. Then open Dev tools › **Export**. The file
-   lands in `Download/QuickBuds/` (PC: `Downloads/QuickBuds`). Remove the Bluetooth addresses and the names of your other devices first.
+   lands in `Download/DeviceDeck/` (PC: `Downloads/DeviceDeck`). Remove the Bluetooth addresses and the names of your other devices first.
 
 If the app's log does not explain the problem, [PACKET-CAPTURE.md](./PACKET-CAPTURE.md) shows how to
 capture the Bluetooth traffic. It also shows what HeyMelody sends.
 
 ## Licence of your contribution
 
-QuickBuds is under the GPL-3.0-or-later. The owner can also offer it under a commercial licence. Before
+DeviceDeck is under the GPL-3.0-or-later. The owner can also offer it under a commercial licence. Before
 you submit a contribution directly to the original upstream, you must personally review and agree to its [Contributor License Agreement](./CLA.md). DeviceDeck-only contributions do not grant the upstream owner additional rights.
 Tick the box in the pull request template. You keep your copyright.
 

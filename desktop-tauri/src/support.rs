@@ -54,8 +54,8 @@ pub fn support_due() -> Value {
     crate::save_setting("support_last_day", (t / DAY).into());
     crate::save_setting(&format!("support_next_{card}"), (t + LATER_DAYS * DAY).into());
     let (title, body, action, url) = match card {
-        "kofi" => ("support_kofi_title", "support_kofi_body", "support_kofi_action", "https://ko-fi.com/spizganed"),
-        _ => ("support_github_title", "support_github_body", "support_github_action", "https://github.com/spizganed/QuickBuds"),
+        "kofi" => ("support_kofi_title", "support_kofi_body", "support_kofi_action", "https://github.com/Basil-AS/DeviceDeck-Android-Windows"),
+        _ => ("support_github_title", "support_github_body", "support_github_action", "https://github.com/Basil-AS/DeviceDeck-Android-Windows"),
     };
     json!({ "card": card, "title": crate::tr(title), "body": crate::tr(body), "action": crate::tr(action),
         "later": crate::tr("support_later"), "never": crate::tr("support_never"), "url": url })

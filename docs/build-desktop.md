@@ -13,8 +13,8 @@ The same code builds on Linux and on Windows. You need Rust (stable, from [rustu
 | Debian / Ubuntu | `build-essential pkg-config libdbus-1-dev libgtk-3-dev libayatana-appindicator3-dev libfontconfig1-dev libxkbcommon-dev` |
 
 ```bash
-git clone https://github.com/spizganed/QuickBuds.git
-cd QuickBuds/desktop
+git clone https://github.com/Basil-AS/DeviceDeck-Android-Windows.git
+cd DeviceDeck/desktop
 cargo test
 cargo run --release
 ```

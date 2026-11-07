@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the desktop release files (Tauri app, desktop-tauri/) into desktop-tauri/dist/:
-#   QuickBuds<version>-windows-x64.zip   quickbuds.exe only (portable, static runtime)
-#   QuickBuds-linux-x64.AppImage         WebKitGTK inside. No version in the name: releases/latest/download/ always finds it.
+#   DeviceDeck<version>-windows-x64.zip   quickbuds.exe only (portable, static runtime)
+#   DeviceDeck-linux-x64.AppImage         WebKitGTK inside. No version in the name: releases/latest/download/ always finds it.
 # Usage: scripts/desktop-dist.sh <version>   (e.g. 5.7.0). QB_APPIMAGE_ONLY=1 builds the AppImage only.
 # Needs: podman (unless QB_NATIVE=1), zip. Windows also needs cargo-xwin, clang, lld, llvm and the msvc rustup target.
 # Linux builds in Ubuntu 24.04 (glibc 2.39): its WebKitGTK renders the transparent window cleanly (the 22.04 one ghosts text).
@@ -21,7 +21,7 @@ if [ -z "${QB_APPIMAGE_ONLY:-}" ]; then
     cd "$app"
     XWIN_ACCEPT_LICENSE=1 RUSTFLAGS="-C target-feature=+crt-static -C link-arg=libucrt.lib -C link-arg=libvcruntime.lib" \
       cargo xwin build --release --target x86_64-pc-windows-msvc
-    cd target/x86_64-pc-windows-msvc/release && zip -q "$dist/QuickBuds$ver-windows-x64.zip" quickbuds.exe
+    cd target/x86_64-pc-windows-msvc/release && zip -q "$dist/DeviceDeck$ver-windows-x64.zip" quickbuds.exe
   ) >"$winlog" 2>&1 &
   winpid=$!
 fi
@@ -43,6 +43,6 @@ else
       '"$build"'
       chown -R '"$(id -u):$(id -g)"' /repo/desktop-tauri/target/ubuntu22 /cargo-reg'
 fi
-cp "$app"/target/ubuntu22/release/bundle/appimage/*.AppImage "$dist/QuickBuds-linux-x64.AppImage"
+cp "$app"/target/ubuntu22/release/bundle/appimage/*.AppImage "$dist/DeviceDeck-linux-x64.AppImage"
 if [ -n "${winpid:-}" ]; then wait "$winpid" || { cat "$winlog"; exit 1; }; tail -2 "$winlog"; fi
 ls -la "$dist"

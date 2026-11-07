@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">DeviceDeck</title>
+  <defs>
+    <linearGradient id="g" x1="18" y1="14" x2="111" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#72E6D1"/><stop offset="1" stop-color="#6887FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="34" fill="#101522"/>
+  <path d="M31 49a33 33 0 0 1 66 0v25a13 13 0 0 1-13 13h-4V62h4a13 13 0 0 1 13 13M31 49v26a13 13 0 0 0 13 13h4V62h-4a13 13 0 0 0-13 13" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="64" cy="49" r="6" fill="#F2F5FF"/>
+  <path d="M64 58v28m0 0-11 11m11-11 11 11" fill="none" stroke="#F2F5FF" stroke-width="5" stroke-linecap="round"/>
+</svg>

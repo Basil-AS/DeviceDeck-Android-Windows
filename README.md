@@ -1,6 +1,6 @@
 <div align="center">
 
-# QuickBuds
+# DeviceDeck
 
 **An alternative to HeyMelody and realme Link for your OnePlus, OPPO and realme earbuds.**
 
@@ -8,26 +8,26 @@ Android · Windows · Linux
 
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android%208%2B%20%7C%20Windows%20%7C%20Linux-3DDC84.svg)](#install)
-[![Release](https://img.shields.io/badge/Release-latest-blue.svg)](https://github.com/spizganed/QuickBuds/releases/latest)
+[![Release](https://img.shields.io/badge/Release-latest-blue.svg)](https://github.com/Basil-AS/DeviceDeck-Android-Windows/releases/latest)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/spizganed)
 [![Discord](https://img.shields.io/badge/Discord-Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/pvsnEf9TrZ)
 
-<img src="docs/images/phone.png" width="230" alt="QuickBuds on a phone"> &nbsp; <img src="docs/images/desktop.png" width="560" alt="QuickBuds on a PC">
+<img src="docs/images/phone.png" width="230" alt="DeviceDeck on a phone"> &nbsp; <img src="docs/images/desktop.png" width="560" alt="DeviceDeck on a PC">
 
 </div>
 
-QuickBuds is an open-source alternative to HeyMelody and realme Link. It talks to your earbuds over
+DeviceDeck is an open-source alternative to HeyMelody and realme Link. It talks to your earbuds over
 Bluetooth. It shows the controls that your model has. The phone has real home screen widgets. The PC has a
 tray icon. It is a hobby project. You can support it on [Ko-fi](https://ko-fi.com/spizganed).
 
 ## Supported earbuds
 
-QuickBuds works on **any Android 8+ phone** (Samsung, Google Pixel, Xiaomi, Nothing, Motorola, OnePlus…),
+DeviceDeck works on **any Android 8+ phone** (Samsung, Google Pixel, Xiaomi, Nothing, Motorola, OnePlus…),
 not only on OnePlus / OPPO phones. It knows every model in HeyMelody's and realme Link's lists: 140 models in 143 entries. Three models have two ids. It shows only the features each model has. Each
 model also lists its known issues in Settings.
 
 On OnePlus, OPPO and realme phones (OxygenOS 12 and later, ColorOS, realme UI), the system's own
-earbud settings can hold the control link of the earbuds. QuickBuds cannot connect in that case. Use
+earbud settings can hold the control link of the earbuds. DeviceDeck cannot connect in that case. Use
 the earbud settings in Settings › Bluetooth › your earbuds, or report the case.
 
 <details><summary><b>Confirmed</b> (43 models)</summary>
@@ -81,7 +81,7 @@ the earbud settings in Settings › Bluetooth › your earbuds, or report the ca
 - **realme Buds T110**: confirmed by its owner on Android: battery, gestures.
 - **realme Buds T200**: confirmed by its owner on Android: battery, noise control, low latency, high-quality audio, 3D audio, hearing profile, equalizer, dual connection, gestures, wear detection, find my earbuds.
 - **realme Buds T200x**: confirmed by its owner on Android: battery, noise control, low latency, equalizer, dual connection, gestures.
-- **realme Buds T200 Lite**: confirmed by its owner on Android: all features that QuickBuds offers, except find my earbuds.
+- **realme Buds T200 Lite**: confirmed by its owner on Android: all features that DeviceDeck offers, except find my earbuds.
 - **realme Buds T300**: confirmed by its owner on Android and Windows: battery, noise control, low latency, 3D audio, equalizer, gestures, find my earbuds.
 - **realme Buds T310**: confirmed by its owner on Android and Windows: battery, noise control, wind noise reduction, low latency, 3D audio, equalizer, dual connection, gestures, find my earbuds.
 - **realme Buds T500 Pro**: confirmed by its owner on Android and Linux: battery, noise control, wind noise reduction, low latency, high-quality audio, 3D audio, hearing profile, equalizer, dual connection, gestures, wear detection, find my earbuds.
@@ -121,7 +121,7 @@ It runs a tour of each feature, shows a diagnosis and adds one JSON line to the 
 
 The app offers this test once, after the first connect to a model that is not confirmed. Settings › Feedback
 sends a description and the log, without a GitHub account. Or open an
-[issue](https://github.com/spizganed/QuickBuds/issues). [CONTRIBUTING.md](./docs/CONTRIBUTING.md#reporting-a-model)
+[issue](https://github.com/Basil-AS/DeviceDeck-Android-Windows/issues). [CONTRIBUTING.md](./docs/CONTRIBUTING.md#reporting-a-model)
 says what to include. Each report lets the next release fix that model.
 
 The developer can answer a report. The answer shows once in the app, on the next daily count (see Privacy).
@@ -141,24 +141,24 @@ Android phone. A PC cannot make it, because the vendor apps run only on a phone.
 apps cannot make it either.
 
 1. Turn on the Bluetooth HCI snoop log in Developer options.
-2. Stop QuickBuds. Change the setting in the vendor app: on, off, on.
+2. Stop DeviceDeck. Change the setting in the vendor app: on, off, on.
 3. Take a bug report and copy `btsnoop_hci.log` out of it.
-4. Open a [Missing feature issue](https://github.com/spizganed/QuickBuds/issues/new?template=missing-feature.yml) and attach the log and the recording.
+4. Open a [Missing feature issue](https://github.com/Basil-AS/DeviceDeck-Android-Windows/issues/new?template=missing-feature.yml) and attach the log and the recording.
 
 All steps: [Send a snoop log for a missing feature](./docs/PACKET-CAPTURE.md#send-a-snoop-log-for-a-missing-feature).
 
 ## Install
 
-The current release is 5.6.0. Pair your earbuds in the system's Bluetooth settings first. QuickBuds connects to paired earbuds. It does not pair them.
+The current release is 5.6.0. Pair your earbuds in the system's Bluetooth settings first. DeviceDeck connects to paired earbuds. It does not pair them.
 
 | Platform | How |
 | --- | --- |
-| **Android 8+** | Install `QuickBuds<version>.apk` from the [latest release](https://github.com/spizganed/QuickBuds/releases/latest). Allow the Bluetooth permission when asked. |
-| **Windows 10 / 11** | Unzip `QuickBuds<version>-windows-x64.zip` and run `quickbuds.exe`. It is portable: no installer, no drivers, no background service. |
+| **Android 8+** | Install `DeviceDeck-Android-<version>.apk` from the [latest release](https://github.com/Basil-AS/DeviceDeck-Android-Windows/releases/latest). Allow the Bluetooth permission when asked. |
+| **Windows 10 / 11** | Unzip `DeviceDeck<version>-windows-x64.zip` and run `quickbuds.exe`. It is portable: no installer, no drivers, no background service. |
 | **Linux** | Run the command below. It needs only `curl` and BlueZ. |
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/spizganed/QuickBuds/main/scripts/install-linux.sh | sh
+curl -fsSL https://raw.githubusercontent.com/spizganed/DeviceDeck/main/scripts/install-linux.sh | sh
 ```
 
 The script needs no administrator rights, adds a menu entry, and the app updates itself. More ways to install, and how to remove it: [INSTALL-LINUX.md](./docs/INSTALL-LINUX.md).
@@ -177,10 +177,10 @@ The script needs no administrator rights, adds a menu entry, and the app updates
 | **Sound** | Equalizer with presets, custom curves and bass boost. High-quality audio, 3D audio, low latency mode. High-quality audio needs an LHDC or LDAC link on models that offer a codec list. The phone's Bluetooth settings choose the codec. The High-quality audio switch changes the bitrate and the sampling rate. |
 | **Hearing** | A hearing test that tunes the sound to your ears, and a fit test of the ear-tip seal. |
 | **Controls** | Gestures per bud, wear detection, dual connection, find my earbuds, prompt volume, tap sensitivity, firmware version. |
-| **Per model** | QuickBuds reads the model and shows only what that model supports. Settings › Known issues lists the limits of your model and phone, and the app tells you once when your model has some. A switch on the feature-sync engine moves only when the earbuds confirm it. Noise control moves at the tap. A failed change shows a toast with the reason. |
-| **Android** | Home screen widgets from 2×2 up: the battery first, then the noise control and switches after a double tap. A 1×1 widget steps through your noise control modes. Quick Settings tiles: noise control, low latency, wind noise reduction and open QuickBuds. A notification with the battery rings. On Android 16, a status chip can show the earbud levels in the status bar. A ten-page setup guide. A game equalizer that follows the game in the foreground (needs Usage access). |
+| **Per model** | DeviceDeck reads the model and shows only what that model supports. Settings › Known issues lists the limits of your model and phone, and the app tells you once when your model has some. A switch on the feature-sync engine moves only when the earbuds confirm it. Noise control moves at the tap. A failed change shows a toast with the reason. |
+| **Android** | Home screen widgets from 2×2 up: the battery first, then the noise control and switches after a double tap. A 1×1 widget steps through your noise control modes. Quick Settings tiles: noise control, low latency, wind noise reduction and open DeviceDeck. A notification with the battery rings. On Android 16, a status chip can show the earbud levels in the status bar. A ten-page setup guide. A game equalizer that follows the game in the foreground (needs Usage access). |
 | **PC** | A tray icon with quick controls (Windows) or a battery menu (Linux). |
-| **Looks** | Material, QuickBuds, Pixel art and Glass styles. OLED Black, Classic Dark and White themes, wallpaper colours, your own accent and palettes. Glass has six backgrounds. The phone and its widgets have all four styles. The PC app has the first three. |
+| **Looks** | Material, DeviceDeck, Pixel art and Glass styles. OLED Black, Classic Dark and White themes, wallpaper colours, your own accent and palettes. Glass has six backgrounds. The phone and its widgets have all four styles. The PC app has the first three. |
 | **Feedback** | Settings › Feedback sends a description, a model test or a crash report with the log, without a GitHub account. The developer can answer a report, and the answer shows once in the app. |
 | **Languages and updates** | 27 languages, switchable in the app. Updates come from GitHub releases. The PC app updates itself. |
 
@@ -201,7 +201,7 @@ The script needs no administrator rights, adds a menu entry, and the app updates
 - [PROTOCOL.md](./docs/PROTOCOL.md): the wire format, every claim tagged with its source.
 - [ROADMAP.md](./docs/ROADMAP.md): the plan, and the features decided against.
 
-Everything to build and release QuickBuds is in this repository, except the signing key. If the
+Everything to build and release DeviceDeck is in this repository, except the signing key. If the
 project stops, anyone can fork it and publish their own signed build.
 
 ## Credits
@@ -218,7 +218,7 @@ both SIL Open Font License 1.1, licenses bundled in `app/src/main/assets/`.
 
 ## Privacy
 
-Once a day, QuickBuds sends its platform, its version and a random install ID to a Cloudflare Worker.
+Once a day, DeviceDeck sends its platform, its version and a random install ID to a Cloudflare Worker.
 The Worker counts active installs with it. The ID ties to no device, account or address. The app sends no earbud data.
 
 The ID also lets the developer answer a report you sent. The answer comes back with the daily count. A problem report carries the same ID and is sent only when you send it. On Android, Settings › Count my install turns the daily count off
@@ -228,11 +228,11 @@ The Worker code is in [report-worker/](./report-worker).
 ## Feature ideas
 
 These are ideas, not plans. Nothing here is promised. To propose one, open a
-[feature idea](https://github.com/spizganed/QuickBuds/issues/new?template=feature-idea.yml).
+[feature idea](https://github.com/Basil-AS/DeviceDeck-Android-Windows/issues/new?template=feature-idea.yml).
 
 **Launch an app with an earbud gesture.** You pick a gesture, for example a triple tap on the left bud.
 You pick an installed app or action. Examples are Spotify, a playlist, or a voice assistant such as
-Gemini, ChatGPT or Claude. QuickBuds runs it when the gesture happens.
+Gemini, ChatGPT or Claude. DeviceDeck runs it when the gesture happens.
 
 Open questions:
 
@@ -249,17 +249,17 @@ Status: idea, no research yet.
 
 Copyright (C) 2026 spizganed
 
-QuickBuds has two licences:
+DeviceDeck has two licences:
 
 - **Open source:** the GNU General Public License v3.0 or later. Everyone can use, study, change and share
-  QuickBuds under this licence. It has no warranty. See [LICENSE](./LICENSE).
-- **Commercial:** the copyright holder can license QuickBuds under other terms, for example for a company
+  DeviceDeck under this licence. It has no warranty. See [LICENSE](./LICENSE).
+- **Commercial:** the copyright holder can license DeviceDeck under other terms, for example for a company
   that wants to build it into a closed-source product. To ask, open an issue on GitHub.
 
 Contributors keep the copyright of their work. They license it under both terms in the
-upstream CLA applies only when you explicitly submit a contribution to the original QuickBuds project; DeviceDeck contributions remain under GPL-3.0-or-later. See [docs/CLA.md](./docs/CLA.md).
+upstream CLA applies only when you explicitly submit a contribution to the original DeviceDeck project; DeviceDeck contributions remain under GPL-3.0-or-later. See [docs/CLA.md](./docs/CLA.md).
 
-QuickBuds is an independent project. It is not affiliated with OnePlus, OPPO, realme, HeyTap or their
+DeviceDeck is an independent project. It is not affiliated with OnePlus, OPPO, realme, HeyTap or their
 affiliates. Those companies do not endorse or sponsor it. OnePlus, OPPO, realme, HeyMelody and the earbud
 model names are trademarks of their owners. This text uses them only to say which devices the app works
 with. The project studied the protocol only to make these earbuds work with this app.
