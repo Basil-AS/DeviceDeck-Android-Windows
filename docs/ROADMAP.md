@@ -46,8 +46,7 @@ These work in code but no owner has confirmed them. They count as working until 
 
 ## Decided against — do not suggest again
 
-- **Any feature that needs a server.** Exception: the problem report's free Cloudflare Worker
-  (`report-worker/`).
+- **Usage telemetry and remote device control.** DeviceDeck does not depend on an application backend.
 - **Firmware updates:** a failed flash can brick the buds. The firmware row points to HeyMelody.
 - **Right-to-left languages:** they need a mirrored layout and a check of every custom-drawn view.
 - **Widgets:** a lock-screen widget; a widget on/off switch; a widget larger than the launcher's padding

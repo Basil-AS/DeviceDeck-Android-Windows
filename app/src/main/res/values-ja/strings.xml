@@ -513,7 +513,7 @@
     <string name="test_broken_hint">何が起きましたか？1 行で十分です。</string>
     <string name="test_mark_all">結果を送信するには、すべての機能を記録してください。</string>
     <string name="about_privacy_title">プライバシー</string>
-    <string name="about_privacy_body">DeviceDeck は 1 日に 1 回、プラットフォーム、バージョン番号（例: 「Android 5.2.1」）、ランダムなインストール ID を送信し、アクティブなユーザー数を数えます。この ID は端末、アカウント、アドレスのいずれにも結び付かず、アプリはイヤホンのデータを送信しません。レポートにも同じ ID が付き、あなたが送信したときだけ送られます。</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">インストール ID をリセット</string>
     <string name="welcome_title">DeviceDeck へようこそ</string>
     <string name="welcome_body">数ステップで DeviceDeck を設定します。選択はあとで設定から変えられます。</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">イヤホンはどちらか一方だけを使います。一方をオンにすると、もう一方はオフになります。</string>
     <string name="setup_issues_body">設定にイヤホンとスマートフォンの制限を一覧で表示します。お使いのモデルに該当がある場合、DeviceDeck は一度だけ知らせます。</string>
     <string name="reply_title">開発者からの返信</string>
-    <string name="about_discord_desc">Discordで開発者とチャット</string>
-    <string name="about_privacy_reply">このIDにより、開発者は送信されたレポートに返信できます。返信は1日1回の集計と一緒に届きます。</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">システムが接続をブロックすることがあります</string>
     <string name="oneplus_hint">OnePlus、OPPO、realme のスマートフォンでは、システムのイヤホン設定がイヤホンのリンクを保持し、DeviceDeck をブロックすることがあります。DeviceDeck が接続しない場合は、設定 › Bluetooth › イヤホンでイヤホン設定を使用してください。</string>
     <string name="connect_try_failed">接続できませんでした（%1$d/%2$d 回目）</string>

@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Mi történt? Egy sor elég.</string>
     <string name="test_mark_all">Jelölj meg minden funkciót az eredmény elküldéséhez.</string>
     <string name="about_privacy_title">Adatvédelem</string>
-    <string name="about_privacy_body">A DeviceDeck naponta egyszer elküldi a platformját, a verziószámát (például „Android 5.2.1”) és egy véletlenszerű telepítési azonosítót az aktív felhasználók megszámlálásához. Az azonosító nem kötődik eszközhöz, fiókhoz vagy címhez, és az alkalmazás nem küld fülhallgatóadatot. A jelentések ugyanazt az azonosítót viszik, és csak akkor mennek el, ha te elküldöd őket.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Telepítési azonosító visszaállítása</string>
     <string name="welcome_title">Üdvözöl a DeviceDeck</string>
     <string name="welcome_body">Néhány lépésben beállítható a DeviceDeck. Minden döntést később módosíthatsz a Beállításokban.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">A fülhallgató csak az egyiket használja. Az egyik bekapcsolása kikapcsolja a másikat.</string>
     <string name="setup_issues_body">A Beállítások felsorolják a fülhallgató és a telefon korlátait. A DeviceDeck egyszer szól is, ha a modelledben van ilyen.</string>
     <string name="reply_title">A fejlesztő válasza</string>
-    <string name="about_discord_desc">Csevegj a fejlesztővel a Discordon</string>
-    <string name="about_privacy_reply">Az azonosító lehetővé teszi, hogy a fejlesztő válaszoljon az elküldött jelentésedre. A válasz a napi számlálással érkezik.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">A rendszer blokkolhatja a kapcsolatot</string>
     <string name="oneplus_hint">OnePlus, OPPO és realme telefonokon a rendszer fülhallgató-beállításai tarthatják a fülhallgató kapcsolatát, és blokkolhatják a DeviceDeckot. Ha a DeviceDeck nem csatlakozik, használja a fülhallgató-beállításokat a Beállítások › Bluetooth › fülhallgatók menüben.</string>
     <string name="connect_try_failed">Nem sikerült csatlakozni (%1$d./%2$d próbálkozás)</string>

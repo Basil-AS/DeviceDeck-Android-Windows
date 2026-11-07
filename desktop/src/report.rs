@@ -1,5 +1,5 @@
 //! App settings › Feedback: the phone's `ProblemReport`, posted with `curl` (as the updater does) to the same
-//! report Worker. Nothing goes out without Send; See what is sent shows the exact text first.
+//! upstream report Worker. Nothing goes out without Send; See what is sent shows the exact text first.
 
 use crate::types::*;
 use crate::session::{Line, LOG};
@@ -9,7 +9,7 @@ use std::io::Write;
 use std::process::Stdio;
 use std::sync::Mutex;
 
-/// The Category options, in the Worker's own words; it drops any other value (report-worker/src/index.js).
+/// The Category options, in the upstream Worker's own words; it drops any other value (report-worker/src/index.js).
 const CATEGORIES: [&str; 6] = ["UI", "Lag", "Connection", "Feature not working", "Battery", "Other"];
 /// Their labels, the phone's `problem_cat_*` strings.
 pub const CATEGORY_KEYS: [&str; 6] = ["problem_cat_ui", "problem_cat_lag", "problem_cat_connection",
@@ -272,8 +272,8 @@ fn known_issues(a: &App) -> (bool, bool, bool) {
     (silent, both, listed("hires_no_codec") || no_codec)
 }
 
-/// Posts [d] to the Worker.
-/// Returns (sent, the Worker's answer text when it refused the report).
+/// Posts [d] to the upstream Worker.
+/// Returns (sent, the upstream Worker's answer text when it refused the report).
 pub(crate) fn send(_d: Draft) -> (bool, Option<String>) {
     (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }

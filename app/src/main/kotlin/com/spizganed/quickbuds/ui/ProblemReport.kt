@@ -11,15 +11,14 @@ import com.spizganed.quickbuds.protocol.ModelCatalog
 import com.spizganed.quickbuds.protocol.OppoPacketFramer
 
 /**
- * The problem report, filled by [ReportActivity]: JSON to the report Worker (report-worker/). The desktop app does
- * the same (desktop/src/report.rs).
+ * Locally prepared and scrubbed feedback content. Android opens a browser issue draft; it does not upload the log.
  */
 object ProblemReport {
 
     /** One report. [categories] are [CATEGORIES] values; [log] is null when the person turned it off. */
     class Report(val model: String, val categories: List<String>, val description: String, val log: String?, val crash: Boolean)
 
-    /** The Category options, in the Worker's own words (it drops any other value, report-worker/src/index.js). */
+    /** Feedback categories presented in the Android issue form. */
     val CATEGORIES = listOf("UI", "Lag", "Connection", "Feature not working", "Battery", "Other")
 
     /** The log's first line: phone, Android, DeviceDeck, buds model and firmware. Exported logs start with it too. */

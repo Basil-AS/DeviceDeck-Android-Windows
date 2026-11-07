@@ -1,5 +1,5 @@
 //! The report path for Feedback and Test my earbuds: the header, the packet log with the phone's scrub, the
-//! preview text and the Worker post. The logic and the words are the ones of `desktop/src/report.rs`; the
+//! preview text and the local issue export. The logic and the words are the ones of `desktop/src/report.rs`; the
 //! Worker route is the same one. Nothing leaves the machine until Send.
 
 use crate::session::{Line, LOG};
@@ -152,8 +152,8 @@ pub fn app_id() -> String {
     id
 }
 
-/// Posts [d] to the Worker.
-/// Returns (sent, the Worker's answer text when it refused the report).
+/// Posts [d] to the upstream Worker.
+/// Returns (sent, the upstream Worker's answer text when it refused the report).
 pub fn send(_d: Draft) -> (bool, Option<String>) {
     (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }

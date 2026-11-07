@@ -515,7 +515,7 @@
     <string name="test_broken_hint">Đã xảy ra chuyện gì? Một dòng là đủ.</string>
     <string name="test_mark_all">Đánh dấu mọi tính năng để gửi kết quả.</string>
     <string name="about_privacy_title">Quyền riêng tư</string>
-    <string name="about_privacy_body">DeviceDeck gửi nền tảng, số phiên bản (ví dụ \"Android 5.2.1\") và một ID cài đặt ngẫu nhiên mỗi ngày một lần để đếm người dùng đang hoạt động. ID không gắn với thiết bị, tài khoản hay địa chỉ nào, và ứng dụng không gửi dữ liệu tai nghe. Báo cáo mang cùng ID đó và chỉ được gửi khi bạn gửi.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Đặt lại ID cài đặt</string>
     <string name="welcome_title">Chào mừng đến với DeviceDeck</string>
     <string name="welcome_body">Vài bước sẽ thiết lập DeviceDeck. Bạn có thể đổi mọi lựa chọn sau trong Cài đặt.</string>
@@ -574,8 +574,8 @@
     <string name="issue_hires_spatial_body">Tai nghe chỉ chạy một trong hai. Bật cái này sẽ tắt cái kia.</string>
     <string name="setup_issues_body">Cài đặt liệt kê các giới hạn của tai nghe và điện thoại của bạn. DeviceDeck cũng báo một lần nếu mẫu của bạn có.</string>
     <string name="reply_title">Phản hồi từ nhà phát triển</string>
-    <string name="about_discord_desc">Trò chuyện với nhà phát triển trên Discord</string>
-    <string name="about_privacy_reply">ID cũng cho phép nhà phát triển trả lời báo cáo bạn đã gửi. Câu trả lời đến cùng lượt đếm hằng ngày.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Hệ thống có thể chặn kết nối</string>
     <string name="oneplus_hint">Trên điện thoại OnePlus, OPPO và realme, cài đặt tai nghe của hệ thống có thể giữ liên kết tai nghe và chặn DeviceDeck. Nếu DeviceDeck không kết nối, hãy dùng cài đặt tai nghe trong Cài đặt › Bluetooth › tai nghe của bạn.</string>
     <string name="connect_try_failed">Không thể kết nối (lần %1$d/%2$d)</string>

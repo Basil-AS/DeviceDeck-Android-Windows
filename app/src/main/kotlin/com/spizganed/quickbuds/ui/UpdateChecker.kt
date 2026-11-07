@@ -81,8 +81,7 @@ object UpdateChecker {
     }
 
     /**
-     * Blocking; call off the main thread. It asks the Worker first. When the Worker fails or its newest
-     * release is not for Android, it asks GitHub once, the old path.
+     * Blocking; call off the main thread. It reads the public DeviceDeck releases API and filters for Android assets.
      */
     fun fetch(): Release {
         // Newest first. Desktop releases (`desktop-v*`) share the repo; skip them.

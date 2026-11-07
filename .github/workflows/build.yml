@@ -1,9 +1,7 @@
 # Checks the locales, runs the Android unit tests and lint, builds the release APK and AAB, runs the core and desktop
-# tests and builds the desktop files (scripts/desktop-dist.sh). Runs only by hand (`gh workflow run Build`, or the
-# Actions tab), never on a push or a pull request. On the PC,
-# scripts/release-build.sh builds the same release files, much faster (docs/CONTRIBUTING.md). The APK is signed
-# when the repository has the RELEASE_KEYSTORE_B64 and RELEASE_KEY_PROPERTIES secrets, so it installs over the
-# release app. The run's Artifacts hold every release file.
+# tests and builds the desktop files (scripts/desktop-dist.sh). Tag pushes publish signed Android or desktop releases.
+# On the PC, scripts/release-build.sh builds the same files. Release-only signing secrets are exposed only to
+# android-v* tags, never to pull requests. Build artifacts are checksummed before publication.
 name: Build
 
 # The run reads the repository only. The signing key arrives as a secret, so no write scope is needed.
@@ -13,6 +11,7 @@ permissions:
 on:
   push:
     branches: [main, develop]
+    tags: ["android-v*", "desktop-v*"]
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -41,11 +40,17 @@ jobs:
         env:
           KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_B64 }}
           PROPS: ${{ secrets.RELEASE_KEY_PROPERTIES }}
-        if: env.KEYSTORE != ''
+        if: startsWith(github.ref, 'refs/tags/android-v') && env.KEYSTORE != ''
         run: |
           mkdir -p local/keys
           echo "$KEYSTORE" | base64 -d > local/keys/quickbuds-release.jks
           printf '%s\n' "$PROPS" > local/keys/keystore.properties
+      - name: Require the persistent signer for Android releases
+        if: startsWith(github.ref, 'refs/tags/android-v')
+        env:
+          KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+          PROPS: ${{ secrets.RELEASE_KEY_PROPERTIES }}
+        run: test -n "$KEYSTORE" && test -n "$PROPS"
       - name: Every string in all locales
         run: python3 scripts/check-locales.py
       - name: Unit tests and lint
@@ -57,6 +62,12 @@ jobs:
           apk=$(find app/build/outputs/apk/release -type f -name '*.apk' -print -quit)
           aab=$(find app/build/outputs/bundle/release -type f -name '*.aab' -print -quit)
           test -n "$ver" && test -n "$apk" && test -n "$aab"
+          if [[ "$GITHUB_REF_NAME" == android-v* ]]; then
+            test "${GITHUB_REF_NAME#android-v}" = "$ver"
+            apksigner_path="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+            test -n "$apksigner_path"
+            "$apksigner_path" verify --verbose "$apk"
+          fi
           mkdir out
           cp "$apk" "out/DeviceDeck-Android-$ver.apk"
           cp "$aab" "out/DeviceDeck-Android-$ver.aab"
@@ -129,3 +140,56 @@ jobs:
           name: checksums
           path: files/SHA256SUMS
           retention-days: 14
+
+  release:
+    needs: [android, desktop, checksums]
+    if: startsWith(github.ref, 'refs/tags/android-v') || startsWith(github.ref, 'refs/tags/desktop-v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - name: Require a commit merged to main
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Select and validate release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          mkdir release-files
+          if [[ "$tag" == android-v* ]]; then
+            version="${tag#android-v}"
+            declared="$(sed -n 's/.*versionName = "\(.*\)"/\1/p' app/build.gradle.kts)"
+            test "$version" = "$declared"
+            cp "artifacts/DeviceDeck-Android-$version.apk" release-files/
+            cp "artifacts/DeviceDeck-Android-$version.aab" release-files/
+          else
+            version="${tag#desktop-v}"
+            declared="$(sed -n 's/^version = "\(.*\)"/\1/p' desktop-tauri/Cargo.toml | head -1)"
+            test "$version" = "$declared"
+            cp artifacts/DeviceDeck*-windows-x64.zip release-files/
+            cp artifacts/DeviceDeck-linux-x64.AppImage release-files/
+          fi
+          : > release-files/SHA256SUMS
+          while IFS= read -r file; do
+            grep -F "  $file" artifacts/SHA256SUMS >> release-files/SHA256SUMS
+          done < <(find release-files -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n')
+          (cd release-files && sha256sum -c SHA256SUMS)
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#*-v}"
+          if [[ "$version" =~ (alpha|beta|rc) ]]; then
+            gh release create "$GITHUB_REF_NAME" release-files/* --verify-tag --prerelease --latest=false --title "DeviceDeck $version" --generate-notes
+          else
+            gh release create "$GITHUB_REF_NAME" release-files/* --verify-tag --latest --title "DeviceDeck $version" --generate-notes
+          fi

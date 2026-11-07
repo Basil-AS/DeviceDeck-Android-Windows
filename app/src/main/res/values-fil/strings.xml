@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Ano ang nangyari? Sapat na ang isang linya.</string>
     <string name="test_mark_all">Markahan ang bawat feature para maipadala ang resulta.</string>
     <string name="about_privacy_title">Privacy</string>
-    <string name="about_privacy_body">Isang beses sa isang araw, ipinapadala ng DeviceDeck ang platform nito, numero ng bersyon (halimbawa \"Android 5.2.1\") at isang random na install ID para mabilang ang mga aktibong user. Hindi nakakabit ang ID sa anumang device, account o address, at hindi nagpapadala ang app ng data ng earbuds. Dala ng mga ulat ang parehong ID at ipinapadala lang kapag ikaw ang nagpadala.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">I-reset ang install ID</string>
     <string name="welcome_title">Maligayang pagdating sa DeviceDeck</string>
     <string name="welcome_body">Ilang hakbang lang para i-set up ang DeviceDeck. Mababago mo ang bawat pagpili sa Settings.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Isa lang sa dalawa ang pinapatakbo ng earbuds. Kapag binuksan ang isa, mapapatay ang isa pa.</string>
     <string name="setup_issues_body">Nakalista sa Mga Setting ang mga limitasyon ng iyong earbuds at telepono. Magsasabi rin ang DeviceDeck nang isang beses kung mayroon ang iyong modelo.</string>
     <string name="reply_title">Sagot ng developer</string>
-    <string name="about_discord_desc">Makipag-chat sa developer sa Discord</string>
-    <string name="about_privacy_reply">Pinapayagan din ng ID ang developer na sumagot sa ulat na ipinadala mo. Dumarating ang sagot kasama ng pang-araw-araw na bilang.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Maaaring harangin ng system ang koneksyon</string>
     <string name="oneplus_hint">Sa mga OnePlus, OPPO at realme phone, maaaring hawakan ng mga setting ng earbud ng system ang link ng earbuds at harangin ang DeviceDeck. Kung hindi kumonekta ang DeviceDeck, gamitin ang mga setting ng earbud sa Settings › Bluetooth › ang iyong earbuds.</string>
     <string name="connect_try_failed">Hindi makakonekta (subok %1$d sa %2$d)</string>

@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Apa yang berlaku? Satu baris sudah cukup.</string>
     <string name="test_mark_all">Tandakan setiap ciri untuk menghantar hasilnya.</string>
     <string name="about_privacy_title">Privasi</string>
-    <string name="about_privacy_body">DeviceDeck menghantar platform, nombor versi (contohnya \"Android 5.2.1\") dan ID pemasangan rawak sekali sehari untuk mengira pengguna aktif. ID itu tidak dikaitkan dengan peranti, akaun atau alamat, dan apl tidak menghantar data fon telinga. Laporan membawa ID yang sama dan hanya dihantar apabila anda menghantarnya.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Tetapkan semula ID pemasangan</string>
     <string name="welcome_title">Selamat datang ke DeviceDeck</string>
     <string name="welcome_body">Beberapa langkah menyediakan DeviceDeck. Setiap pilihan boleh diubah kemudian dalam Tetapan.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Earbud hanya menjalankan satu daripadanya. Menghidupkan satu akan mematikan yang lain.</string>
     <string name="setup_issues_body">Tetapan menyenaraikan had earbud dan telefon anda. DeviceDeck juga memberitahu sekali jika model anda mempunyainya.</string>
     <string name="reply_title">Balasan daripada pembangun</string>
-    <string name="about_discord_desc">Sembang dengan pembangun di Discord</string>
-    <string name="about_privacy_reply">ID ini juga membolehkan pembangun membalas laporan yang anda hantar. Balasan datang bersama pengiraan harian.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Sistem boleh menyekat sambungan</string>
     <string name="oneplus_hint">Pada telefon OnePlus, OPPO dan realme, tetapan earbud sistem boleh menahan pautan earbud dan menyekat DeviceDeck. Jika DeviceDeck tidak bersambung, gunakan tetapan earbud dalam Tetapan › Bluetooth › earbud anda.</string>
     <string name="connect_try_failed">Tidak dapat bersambung (cubaan %1$d daripada %2$d)</string>

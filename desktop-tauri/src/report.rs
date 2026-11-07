@@ -1,4 +1,4 @@
-//! The report path for Feedback and Test my earbuds: header, scrubbed packet log, preview, Worker post.
+//! The report path for Feedback and Test my earbuds: header, scrubbed packet log, preview, local issue export.
 
 //! Ported from `desktop/src/report.rs` (the Slint file also holds the Slint screen).
 
@@ -14,7 +14,7 @@ use std::process::Stdio;
 
 
 
-/// The Category options, in the Worker's own words; it drops any other value (report-worker/src/index.js).
+/// The Category options, in the upstream Worker's own words; it drops any other value (report-worker/src/index.js).
 pub const CATEGORIES: [&str; 6] = ["UI", "Lag", "Connection", "Feature not working", "Battery", "Other"];
 /// Their labels, the phone's `problem_cat_*` strings.
 pub const CATEGORY_KEYS: [&str; 6] = ["problem_cat_ui", "problem_cat_lag", "problem_cat_connection",
@@ -164,8 +164,8 @@ pub fn app_id() -> String {
 }
 
 
-/// Posts [d] to the Worker.
-/// Returns (sent, the Worker's answer text when it refused the report).
+/// Posts [d] to the upstream Worker.
+/// Returns (sent, the upstream Worker's answer text when it refused the report).
 pub fn send(_d: Draft) -> (bool, Option<String>) {
     (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }
@@ -175,5 +175,5 @@ pub fn known(model: &str) -> bool {
     models().iter().any(|m| m["name"].as_str().is_some_and(|n| n.eq_ignore_ascii_case(model)))
 }
 
-/// Posts [body] to the Worker route `report` or `ping`.
+/// Posts [body] to the upstream Worker route `report` or `ping`.
 pub fn post_to(_route: &str, _body: &str) -> (u16, String) { (0, String::new()) }

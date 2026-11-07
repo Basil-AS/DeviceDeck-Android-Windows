@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Wat gebeurde er? Eén regel is genoeg.</string>
     <string name="test_mark_all">Markeer elke functie om het resultaat te versturen.</string>
     <string name="about_privacy_title">Privacy</string>
-    <string name="about_privacy_body">DeviceDeck stuurt één keer per dag zijn platform, versienummer (bijvoorbeeld „Android 5.2.1”) en een willekeurig installatie-ID om actieve gebruikers te tellen. Het ID is aan geen enkel apparaat, account of adres gekoppeld en de app stuurt geen oordopjesgegevens. Meldingen dragen hetzelfde ID en gaan alleen weg als jij ze verstuurt.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Installatie-ID resetten</string>
     <string name="welcome_title">Welkom bij DeviceDeck</string>
     <string name="welcome_body">Een paar stappen stellen DeviceDeck in. Je kunt elke keuze later wijzigen in Instellingen.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">De oordopjes gebruiken maar één van beide. Als je er één aanzet, gaat de ander uit.</string>
     <string name="setup_issues_body">Instellingen toont de beperkingen van je oordopjes en telefoon. DeviceDeck meldt het ook één keer als je model ze heeft.</string>
     <string name="reply_title">Antwoord van de ontwikkelaar</string>
-    <string name="about_discord_desc">Chat met de ontwikkelaar op Discord</string>
-    <string name="about_privacy_reply">Met de ID kan de ontwikkelaar ook antwoorden op een rapport dat je stuurde. Het antwoord komt met de dagelijkse telling.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Het systeem kan de verbinding blokkeren</string>
     <string name="oneplus_hint">Op OnePlus-, OPPO- en realme-telefoons kunnen de oordopjesinstellingen van het systeem de verbinding van de oordopjes vasthouden en DeviceDeck blokkeren. Als DeviceDeck geen verbinding maakt, gebruik de oordopjesinstellingen in Instellingen › Bluetooth › je oordopjes.</string>
     <string name="connect_try_failed">Verbinden mislukt (poging %1$d van %2$d)</string>

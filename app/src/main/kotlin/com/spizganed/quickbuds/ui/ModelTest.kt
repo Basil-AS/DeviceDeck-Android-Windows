@@ -14,7 +14,7 @@ import org.json.JSONObject
 
 /**
  * Test my earbuds ([ModelTestActivity]): the owner marks each feature the app shows, and one report with the log goes
- * to the Worker as category "Test". A model's `confirmed` list in `models.json` names the features an owner
+ * to the GitHub issue draft as category "Test". A model's `confirmed` list in `models.json` names the features an owner
  * confirmed; a model whose list covers every feature shown gets no prompt. The desktop app does the same
  * (desktop/src/modeltest.rs), with the same keys and the same report text.
  */
@@ -62,7 +62,7 @@ object ModelTest {
         Triple("states", R.string.test_check_states, "feature states"),
     )
 
-    /** The start of the machine-readable line. The Worker and `scripts/import-model-test.py` find the JSON after it. */
+    /** The start of the machine-readable line. The export tooling identifies the JSON after it. */
     const val JSON_PREFIX = "MODEL TEST JSON "
 
     /**

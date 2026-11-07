@@ -7,7 +7,6 @@ use crate::{icons, palette, t, App};
 use eframe::egui::{self, Align2, FontId, Pos2, Rect, Ui, Vec2};
 
 const GITHUB: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows";
-const KOFI: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows";
 const DISCORD: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions";
 /// DESIGN.md, "Design basis of each style".
 const INDEPENDENT: &str = "DeviceDeck is an independent project and is not affiliated with or endorsed by Google or Apple.";
@@ -36,10 +35,9 @@ pub fn show(app: &App, ui: &mut Ui, body: Rect) -> f32 {
     phone::paragraph(ui, Rect::from_min_size(Pos2::new(x0 + 8.0, y + 14.0), Vec2::new(w - 16.0, h)), tagline, 15.0, glass::white(1.0), true);
     y += 14.0 + h + 20.0;
 
-    // The three links: the phone's buttons carry the description; here the address takes its place.
+    // Project and community links.
     let links = [
         (t(tr, "about_github"), GITHUB, icons::GITHUB),
-        (t(tr, "about_kofi"), KOFI, icons::KOFI),
         (t(tr, "about_discord"), DISCORD, icons::CHAT),
     ];
     for (label, url, icon) in links {
