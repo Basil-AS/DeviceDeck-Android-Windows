@@ -515,7 +515,7 @@
     <string name="test_broken_hint">发生了什么？一行就够了。</string>
     <string name="test_mark_all">标记所有功能后即可发送结果。</string>
     <string name="about_privacy_title">隐私</string>
-    <string name="about_privacy_body">DeviceDeck 每天发送一次平台、版本号（例如 “Android 5.2.1”）和一个随机安装 ID，用于统计活跃用户。该 ID 不与任何设备、账号或地址关联，应用也不会发送耳机数据。报告带有相同的 ID，仅在你发送时才会发出。</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">重置安装 ID</string>
     <string name="welcome_title">欢迎使用 DeviceDeck</string>
     <string name="welcome_body">几步就能设置好 DeviceDeck。每个选择之后都可以在设置中更改。</string>
@@ -574,8 +574,8 @@
     <string name="issue_hires_spatial_body">耳机一次只运行其中一个。开启一个会关闭另一个。</string>
     <string name="setup_issues_body">设置中列出了耳机和手机的限制。如果你的型号有，DeviceDeck 也会提醒一次。</string>
     <string name="reply_title">开发者的回复</string>
-    <string name="about_discord_desc">在 Discord 上与开发者聊天</string>
-    <string name="about_privacy_reply">该 ID 还能让开发者回复你发送的报告。回复随每日计数一起送达。</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">系统可能会阻止连接</string>
     <string name="oneplus_hint">在 OnePlus、OPPO 和 realme 手机上，系统的耳机设置可能会占用耳机连接并阻止 DeviceDeck 连接。如果 DeviceDeck 无法连接，请使用设置 › 蓝牙 › 您的耳机中的耳机设置。</string>
     <string name="connect_try_failed">无法连接（第 %1$d/%2$d 次）</string>

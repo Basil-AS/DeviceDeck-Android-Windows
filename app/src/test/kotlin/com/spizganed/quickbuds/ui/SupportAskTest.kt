@@ -12,32 +12,33 @@ class SupportAskTest {
     private val now = 100 * day
 
     private fun pick(
-        installedAt: Long = now - 20 * day, connections: Int = 0, lastDay: Long = -1,
+        at: Long = now, installedAt: Long = now - 20 * day, connections: Int = 0, lastDay: Long = -1,
         next: Map<Card, Long> = emptyMap(), off: Set<Card> = emptySet(),
-    ) = SupportAsk.pick(installedAt, connections, now, lastDay, { next[it] ?: 0L }, { it in off })
+    ) = SupportAsk.pick(installedAt, connections, at, lastDay, { next[it] ?: 0L }, { it in off })
 
     @Test fun nothingBeforeFourteenDaysOrTenConnections() {
         assertNull(pick(installedAt = now - 5 * day, connections = 9))
     }
 
-    @Test fun fourteenDaysMakeTheKofiCardDue() = assertEquals(Card.KOFI, pick())
+    @Test fun fourteenDaysMakeTheGitHubCardDue() = assertEquals(Card.GITHUB, pick())
 
     @Test fun tenConnectionsMakeItDueOnANewInstall() =
-        assertEquals(Card.KOFI, pick(installedAt = now - day, connections = 10))
+        assertEquals(Card.GITHUB, pick(installedAt = now - day, connections = 10))
 
     @Test fun oneCardADay() = assertNull(pick(lastDay = now / day))
 
-    @Test fun githubFollowsKofiOnAnotherDay() {
-        val next = mapOf(Card.KOFI to now + 30 * day)
-        assertEquals(Card.GITHUB, pick(next = next, lastDay = now / day - 1))
+    @Test fun githubCardReturnsAfterLater() {
+        val next = mapOf(Card.GITHUB to now + 30 * day)
+        assertNull(pick(next = next, lastDay = now / day - 1))
+        assertEquals(Card.GITHUB, pick(at = now + 30 * day, next = next, lastDay = now / day))
     }
 
     @Test fun laterHoldsACardBackUntilItsDate() {
-        val next = mapOf(Card.KOFI to now + day, Card.GITHUB to now + day)
+        val next = mapOf(Card.GITHUB to now + day)
         assertNull(pick(next = next))
     }
 
-    @Test fun doNotAskAgainSkipsThatCard() = assertEquals(Card.GITHUB, pick(off = setOf(Card.KOFI)))
+    @Test fun doNotAskAgainSkipsTheGitHubCard() = assertEquals(null, pick(off = setOf(Card.GITHUB)))
 
     @Test fun nothingWhenBothAreOff() = assertNull(pick(off = Card.values().toSet()))
 }

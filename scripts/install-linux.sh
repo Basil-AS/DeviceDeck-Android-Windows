@@ -1,6 +1,6 @@
 #!/bin/sh
 # Installs DeviceDeck on Linux for the current user: the AppImage, a `quickbuds` command and a menu entry.
-#   curl -fsSL https://raw.githubusercontent.com/spizganed/DeviceDeck/main/scripts/install-linux.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/Basil-AS/DeviceDeck-Android-Windows/develop/scripts/install-linux.sh | sh
 # Install a local file instead of the release: QB_APPIMAGE=/path/DeviceDeck-linux-x64.AppImage sh install-linux.sh
 # Remove it again with: sh install-linux.sh uninstall
 # No root needed. Needs curl and BlueZ (bluetoothctl). Updates come from the app itself.

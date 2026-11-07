@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Ce s-a întâmplat? Un rând este suficient.</string>
     <string name="test_mark_all">Marchează fiecare funcție ca să trimiți rezultatul.</string>
     <string name="about_privacy_title">Confidențialitate</string>
-    <string name="about_privacy_body">O dată pe zi DeviceDeck trimite platforma, numărul versiunii (de exemplu „Android 5.2.1”) și un ID de instalare aleatoriu pentru a număra utilizatorii activi. ID-ul nu este legat de niciun dispozitiv, cont sau adresă, iar aplicația nu trimite date despre căști. Rapoartele poartă același ID și se trimit doar când le trimiți tu.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Resetează ID-ul de instalare</string>
     <string name="welcome_title">Bun venit în DeviceDeck</string>
     <string name="welcome_body">Câțiva pași configurează DeviceDeck. Poți schimba fiecare alegere mai târziu în Setări.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Căștile folosesc doar unul dintre ele. Pornirea unuia îl oprește pe celălalt.</string>
     <string name="setup_issues_body">Setările enumeră limitele căștilor și ale telefonului tău. DeviceDeck te anunță și o dată dacă modelul tău are vreuna.</string>
     <string name="reply_title">Răspunsul dezvoltatorului</string>
-    <string name="about_discord_desc">Discută cu dezvoltatorul pe Discord</string>
-    <string name="about_privacy_reply">ID-ul permite dezvoltatorului să răspundă și la un raport trimis de tine. Răspunsul vine odată cu numărătoarea zilnică.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Sistemul poate bloca conexiunea</string>
     <string name="oneplus_hint">Pe telefoanele OnePlus, OPPO și realme, setările earbuds ale sistemului pot ține legătura earbuds-urilor și pot bloca DeviceDeck. Dacă DeviceDeck nu se conectează, folosește setările earbuds în Setări › Bluetooth › earbuds-urile tale.</string>
     <string name="connect_try_failed">Conectarea a eșuat (încercarea %1$d din %2$d)</string>

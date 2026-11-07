@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Що сталося? Досить одного рядка.</string>
     <string name="test_mark_all">Позначте кожну функцію, щоб надіслати результат.</string>
     <string name="about_privacy_title">Конфіденційність</string>
-    <string name="about_privacy_body">Раз на день DeviceDeck надсилає свою платформу, номер версії (наприклад, «Android 5.2.1») і випадковий ідентифікатор встановлення, щоб рахувати активних користувачів. Ідентифікатор не пов’язаний із пристроєм, обліковим записом чи адресою, а застосунок не надсилає дані навушників. Звіти містять той самий ідентифікатор і надсилаються лише тоді, коли ви їх надсилаєте.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Скинути ідентифікатор встановлення</string>
     <string name="welcome_title">Ласкаво просимо до DeviceDeck</string>
     <string name="welcome_body">Кілька кроків налаштують DeviceDeck. Будь-який вибір можна потім змінити в налаштуваннях.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Навушники використовують лише одне з них. Увімкнення одного вимикає інше.</string>
     <string name="setup_issues_body">У Налаштуваннях перелічено обмеження ваших навушників і телефона. DeviceDeck також один раз повідомить, якщо вони є у вашої моделі.</string>
     <string name="reply_title">Відповідь розробника</string>
-    <string name="about_discord_desc">Чат з розробником у Discord</string>
-    <string name="about_privacy_reply">ID також дає розробнику змогу відповісти на надісланий вами звіт. Відповідь приходить разом із щоденним підрахунком.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Система може блокувати підключення</string>
     <string name="oneplus_hint">На телефонах OnePlus, OPPO і realme системні налаштування навушників можуть утримувати зв\'язок навушників і блокувати DeviceDeck. Якщо DeviceDeck не підключається, відкрийте налаштування навушників у Налаштування › Bluetooth › ваші навушники.</string>
     <string name="connect_try_failed">Не вдалося підключитися (спроба %1$d з %2$d)</string>

@@ -443,13 +443,13 @@ function buildWindow(){
   <section class="page" data-page="about" hidden>
     <div class="card hero"><div class="logoBig">${ic('budL')}${ic('budR')}</div>
       <div class="herot"><div class="t" style="font-size:17px;font-weight:400">${$t('app_name')} <span class="s" id="aboutVer" style="display:inline;font-size:12px;font-weight:400"></span></div><div class="s" style="font-size:12px">${$t('about_tagline')}</div></div></div>
-    <div class="btnrow"><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows">${ic('github')}GitHub</button><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows">${ic('kofi')}Ko-fi</button><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions">${ic('discord')}Discord</button></div>
+    <div class="btnrow"><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows">${ic('github')}GitHub</button><button class="btn press" data-act="url" data-v="https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions">${ic('discord')}Discussions</button></div>
     <div id="replyBox" hidden><div class="lbl">${$t('reply_title')}</div><div class="card pad prose"></div></div>
     <div class="cols st">
       <div class="col"><div class="lbl">${$t('about_license_title')}</div><div class="card pad prose" style="flex:1">${$t('about_license_body')}</div></div>
       <div class="col"><div class="lbl">${$t('about_privacy_title')}</div><div class="card pad prose" style="flex:1">${$t('about_privacy_body')}</div></div>
     </div>
-    <div class="group"><div class="row">${ic('info')}<div class="txt"><div class="t">${$t('about_privacy_reset')}</div><div class="s">${$t('about_privacy_reply')}</div></div><button class="btn press" data-act="resetid">${$t('about_privacy_reset')}</button></div></div>
+
   </section>
   </main>
   <div class="toast" role="status" aria-live="polite"></div>`;
@@ -759,7 +759,6 @@ document.addEventListener('click',ev=>{
     if(a==='tprev'){QBLIVE.testPreview();return;}
     if(a==='tsend'){QBLIVE.send({t:'test_send'});return;}
     if(a==='url'){window.__TAURI__.core.invoke('open_url',{url:v});return;}
-    if(a==='resetid'){window.__TAURI__.core.invoke('reset_install_id');toast($t('about_privacy_reset'));return;}
   }
   if(a==='conn'){if(window.QBLIVE)QBLIVE.toggleConn();return;}
   if(a==='openwin'){setView('window');return;}
@@ -1111,7 +1110,7 @@ if(window.__TAURI__){
     const rp=byId('replyBox');if(rp){rp.hidden=!st.reply;if(st.reply)rp.querySelector('.prose').textContent=st.reply;}
     apply();});
   loadSettings();
-  // The due card (Ko-fi or a GitHub star): Support opens the page; Later and a closed dialog bring it back in 30 days.
+  // GitHub project reminder: Support opens the page; Later and close bring it back after the wait period.
   QBLIVE.supportCard=()=>T.core.invoke('support_due').then(c=>{if(!c)return;
     dialog(`<h3>${esc(c.title)}</h3><div class="s" style="text-align:center;margin:0;white-space:pre-line">${esc(c.body)}</div><div class="acts two"><button class="btn press" data-close>${esc(c.later)}</button><button class="btn pri press" id="spOk">${esc(c.action)}</button></div><div class="acts"><button class="btn press" id="spNever">${esc(c.never)}</button></div>`,
       (d,close)=>{d.querySelector('#spOk').addEventListener('click',()=>{T.core.invoke('support_off',{card:c.card});T.core.invoke('open_url',{url:c.url});close();});

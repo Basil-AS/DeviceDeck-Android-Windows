@@ -513,7 +513,7 @@
     <string name="test_broken_hint">¿Qué pasó? Basta con una línea.</string>
     <string name="test_mark_all">Marca cada función para enviar el resultado.</string>
     <string name="about_privacy_title">Privacidad</string>
-    <string name="about_privacy_body">Una vez al día DeviceDeck envía su plataforma, su número de versión (por ejemplo «Android 5.2.1») y un ID de instalación aleatorio para contar los usuarios activos. El ID no se vincula a ningún dispositivo, cuenta ni dirección, y la app no envía datos de los auriculares. Los informes llevan el mismo ID y solo se envían cuando tú los envías.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Restablecer el ID de instalación</string>
     <string name="welcome_title">Te damos la bienvenida a DeviceDeck</string>
     <string name="welcome_body">Unos pasos configuran DeviceDeck. Puedes cambiar cada opción después en Ajustes.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Los auriculares usan solo uno de los dos. Al activar uno, se desactiva el otro.</string>
     <string name="setup_issues_body">Los ajustes muestran los límites de tus auriculares y de tu teléfono. DeviceDeck también te avisa una vez si tu modelo tiene alguno.</string>
     <string name="reply_title">Respuesta del desarrollador</string>
-    <string name="about_discord_desc">Chatea con el desarrollador en Discord</string>
-    <string name="about_privacy_reply">El ID también permite al desarrollador responder a un informe que enviaste. La respuesta llega con el recuento diario.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">El sistema puede bloquear la conexión</string>
     <string name="oneplus_hint">En los teléfonos OnePlus, OPPO y realme, los ajustes de auriculares del sistema pueden retener la conexión de los auriculares y bloquear DeviceDeck. Si DeviceDeck no se conecta, usa los ajustes de auriculares en Ajustes › Bluetooth › tus auriculares.</string>
     <string name="connect_try_failed">No se pudo conectar (intento %1$d de %2$d)</string>

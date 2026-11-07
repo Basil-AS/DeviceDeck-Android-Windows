@@ -515,7 +515,7 @@
     <string name="test_broken_hint">क्या हुआ? एक पंक्ति काफ़ी है।</string>
     <string name="test_mark_all">नतीजा भेजने के लिए हर फ़ीचर चिह्नित करें।</string>
     <string name="about_privacy_title">गोपनीयता</string>
-    <string name="about_privacy_body">DeviceDeck दिन में एक बार अपना प्लेटफ़ॉर्म, संस्करण संख्या (उदाहरण के लिए \"Android 5.2.1\") और एक यादृच्छिक इंस्टॉल आईडी भेजता है, ताकि सक्रिय उपयोगकर्ताओं की गिनती हो सके। यह आईडी किसी डिवाइस, खाते या पते से नहीं जुड़ी है, और ऐप इयरबड्स का कोई डेटा नहीं भेजता। रिपोर्ट में यही आईडी होती है और वे तभी भेजी जाती हैं जब आप उन्हें भेजते हैं।</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">इंस्टॉल आईडी रीसेट करें</string>
     <string name="welcome_title">DeviceDeck में आपका स्वागत है</string>
     <string name="welcome_body">कुछ चरणों में DeviceDeck सेट हो जाता है। हर विकल्प बाद में सेटिंग में बदला जा सकता है।</string>
@@ -574,8 +574,8 @@
     <string name="issue_hires_spatial_body">इयरबड इनमें से एक ही चलाते हैं। एक चालू करने पर दूसरा बंद हो जाता है।</string>
     <string name="setup_issues_body">सेटिंग में आपके इयरबड और फ़ोन की सीमाएँ दी गई हैं। आपके मॉडल में कोई हो तो DeviceDeck एक बार बताएगा।</string>
     <string name="reply_title">डेवलपर का उत्तर</string>
-    <string name="about_discord_desc">Discord पर डेवलपर से चैट करें</string>
-    <string name="about_privacy_reply">आईडी से डेवलपर आपकी भेजी रिपोर्ट का उत्तर भी दे सकता है। उत्तर दैनिक गिनती के साथ आता है।</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">सिस्टम कनेक्शन ब्लॉक कर सकता है</string>
     <string name="oneplus_hint">OnePlus, OPPO और realme फ़ोन पर, सिस्टम की ईयरबड सेटिंग्स ईयरबड का लिंक पकड़ सकती हैं और DeviceDeck को ब्लॉक कर सकती हैं। अगर DeviceDeck कनेक्ट नहीं होता, तो सेटिंग्स › Bluetooth › आपके ईयरबड में ईयरबड सेटिंग्स का उपयोग करें।</string>
     <string name="connect_try_failed">कनेक्ट नहीं हो सका (प्रयास %1$d/%2$d)</string>

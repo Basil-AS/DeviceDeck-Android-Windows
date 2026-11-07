@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Co się stało? Wystarczy jedna linijka.</string>
     <string name="test_mark_all">Oznacz każdą funkcję, aby wysłać wynik.</string>
     <string name="about_privacy_title">Prywatność</string>
-    <string name="about_privacy_body">Raz dziennie DeviceDeck wysyła swoją platformę, numer wersji (na przykład „Android 5.2.1”) i losowy identyfikator instalacji, aby liczyć aktywnych użytkowników. Identyfikator nie jest powiązany z urządzeniem, kontem ani adresem, a aplikacja nie wysyła danych słuchawek. Zgłoszenia zawierają ten sam identyfikator i są wysyłane tylko wtedy, gdy je wyślesz.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Zresetuj identyfikator instalacji</string>
     <string name="welcome_title">Witaj w DeviceDeck</string>
     <string name="welcome_body">Kilka kroków konfiguruje DeviceDeck. Każdy wybór możesz później zmienić w Ustawieniach.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Słuchawki używają tylko jednego z nich. Włączenie jednego wyłącza drugi.</string>
     <string name="setup_issues_body">Ustawienia zawierają listę ograniczeń słuchawek i telefonu. DeviceDeck raz o nich powiadomi, jeśli Twój model je ma.</string>
     <string name="reply_title">Odpowiedź dewelopera</string>
-    <string name="about_discord_desc">Czat z deweloperem na Discordzie</string>
-    <string name="about_privacy_reply">Identyfikator pozwala też deweloperowi odpowiedzieć na wysłane zgłoszenie. Odpowiedź przychodzi z dziennym zliczeniem.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">System może blokować połączenie</string>
     <string name="oneplus_hint">Na telefonach OnePlus, OPPO i realme ustawienia słuchawek systemu mogą utrzymywać połączenie słuchawek i blokować DeviceDeck. Jeśli DeviceDeck nie połączy się, użyj ustawień słuchawek w Ustawienia › Bluetooth › Twoje słuchawki.</string>
     <string name="connect_try_failed">Nie udało się połączyć (próba %1$d z %2$d)</string>

@@ -513,7 +513,7 @@
     <string name="test_broken_hint">무슨 일이 있었나요? 한 줄이면 충분합니다.</string>
     <string name="test_mark_all">결과를 보내려면 모든 기능을 표시하세요.</string>
     <string name="about_privacy_title">개인정보</string>
-    <string name="about_privacy_body">DeviceDeck는 하루에 한 번 플랫폼, 버전 번호(예: \"Android 5.2.1\"), 무작위 설치 ID를 보내 활성 사용자 수를 집계합니다. 이 ID는 기기, 계정, 주소와 연결되지 않으며 앱은 이어버드 데이터를 보내지 않습니다. 보고서에도 같은 ID가 담기며 직접 보낼 때만 전송됩니다.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">설치 ID 초기화</string>
     <string name="welcome_title">DeviceDeck에 오신 것을 환영합니다</string>
     <string name="welcome_body">몇 단계로 DeviceDeck를 설정합니다. 모든 선택은 나중에 설정에서 바꿀 수 있습니다.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">이어버드는 둘 중 하나만 사용합니다. 하나를 켜면 다른 하나가 꺼집니다.</string>
     <string name="setup_issues_body">설정에 이어버드와 휴대폰의 제한이 나옵니다. 모델에 해당하는 것이 있으면 DeviceDeck가 한 번 알려 줍니다.</string>
     <string name="reply_title">개발자의 답변</string>
-    <string name="about_discord_desc">Discord에서 개발자와 채팅</string>
-    <string name="about_privacy_reply">이 ID로 개발자가 보낸 신고에 답할 수도 있습니다. 답변은 하루 한 번의 집계와 함께 옵니다.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">시스템이 연결을 차단할 수 있습니다</string>
     <string name="oneplus_hint">OnePlus, OPPO, realme 휴대전화에서는 시스템의 이어버드 설정이 이어버드 링크를 유지하고 DeviceDeck를 차단할 수 있습니다. DeviceDeck가 연결되지 않으면 설정 › Bluetooth › 이어버드에서 이어버드 설정을 사용하세요.</string>
     <string name="connect_try_failed">연결하지 못했습니다(%1$d/%2$d회)</string>

@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Vad hände? En rad räcker.</string>
     <string name="test_mark_all">Markera varje funktion för att skicka resultatet.</string>
     <string name="about_privacy_title">Integritet</string>
-    <string name="about_privacy_body">En gång om dagen skickar DeviceDeck sin plattform, versionsnummer (till exempel ”Android 5.2.1”) och ett slumpmässigt installations-ID för att räkna aktiva användare. ID:t är inte kopplat till någon enhet, något konto eller någon adress, och appen skickar inga hörlursdata. Rapporter bär samma ID och skickas bara när du skickar dem.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Återställ installations-ID</string>
     <string name="welcome_title">Välkommen till DeviceDeck</string>
     <string name="welcome_body">Några steg ställer in DeviceDeck. Du kan ändra varje val senare i Inställningar.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Hörlurarna kör bara ett av dem. Slår du på det ena stängs det andra av.</string>
     <string name="setup_issues_body">Inställningar listar begränsningarna för dina hörlurar och din telefon. DeviceDeck säger också till en gång om din modell har några.</string>
     <string name="reply_title">Svar från utvecklaren</string>
-    <string name="about_discord_desc">Chatta med utvecklaren på Discord</string>
-    <string name="about_privacy_reply">ID:t låter också utvecklaren svara på en rapport du skickat. Svaret kommer med den dagliga räkningen.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Systemet kan blockera anslutningen</string>
     <string name="oneplus_hint">På OnePlus-, OPPO- och realme-telefoner kan systemets öronsnäckeinställningar hålla öronsnäckornas länk och blockera DeviceDeck. Om DeviceDeck inte ansluter, använd öronsnäckeinställningarna i Inställningar › Bluetooth › dina öronsnäckor.</string>
     <string name="connect_try_failed">Det gick inte att ansluta (försök %1$d av %2$d)</string>

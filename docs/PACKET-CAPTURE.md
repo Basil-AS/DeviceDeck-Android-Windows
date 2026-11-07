@@ -166,8 +166,7 @@ data from other connected Bluetooth devices. Send it in private, unless you acce
 
 ### 5. Where to send the file
 
-Send the `btsnoop_hci.log` file in a direct message to the developer on the DeviceDeck Discord
-server: https://discord.gg/pvsnEf9TrZ.
+Attach the filtered capture to your GitHub issue. The raw log includes Bluetooth addresses and traffic from other devices; share it privately through a temporary link only if needed.
 
 If you accept that everyone sees this data, you can do one of these:
 
@@ -234,7 +233,7 @@ A guessed command fails silently on the earbuds.
 2. Read [Protect your privacy](#4-protect-your-privacy).
 3. Open a [Missing feature issue](https://github.com/Basil-AS/DeviceDeck-Android-Windows/issues/new?template=missing-feature.yml).
    Attach the log, the recording or screenshots, and your notes. To keep the log private, send it as in
-   [Where to send the file](#5-where-to-send-the-file) and write "sent on Discord" in the issue.
+   [Where to send the file](#5-where-to-send-the-file) and note in the issue that you shared it privately.
 
 One log for one setting is enough. You can record several settings in one log.
 Then write down the time of each change.

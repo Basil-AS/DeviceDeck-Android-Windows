@@ -513,7 +513,7 @@
     <string name="test_broken_hint">O que aconteceu? Uma linha chega.</string>
     <string name="test_mark_all">Marque cada função para enviar o resultado.</string>
     <string name="about_privacy_title">Privacidade</string>
-    <string name="about_privacy_body">Uma vez por dia o DeviceDeck envia a sua plataforma, o número da versão (por exemplo \"Android 5.2.1\") e um ID de instalação aleatório para contar os usuários ativos. O ID não está ligado a nenhum dispositivo, conta ou endereço, e o app não envia dados dos fones. Os relatórios levam o mesmo ID e só são enviados quando você os envia.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Redefinir o ID de instalação</string>
     <string name="welcome_title">Boas-vindas ao DeviceDeck</string>
     <string name="welcome_body">Alguns passos configuram o DeviceDeck. Você pode mudar cada escolha depois em Configurações.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Os fones usam apenas um dos dois. Ligar um desliga o outro.</string>
     <string name="setup_issues_body">As Configurações listam os limites dos seus fones e do seu telefone. O DeviceDeck também avisa uma vez se o seu modelo tiver algum.</string>
     <string name="reply_title">Resposta do desenvolvedor</string>
-    <string name="about_discord_desc">Converse com o desenvolvedor no Discord</string>
-    <string name="about_privacy_reply">O ID também permite que o desenvolvedor responda a um relatório que você enviou. A resposta chega com a contagem diária.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">O sistema pode bloquear a conexão</string>
     <string name="oneplus_hint">Em telefones OnePlus, OPPO e realme, as configurações de fones do sistema podem manter o vínculo dos fones e bloquear o DeviceDeck. Se o DeviceDeck não se conectar, use as configurações de fones em Configurações › Bluetooth › seus fones.</string>
     <string name="connect_try_failed">Não foi possível conectar (tentativa %1$d de %2$d)</string>

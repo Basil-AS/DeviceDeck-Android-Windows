@@ -513,7 +513,7 @@
     <string name="test_broken_hint">Ne oldu? Bir satır yeterli.</string>
     <string name="test_mark_all">Sonucu göndermek için her özelliği işaretleyin.</string>
     <string name="about_privacy_title">Gizlilik</string>
-    <string name="about_privacy_body">DeviceDeck günde bir kez platformunu, sürüm numarasını (örneğin “Android 5.2.1”) ve rastgele bir kurulum kimliğini gönderir; amaç etkin kullanıcıları saymaktır. Kimlik hiçbir cihaza, hesaba veya adrese bağlı değildir ve uygulama kulaklık verisi göndermez. Raporlar aynı kimliği taşır ve yalnızca sen gönderdiğinde gönderilir.</string>
+    <string name="about_privacy_body">DeviceDeck sends no usage telemetry. Bluetooth control runs locally. Update checks contact the public GitHub Releases API.</string>
     <string name="about_privacy_reset">Kurulum kimliğini sıfırla</string>
     <string name="welcome_title">DeviceDeck\'a hoş geldin</string>
     <string name="welcome_body">Birkaç adım DeviceDeck’ı kurar. Her seçimi sonra Ayarlar’dan değiştirebilirsin.</string>
@@ -572,8 +572,8 @@
     <string name="issue_hires_spatial_body">Kulaklık ikisinden yalnızca birini kullanır. Birini açmak diğerini kapatır.</string>
     <string name="setup_issues_body">Ayarlar kulaklığınızın ve telefonunuzun sınırlarını listeler. Modelinizde varsa DeviceDeck size bir kez de haber verir.</string>
     <string name="reply_title">Geliştiricinin yanıtı</string>
-    <string name="about_discord_desc">Discord’da geliştiriciyle sohbet et</string>
-    <string name="about_privacy_reply">Kimlik, geliştiricinin gönderdiğiniz bir rapora yanıt vermesini de sağlar. Yanıt günlük sayımla birlikte gelir.</string>
+    <string name="about_discord_desc">Open DeviceDeck community discussions</string>
+    <string name="about_privacy_reply">DeviceDeck does not upload diagnostic reports. Android feedback opens a GitHub issue draft in your browser for review.</string>
     <string name="issue_oneplus_title">Sistem bağlantıyı engelleyebilir</string>
     <string name="oneplus_hint">OnePlus, OPPO ve realme telefonlarda sistemin kulaklık ayarları kulaklıkların bağlantısını tutabilir ve DeviceDeck uygulamasını engelleyebilir. DeviceDeck bağlanmazsa Ayarlar › Bluetooth › kulaklığınız bölümünde kulaklık ayarlarını kullanın.</string>
     <string name="connect_try_failed">Bağlanılamadı (deneme %1$d/%2$d)</string>
