@@ -345,13 +345,12 @@ fn main() {
             hearing::init(app.handle());
             modeltest::init(app.handle());
             link::start(app.handle());
-            std::thread::spawn(app::ping);
 
             // Windows: the icon opens the panel on a left or a right click. Linux has `tray.rs`.
             #[cfg(windows)]
             tauri::tray::TrayIconBuilder::new()
                 .icon(tauri::image::Image::from_bytes(include_bytes!("../icons/tray.png")).expect("tray icon"))
-                .tooltip("QuickBuds")
+                .tooltip("DeviceDeck")
                 .on_tray_icon_event(|tray, e| {
                     if let tauri::tray::TrayIconEvent::Click { button_state: tauri::tray::MouseButtonState::Up, .. } = e {
                         show_panel(tray.app_handle());
