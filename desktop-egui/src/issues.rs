@@ -78,4 +78,12 @@ mod tests {
         assert!(!keys.contains(&"samsung_codec"), "not an Android phone");
         assert!(keys.contains(&"hires_spatial"), "one switch turns the other off");
     }
+
+    #[test]
+    fn realme_air7_pro_lists_its_documented_silent_spatial_issue() {
+        let model = types::models().iter().find(|m| m["id"].as_str() == Some("064C12"));
+        let Some(model) = model else { panic!("Air 7 Pro profile is missing") };
+        let s = Snapshot { model: Some(model), features: vec![(types::FEATURE_SPATIAL, 1)], ..Default::default() };
+        assert_eq!(keys(&s), vec!["spatial_silent"]);
+    }
 }
