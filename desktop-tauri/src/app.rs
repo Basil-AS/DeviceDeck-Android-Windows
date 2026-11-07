@@ -1,6 +1,5 @@
 //! The app's own commands: settings, App update, Feedback, the daily count and starting with the computer.
 
-use crate::tr;
 use crate::update::{self, Release};
 use serde_json::{json, Value};
 use std::sync::Mutex;
@@ -13,30 +12,13 @@ pub const LANGUAGES: &[&str] = &[
 ];
 
 /// The settings the page may write, with the type each one holds.
-const KEYS: &[&str] = &["usage_ping", "clear_battery", "dev_tools_button", "update_auto"];
+const KEYS: &[&str] = &["clear_battery", "dev_tools_button", "update_auto"];
 
 /// A reply of the developer to a report of this install, from the daily count.
 static REPLY: Mutex<Option<String>> = Mutex::new(None);
 /// The release the last update check found.
 static FOUND: Mutex<Option<Release>> = Mutex::new(None);
 
-/// Counts this install once a day: platform, version and the install ID (README, Privacy).
-pub fn ping() {
-    let st = crate::load_settings();
-    if st["usage_ping"].as_bool() == Some(false) { return; }
-    let today = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() / 86_400).unwrap_or(0);
-    if st["usage_ping_day"].as_u64() == Some(today) { return; }
-    let body = json!({
-        "platform": if cfg!(windows) { "Windows" } else { "Linux" },
-        "version": env!("CARGO_PKG_VERSION"),
-        "id": crate::report::app_id(),
-    });
-    let (code, text) = crate::report::post_to("ping", &body.to_string());
-    if code != 200 { return; }
-    crate::save_setting("usage_ping_day", today.into());
-    let reply = serde_json::from_str::<Value>(&text).ok().and_then(|v| v["reply"]["text"].as_str().map(String::from));
-    if let Some(r) = reply.filter(|r| !r.trim().is_empty()) { *REPLY.lock().unwrap() = Some(r); }
-}
 
 #[tauri::command]
 pub fn get_settings() -> Value {
@@ -46,7 +28,6 @@ pub fn get_settings() -> Value {
     json!({
         "version": env!("CARGO_PKG_VERSION"),
         "language": LANGUAGES.iter().position(|l| *l == lang).unwrap_or(0),
-        "usage_ping": flag("usage_ping", true),
         "clear_battery": flag("clear_battery", false),
         "dev_tools_button": flag("dev_tools_button", false),
         "update_auto": flag("update_auto", true),
@@ -95,10 +76,10 @@ fn autostart_on() -> bool {
     #[cfg(not(windows))]
     { autostart_file().is_some_and(|f| f.exists()) }
     #[cfg(windows)]
-    { update::quiet("reg").args(["query", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run", "/v", "QuickBuds"]).output().is_ok_and(|o| o.status.success()) }
+    { update::quiet("reg").args(["query", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run", "/v", "DeviceDeck"]).output().is_ok_and(|o| o.status.success()) }
 }
 
-/// Starts QuickBuds in the tray when the user signs in. Windows: the Run key (untested on a real PC).
+/// Starts DeviceDeck in the tray when the user signs in. Windows: the Run key (untested on a real PC).
 #[tauri::command]
 pub fn set_autostart(on: bool) {
     let Ok(exe) = std::env::current_exe() else { return };
@@ -108,7 +89,7 @@ pub fn set_autostart(on: bool) {
     if let Some(f) = autostart_file() {
         if on {
             if let Some(d) = f.parent() { let _ = std::fs::create_dir_all(d); }
-            let _ = std::fs::write(&f, format!("[Desktop Entry]\nType=Application\nName=QuickBuds\nExec=\"{}\" --tray\nTerminal=false\n", exe.display()));
+            let _ = std::fs::write(&f, format!("[Desktop Entry]\nType=Application\nName=DeviceDeck\nExec=\"{}\" --tray\nTerminal=false\n", exe.display()));
         } else {
             let _ = std::fs::remove_file(f);
         }
@@ -117,9 +98,9 @@ pub fn set_autostart(on: bool) {
     {
         let key = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run";
         if on {
-            let _ = update::quiet("reg").args(["add", key, "/v", "QuickBuds", "/t", "REG_SZ", "/d", &format!("\"{}\" --tray", exe.display()), "/f"]).output();
+            let _ = update::quiet("reg").args(["add", key, "/v", "DeviceDeck", "/t", "REG_SZ", "/d", &format!("\"{}\" --tray", exe.display()), "/f"]).output();
         } else {
-            let _ = update::quiet("reg").args(["delete", key, "/v", "QuickBuds", "/f"]).output();
+            let _ = update::quiet("reg").args(["delete", key, "/v", "DeviceDeck", "/f"]).output();
         }
     }
 }

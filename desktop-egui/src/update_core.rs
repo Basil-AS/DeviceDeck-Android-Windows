@@ -6,8 +6,8 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const API: &str = "https://api.github.com/repos/spizganed/QuickBuds/releases?per_page=30";
-pub const PAGE: &str = "https://github.com/spizganed/QuickBuds/releases/latest";
+const API: &str = "https://api.github.com/repos/Basil-AS/DeviceDeck-Android-Windows/releases?per_page=30";
+pub const PAGE: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/releases/latest";
 
 /// The AppImage this process runs from: its runtime sets `APPIMAGE` to the file's path.
 fn appimage() -> Option<PathBuf> { if cfg!(windows) { None } else { std::env::var_os("APPIMAGE").map(PathBuf::from) } }

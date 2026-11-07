@@ -1,4 +1,4 @@
-// QuickBuds desktop UI: the main window and the tray's quick panel. Classic or Dot matrix style, the phone's presets.
+// DeviceDeck desktop UI: the main window and the tray's quick panel. Classic or Dot matrix style, the phone's presets.
 
 import { ListView, ScrollView, Palette as SysPalette } from "std-widgets.slint";
 // The phone's bundled Doto, for the Dot matrix style.
@@ -60,7 +60,7 @@ export global Dots {
     in property <float> scale: 1;
     // The dot pitch in physical px.
     in property <float> pitch: 2;
-    // 0 QuickBuds, 1 Pixel art, 2 Material.
+    // 0 DeviceDeck, 1 Pixel art, 2 Material.
     callback set-style(int);
     pure callback box-px(float, float, color, color, float) -> image;
     pure callback ring-px(float, int, int, color, color, color) -> image;
@@ -170,7 +170,7 @@ export global Tr {
     in property <string> eq-add;
     in property <string> eq-save;
     // ponytail: desktop-only strings, English until the translation pass.
-    in property <string> open: "Open QuickBuds";
+    in property <string> open: "Open DeviceDeck";
     in property <string> quit: "Quit";
     in property <string> style-title: "Style";
     in property <string> theme-title: "Themes, colors & styles";
@@ -1003,7 +1003,7 @@ component TitleBar inherits Rectangle {
         padding-left: 16px;
         spacing: 10px;
         Image { source: Buds.icon-app; width: 20px; height: 20px; y: (parent.height - self.height) / 2; }
-        Text { text: "QuickBuds"; color: Palette.text; font-size: 13px; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; }
+        Text { text: "DeviceDeck"; color: Palette.text; font-size: 13px; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; }
         CaptionButton {
             clicked => { root.minimize(); }
             Rectangle { width: 10px; height: 1px; background: Palette.text; }
@@ -3412,7 +3412,7 @@ export component MainWindow inherits Window {
     // Match system follows the system's light or dark mode.
     property <bool> system-light: Theme.system-light;
     changed system-light => { Theme.system-changed(); }
-    title: "QuickBuds";
+    title: "DeviceDeck";
     icon: Buds.icon-app;
     min-width: 900px;
     min-height: 580px;
@@ -3744,7 +3744,7 @@ export component MainWindow inherits Window {
 export component QuickPanel inherits Window {
     no-frame: true;
     always-on-top: true;
-    title: "QuickBuds";
+    title: "DeviceDeck";
     width: 300px;
     height: 250px;
     background: Dots.material ? Palette.container : Palette.outline;
@@ -3759,7 +3759,7 @@ export component QuickPanel inherits Window {
             spacing: 8px;
             HorizontalLayout {
                 Text {
-                    text: Buds.name == "" ? "QuickBuds" : Buds.name;
+                    text: Buds.name == "" ? "DeviceDeck" : Buds.name;
                     color: Palette.text; font-size: 13px; font-weight: 700;
                     overflow: elide; horizontal-stretch: 1;
                 }

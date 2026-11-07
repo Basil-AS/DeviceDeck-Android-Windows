@@ -7,9 +7,8 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const WORKER: &str = "https://quickbuds-report.spizganed.workers.dev/latest";
-const API: &str = "https://api.github.com/repos/spizganed/QuickBuds/releases?per_page=30";
-pub const PAGE: &str = "https://github.com/spizganed/QuickBuds/releases/latest";
+const API: &str = "https://api.github.com/repos/Basil-AS/DeviceDeck-Android-Windows/releases?per_page=30";
+pub const PAGE: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/releases/latest";
 
 /// The AppImage this process runs from: its runtime sets `APPIMAGE` to the file's path.
 fn appimage() -> Option<PathBuf> { if cfg!(windows) { None } else { std::env::var_os("APPIMAGE").map(PathBuf::from) } }
@@ -45,13 +44,8 @@ fn parts(v: &str) -> Vec<u32> { v.split(['.', '-']).map_while(|p| p.parse().ok()
 
 pub fn newer(remote: &str, local: &str) -> bool { parts(remote) > parts(local) }
 
-/// The newest release that carries this platform's archive. The Worker answers one release; when it fails
-/// or that release has no archive for this platform, GitHub answers once.
+/// The newest release that carries this platform's archive.
 pub fn latest() -> Result<Release, String> {
-    let one = curl(&[WORKER]).and_then(|b| serde_json::from_slice::<Value>(&b).map_err(|e| e.to_string()));
-    if let Ok(r) = one {
-        if let Some(r) = pick_one(&r, asset()) { return Ok(r); }
-    }
     let list: Value = serde_json::from_slice(&curl(&["-H", "Accept: application/vnd.github+json", API])?)
         .map_err(|e| e.to_string())?;
     pick(&list, asset()).ok_or_else(|| "no release found".into())

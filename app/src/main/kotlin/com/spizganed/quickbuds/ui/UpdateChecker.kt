@@ -27,8 +27,7 @@ import java.io.File
  */
 object UpdateChecker {
 
-    private const val API = "https://quickbuds-report.spizganed.workers.dev/latest"
-    private const val GITHUB = "https://api.github.com/repos/spizganed/QuickBuds/releases?per_page=30"
+    private const val API = "https://api.github.com/repos/Basil-AS/DeviceDeck-Android-Windows/releases?per_page=30"
 
     /** Settings › App › Check for updates (default on). */
     const val KEY_AUTO = "updateAutoCheck"
@@ -38,7 +37,7 @@ object UpdateChecker {
     /** The check interval, for the in-app check and the background job. */
     const val INTERVAL_MS = 6 * 60 * 60 * 1000L
     const val JOB_ID = 4301
-    private const val CHANNEL_ID = "QuickBuds_Update"
+    private const val CHANNEL_ID = "DeviceDeck_Update"
     private const val NOTIFICATION_ID = 4301
 
     /** An in-app fetch is running, so a second resume does not start another one. */
@@ -86,9 +85,8 @@ object UpdateChecker {
      * release is not for Android, it asks GitHub once, the old path.
      */
     fun fetch(): Release {
-        runCatching { release(JSONObject(get(API, "application/json"))) }.getOrNull()?.let { return it }
-        // Newest first. Desktop releases (`desktop-v*`) and pre-releases share the repo; skip them.
-        val list = JSONArray(get(GITHUB, "application/vnd.github+json"))
+        // Newest first. Desktop releases (`desktop-v*`) share the repo; skip them.
+        val list = JSONArray(get(API, "application/vnd.github+json"))
         for (i in 0 until list.length()) {
             runCatching { release(list.getJSONObject(i)) }.getOrNull()?.let { return it }
         }
@@ -98,13 +96,13 @@ object UpdateChecker {
     /** The Android release in [json], or null when the tag is not an app build or has no `.apk`. */
     private fun release(json: JSONObject): Release? {
         val tag = json.optString("tag_name")
-        if (!tag.startsWith("v") || json.optBoolean("prerelease")) return null
+        if (!tag.startsWith("android-v") || json.optBoolean("prerelease")) return null
         val assets = json.optJSONArray("assets") ?: return null
         val apk = (0 until assets.length())
             .map { assets.getJSONObject(it).optString("browser_download_url") }
             .firstOrNull { it.endsWith(".apk", ignoreCase = true) }
             ?: return null
-        return Release(tag, apk, json.optString("body").takeIf { it != "null" }.orEmpty())
+        return Release(tag.removePrefix("android-"), apk, json.optString("body").takeIf { it != "null" }.orEmpty())
     }
 
     /** Numeric compare of "v2.1.0" against "2.1.0-debug"; suffixes are ignored. */
@@ -151,7 +149,7 @@ object UpdateChecker {
 
     /** On a cold start the last update's download (UpdateActivity, ~2.5 MB) is installed or abandoned: delete it. */
     fun clearDownload(c: Context) {
-        java.io.File(c.cacheDir, "quickbuds-update.apk").delete()
+        java.io.File(c.cacheDir, "devicedeck-update.apk").delete()
     }
 
     /**

@@ -7,9 +7,8 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const WORKER: &str = "https://quickbuds-report.spizganed.workers.dev/latest";
-const API: &str = "https://api.github.com/repos/spizganed/QuickBuds/releases?per_page=30";
-pub const PAGE: &str = "https://github.com/spizganed/QuickBuds/releases/latest";
+const API: &str = "https://api.github.com/repos/Basil-AS/DeviceDeck-Android-Windows/releases?per_page=30";
+pub const PAGE: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/releases/latest";
 
 /// The AppImage this process runs from: its runtime sets `APPIMAGE` to the file's path.
 fn appimage() -> Option<PathBuf> { if cfg!(windows) { None } else { std::env::var_os("APPIMAGE").map(PathBuf::from) } }
@@ -45,13 +44,8 @@ fn parts(v: &str) -> Vec<u32> { v.split(['.', '-']).map_while(|p| p.parse().ok()
 
 pub fn newer(remote: &str, local: &str) -> bool { parts(remote) > parts(local) }
 
-/// The newest release that carries this platform's archive. The Worker answers one release; when it fails
-/// or that release has no archive for this platform, GitHub answers once.
+/// The newest release that carries this platform's archive.
 pub fn latest() -> Result<Release, String> {
-    let one = curl(&[WORKER]).and_then(|b| serde_json::from_slice::<Value>(&b).map_err(|e| e.to_string()));
-    if let Ok(r) = one {
-        if let Some(r) = pick_one(&r, asset()) { return Ok(r); }
-    }
     let list: Value = serde_json::from_slice(&curl(&["-H", "Accept: application/vnd.github+json", API])?)
         .map_err(|e| e.to_string())?;
     pick(&list, asset()).ok_or_else(|| "no release found".into())
@@ -117,7 +111,7 @@ fn verify(path: &Path, url: &str, sums: &str) -> Result<(), String> {
     }).ok_or_else(|| format!("SHA256SUMS has no line for {name}."))?;
     let got = hex(&sha256(&std::fs::read(path).map_err(|e| e.to_string())?));
     if got.eq_ignore_ascii_case(want) { Ok(()) }
-    else { Err("The download does not match SHA256SUMS. QuickBuds kept this version.".into()) }
+    else { Err("The download does not match SHA256SUMS. DeviceDeck kept this version.".into()) }
 }
 
 fn hex(b: &[u8]) -> String { b.iter().map(|x| format!("{x:02x}")).collect() }
@@ -204,7 +198,7 @@ pub fn install(r: &Release, progress: &dyn Fn(u64, u64)) -> Result<(), String> {
     let _ = std::fs::remove_dir_all(&tmp);
     std::fs::create_dir_all(&tmp).map_err(|e| e.to_string())?;
     let new = if appimage().is_some() {
-        let new = tmp.join("QuickBuds.AppImage");
+        let new = tmp.join("DeviceDeck.AppImage");
         download(&r.url, &new, progress)?;
         verify(&new, &r.url, &sums)?;
         #[cfg(unix)]
@@ -216,7 +210,7 @@ pub fn install(r: &Release, progress: &dyn Fn(u64, u64)) -> Result<(), String> {
         verify(&archive, &r.url, &sums)?;
         let ok = quiet("tar").arg("-xf").arg(&archive).arg("-C").arg(&tmp).status().map_err(|e| format!("tar: {e}"))?;
         if !ok.success() { return Err("could not unpack the download".into()); }
-        find(&tmp, exe.file_name().ok_or("name")?).ok_or("the download has no QuickBuds binary")?
+        find(&tmp, exe.file_name().ok_or("name")?).ok_or("the download has no DeviceDeck binary")?
     };
     let _ = std::fs::remove_file(old(&exe));
     std::fs::rename(&exe, old(&exe)).map_err(|e| e.to_string())?;
@@ -278,7 +272,7 @@ mod download_tests {
                 }
             }
         });
-        format!("http://{addr}/QuickBuds-linux-x64.AppImage")
+        format!("http://{addr}/DeviceDeck-linux-x64.AppImage")
     }
 
     #[test]
@@ -344,10 +338,10 @@ mod install_tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let marker = dir.join("started");
-        let current = dir.join("QuickBuds.AppImage");
+        let current = dir.join("DeviceDeck.AppImage");
         std::fs::write(&current, "#!/bin/sh\necho old\n").unwrap();
         let new_body = format!("#!/bin/sh\necho started > {}\n", marker.display()).into_bytes();
-        let name = "QuickBuds-linux-x64.AppImage";
+        let name = "DeviceDeck-linux-x64.AppImage";
         let sums = format!("{}  {name}\n", hex(&sha256(&new_body))).into_bytes();
         let base = serve(vec![(name, new_body.clone()), ("SHA256SUMS", sums)]);
         std::env::set_var("APPIMAGE", &current);

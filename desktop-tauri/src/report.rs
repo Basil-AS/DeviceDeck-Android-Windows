@@ -14,7 +14,6 @@ use std::process::Stdio;
 
 
 
-const WORKER: &str = "https://quickbuds-report.spizganed.workers.dev/report";
 /// The Category options, in the Worker's own words; it drops any other value (report-worker/src/index.js).
 pub const CATEGORIES: [&str; 6] = ["UI", "Lag", "Connection", "Feature not working", "Battery", "Other"];
 /// Their labels, the phone's `problem_cat_*` strings.
@@ -25,7 +24,7 @@ pub const CATEGORY_KEYS: [&str; 6] = ["problem_cat_ui", "problem_cat_lag", "prob
 pub fn header(s: &Snapshot) -> String {
     let model = s.model.and_then(|m| m["name"].as_str()).unwrap_or(if s.name.is_empty() { "unknown buds" } else { s.name.as_str() });
     let id = s.model.and_then(|m| m["id"].as_str()).unwrap_or("?");
-    format!("QuickBuds {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
+    format!("DeviceDeck {} | {} | {} | {model} ({id}) firmware {}", env!("CARGO_PKG_VERSION"), computer(), system(),
         s.firmware.as_deref().unwrap_or("?"))
 }
 
@@ -167,16 +166,8 @@ pub fn app_id() -> String {
 
 /// Posts [d] to the Worker.
 /// Returns (sent, the Worker's answer text when it refused the report).
-pub fn send(d: Draft) -> (bool, Option<String>) {
-    let json = serde_json::json!({
-        "app": format!("QuickBuds {} {}", env!("CARGO_PKG_VERSION"), if cfg!(windows) { "Windows" } else { "Linux" }),
-        "model": d.model, "categories": d.categories, "description": d.description, "log": d.log, "crash": d.crash,
-        "id": app_id(),
-    });
-    let (code, text) = post(WORKER, &json.to_string());
-    let message = serde_json::from_str::<serde_json::Value>(&text).ok()
-        .and_then(|v| v["message"].as_str().map(String::from));
-    (code == 200, if code == 200 { None } else { message })
+pub fn send(_d: Draft) -> (bool, Option<String>) {
+    (false, Some("Open a DeviceDeck GitHub issue to share feedback.".into()))
 }
 
 /// A model name from the list, any case.
@@ -185,4 +176,4 @@ pub fn known(model: &str) -> bool {
 }
 
 /// Posts [body] to the Worker route `report` or `ping`.
-pub fn post_to(route: &str, body: &str) -> (u16, String) { post(&WORKER.replace("/report", &format!("/{route}")), body) }
+pub fn post_to(_route: &str, _body: &str) -> (u16, String) { (0, String::new()) }

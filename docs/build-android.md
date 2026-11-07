@@ -4,8 +4,8 @@ You need JDK 21 and the Android SDK with platform 37. Android Studio brings both
 works as `JAVA_HOME`.
 
 ```bash
-git clone https://github.com/spizganed/QuickBuds.git
-cd QuickBuds
+git clone https://github.com/Basil-AS/DeviceDeck-Android-Windows.git
+cd DeviceDeck
 echo "sdk.dir=$HOME/Android/Sdk" > local.properties   # your SDK path
 ./gradlew assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk

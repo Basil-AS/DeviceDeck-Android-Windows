@@ -32,9 +32,9 @@ fail=0
 ./gradlew -q assembleRelease bundleRelease || { fail=1; echo "FAILED: release APK and AAB" >&2; }
 wait $dpid || { fail=1; echo "FAILED: desktop files" >&2; cat "$log/dist.txt"; }
 [ $fail = 0 ] || exit 1
-cp app/build/outputs/apk/release/app-release.apk "$out/QuickBuds$ver.apk"
-cp app/build/outputs/bundle/release/app-release.aab "$out/QuickBuds$ver.aab"
+cp app/build/outputs/apk/release/app-release.apk "$out/DeviceDeck$ver.apk"
+cp app/build/outputs/bundle/release/app-release.aab "$out/DeviceDeck$ver.aab"
 cp desktop-tauri/dist/* "$out/"
 # The updater and the Linux installer verify the download against this file.
-( cd "$out" && sha256sum QuickBuds*.apk QuickBuds*.aab QuickBuds*.zip QuickBuds*.AppImage > SHA256SUMS )
+( cd "$out" && sha256sum DeviceDeck*.apk DeviceDeck*.aab DeviceDeck*.zip DeviceDeck*.AppImage > SHA256SUMS )
 ls -la "$out"

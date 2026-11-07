@@ -157,7 +157,7 @@ impl Panel {
 pub fn open(ctx: &egui::Context, view: View, pos: (f32, f32), tx: Sender<Action>, focused: Arc<AtomicBool>) {
     let ppp = ctx.pixels_per_point();
     let builder = egui::ViewportBuilder::default()
-        .with_title("QuickBuds")
+        .with_title("DeviceDeck")
         .with_decorations(false)
         .with_transparent(true)
         .with_always_on_top()
@@ -371,7 +371,7 @@ mod tests {
         assert_eq!(checked, ["ANC-Light"]);
         assert_eq!(v.modes[0].label, t(&tr, "anc_seg_off"));
         assert_eq!(v.low, Some(false));
-        assert_eq!(v.open, "Open QuickBuds");
+        assert_eq!(v.open, "Open DeviceDeck");
     }
 
     #[test]

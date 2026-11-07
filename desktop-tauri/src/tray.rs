@@ -18,7 +18,7 @@ impl Tray {
 
 impl ksni::Tray for Tray {
     fn id(&self) -> String { "quickbuds".into() }
-    fn title(&self) -> String { "QuickBuds".into() }
+    fn title(&self) -> String { "DeviceDeck".into() }
     fn icon_pixmap(&self) -> Vec<ksni::Icon> { vec![ksni::Icon { width: self.icon.width, height: self.icon.height, data: self.icon.data.clone() }] }
     fn activate(&mut self, _x: i32, _y: i32) { self.open_panel(); }
     // The host asks for the menu on a right click. The menu is empty, so the panel opens instead.

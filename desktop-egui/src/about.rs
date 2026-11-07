@@ -6,11 +6,11 @@ use crate::phone;
 use crate::{icons, palette, t, App};
 use eframe::egui::{self, Align2, FontId, Pos2, Rect, Ui, Vec2};
 
-const GITHUB: &str = "https://github.com/spizganed/QuickBuds";
-const KOFI: &str = "https://ko-fi.com/spizganed";
-const DISCORD: &str = "https://discord.gg/pvsnEf9TrZ";
+const GITHUB: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows";
+const KOFI: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows";
+const DISCORD: &str = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions";
 /// DESIGN.md, "Design basis of each style".
-const INDEPENDENT: &str = "QuickBuds is an independent project and is not affiliated with or endorsed by Google or Apple.";
+const INDEPENDENT: &str = "DeviceDeck is an independent project and is not affiliated with or endorsed by Google or Apple.";
 
 pub fn show(app: &App, ui: &mut Ui, body: Rect) -> f32 {
     let tr = &app.tr;
