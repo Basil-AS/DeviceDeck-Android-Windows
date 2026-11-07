@@ -41,7 +41,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-The current app version is 0.1.0-alpha.1. It is an early DeviceDeck fork build; support for the requested Edifier and Baseus models is not complete. Pair devices in system Bluetooth settings first; DeviceDeck connects to paired devices but does not pair them.
+The current app version is 0.1.0-alpha.2. It is an early DeviceDeck fork build; support for the requested Edifier and Baseus models is not complete. Pair devices in system Bluetooth settings first; DeviceDeck connects to paired devices but does not pair them.
 
 | Platform | How |
 | --- | --- |
