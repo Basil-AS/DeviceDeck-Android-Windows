@@ -12,9 +12,9 @@ class SupportAskTest {
     private val now = 100 * day
 
     private fun pick(
-        installedAt: Long = now - 20 * day, connections: Int = 0, lastDay: Long = -1,
+        at: Long = now, installedAt: Long = now - 20 * day, connections: Int = 0, lastDay: Long = -1,
         next: Map<Card, Long> = emptyMap(), off: Set<Card> = emptySet(),
-    ) = SupportAsk.pick(installedAt, connections, now, lastDay, { next[it] ?: 0L }, { it in off })
+    ) = SupportAsk.pick(installedAt, connections, at, lastDay, { next[it] ?: 0L }, { it in off })
 
     @Test fun nothingBeforeFourteenDaysOrTenConnections() {
         assertNull(pick(installedAt = now - 5 * day, connections = 9))
@@ -29,7 +29,8 @@ class SupportAskTest {
 
     @Test fun githubCardReturnsAfterLater() {
         val next = mapOf(Card.GITHUB to now + 30 * day)
-        assertEquals(Card.GITHUB, pick(next = next, lastDay = now / day - 1))
+        assertNull(pick(next = next, lastDay = now / day - 1))
+        assertEquals(Card.GITHUB, pick(at = now + 30 * day, next = next, lastDay = now / day))
     }
 
     @Test fun laterHoldsACardBackUntilItsDate() {
