@@ -257,7 +257,7 @@ QuickBuds has two licences:
   that wants to build it into a closed-source product. To ask, open an issue on GitHub.
 
 Contributors keep the copyright of their work. They license it under both terms in the
-[Contributor License Agreement](./docs/CLA.md). The public source stays under the GPL.
+upstream CLA applies only when you explicitly submit a contribution to the original QuickBuds project; DeviceDeck contributions remain under GPL-3.0-or-later. See [docs/CLA.md](./docs/CLA.md).
 
 QuickBuds is an independent project. It is not affiliated with OnePlus, OPPO, realme, HeyTap or their
 affiliates. Those companies do not endorse or sponsor it. OnePlus, OPPO, realme, HeyMelody and the earbud

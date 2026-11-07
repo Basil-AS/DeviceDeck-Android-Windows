@@ -1,4 +1,7 @@
-# Contributor License Agreement
+# Upstream Contributor License Agreement
+
+This agreement belongs to the original QuickBuds upstream. It does not govern pull requests to the DeviceDeck fork. DeviceDeck will not submit contributions to upstream under these terms unless a human contributor explicitly agrees to them.
+
 
 This agreement applies when you send a contribution to QuickBuds. A contribution is a pull request, a patch,
 or text that you send and ask the project to use. "The owner" is spizganed, the copyright holder of QuickBuds.

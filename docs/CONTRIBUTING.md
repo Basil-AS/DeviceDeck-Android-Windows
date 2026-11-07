@@ -25,7 +25,7 @@ capture the Bluetooth traffic. It also shows what HeyMelody sends.
 ## Licence of your contribution
 
 QuickBuds is under the GPL-3.0-or-later. The owner can also offer it under a commercial licence. Before
-the owner merges your pull request, you must agree to the [Contributor License Agreement](./CLA.md).
+you submit a contribution directly to the original upstream, you must personally review and agree to its [Contributor License Agreement](./CLA.md). DeviceDeck-only contributions do not grant the upstream owner additional rights.
 Tick the box in the pull request template. You keep your copyright.
 
 Do not copy code or text from HeyMelody, realme Link or other vendor apps. Write your own code from the
