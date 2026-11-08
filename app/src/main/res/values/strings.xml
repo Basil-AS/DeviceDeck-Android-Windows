@@ -15,6 +15,16 @@
     <string name="device_hub_mode_outdoor" translatable="false">Outdoor</string>
     <string name="device_hub_mode_off" translatable="false">Off</string>
     <string name="device_hub_mode_transparency" translatable="false">Transparency</string>
+    <string name="accessory_title" translatable="false">More devices</string>
+    <string name="accessory_choose_model" translatable="false">Choose a device</string>
+    <string name="accessory_scan" translatable="false">Scan for devices</string>
+    <string name="accessory_scanning" translatable="false">Scanning nearby…</string>
+    <string name="accessory_no_devices" translatable="false">No supported device found. Wake it and try again.</string>
+    <string name="accessory_connect" translatable="false">Connect</string>
+    <string name="accessory_refresh" translatable="false">Refresh status</string>
+    <string name="accessory_disconnect" translatable="false">Disconnect</string>
+    <string name="accessory_battery" translatable="false">Battery</string>
+    <string name="accessory_noise" translatable="false">Noise control</string>
 
     <!-- Device title shown before the buds report their name. -->
     <string name="default_device_name" translatable="false">OnePlus Buds 4</string>

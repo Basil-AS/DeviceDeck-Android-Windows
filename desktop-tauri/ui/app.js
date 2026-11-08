@@ -288,10 +288,10 @@ const swRow=(i,t,s,k)=>`<div class="row">${i?ic(i):''}<div class="txt"><div clas
 const navRow=(i,t,s,act)=>`<button class="row press" ${act}>${ic(i)}<div class="txt"><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>${ic('chev','ch')}</button>`;
 const srow=(t,s,ctrl,id='')=>`<div class="srow"${id?` id="${id}"`:''}><div class="txt"><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div><div class="ctrl">${ctrl}</div></div>`;
 const back=(to,label)=>`<button class="btn icon press" data-act="page" data-v="${to}" aria-label="Back to ${label}">${ic('back')}</button>`;
-const PAGES=[['overview','battery','desktop_nav_overview'],['eq','eq','eq_title'],['hearing','hearing','row_golden_title'],['gestures','gesture','row_gesture_title'],['earbud','earbud','earbuds_title']];
+const PAGES=[['overview','battery','desktop_nav_overview'],['eq','eq','eq_title'],['hearing','hearing','row_golden_title'],['gestures','gesture','row_gesture_title'],['earbud','earbud','earbuds_title'],['accessories','devices','accessory_title']];
 const APPPAGES=[['appearance','palette','settings_appearance'],['settings','cog','desktop_nav_app_settings'],['update','update','update_title'],['about','info','settings_about_title']];
 const NAVOF={};
-const ORDER=['overview','eq','hearing','gestures','earbud','appearance','settings','update','about','dev','feedback','test'];
+const ORDER=['overview','eq','hearing','gestures','earbud','accessories','appearance','settings','update','about','dev','feedback','test'];
 
 /* equalizer geometry */
 const FREQS=['62','250','1k','4k','8k','16k'];
@@ -379,6 +379,26 @@ function buildWindow(){
         <div class="row">${ic('devices')}<div class="txt"><div class="t">${$t('dual_title')}</div><div class="s">${$t('dual_switch_sub')}</div></div>${sw('dual')}</div>
         <div class="devs" id="devs"></div></div></div>
       <div id="fwBox"><div class="lbl">${$t('earbuds_section_about')}</div><div class="group"><button class="row press" data-act="fwinfo">${ic('info')}<div class="txt"><div class="t">${$t('row_firmware_title')}</div></div><span class="v mono">–</span>${ic('chev','ch')}</button></div></div>
+    </div>
+  </section>
+
+  <section class="page" data-page="accessories" hidden>
+    <div class="ph"><h2>${$t('accessory_title')}</h2></div>
+    <div class="card pad">
+      <div class="lbl">${$t('accessory_choose_model')}</div>
+      <select class="field" id="accessoryModel" aria-label="${$t('accessory_choose_model')}">
+        <option value="edifier-w820nb-plus">EDIFIER W820NB Plus</option>
+        <option value="baseus-bowie-30">Baseus Bowie 30</option>
+      </select>
+      <div class="ph"><span class="s" id="accessoryStatus" aria-live="polite" style="flex:1;margin:0">${$t('accessory_no_devices')}</span><button class="btn pri press" data-act="accscan">${$t('accessory_scan')}</button></div>
+    </div>
+    <div class="group" id="accessoryDevices"></div>
+    <div class="card pad" id="accessoryControls" hidden>
+      <div class="t" id="accessoryName">–</div>
+      <div class="row">${ic('battery')}<div class="txt"><div class="t">${$t('accessory_battery')}</div></div><span class="v" id="accessoryBattery">–</span></div>
+      <div class="row">${ic('anc')}<div class="txt"><div class="t">${$t('accessory_noise')}</div></div><span class="v" id="accessoryNoise">–</span></div>
+      <div class="lbl">${$t('accessory_noise')}</div><div class="group" id="accessoryModes"></div>
+      <div class="ph"><button class="btn press" data-act="accrefresh">${$t('accessory_refresh')}</button><button class="btn press" data-act="accdisconnect">${$t('accessory_disconnect')}</button></div>
     </div>
   </section>
 
@@ -702,6 +722,11 @@ document.addEventListener('click',ev=>{
     if(on&&k==='sp'&&S.hq){S.hq=false;toast('High-quality audio went off: the earbuds run only one of them.');}
     apply();return;}
   if(a==='page'){if(S.page!==v)go(v);return;}
+  if(a==='accscan'){window.QBLIVE&&QBLIVE.accessoryScan();return;}
+  if(a==='accconnect'){window.QBLIVE&&QBLIVE.accessoryConnect(v);return;}
+  if(a==='accmode'){window.QBLIVE&&QBLIVE.accessoryMode(v);return;}
+  if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
+  if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
   if(a==='glassbg'){reveal(ev,()=>{S.glassBg=v;apply();});return;}
   if(a==='swatch'){const c=+v;if(S.colorMode==='accent')S.accent=c;else{const pr=S.presets.find(x=>x.id===S.active);if(pr)pr[TOK[S.editTok][0]]=c;}remember(c);reveal(ev,()=>{apply();renderColorPanel();});return;}
   if(a==='newpreset'){const p=palette(),id='p'+Date.now();S.presets.push({id,name:`Palette ${S.presets.length+1}`,bg:p.bg,card:p.card,accent:p.accent,text:p.text,text2:p.text2,outline:p.outline});S.active=id;S.editTok=2;apply();renderColorPanel();return;}
@@ -851,7 +876,35 @@ if(window.__TAURI__){
     eqDel(){const p=curEq();if(!p)return;const e=this.eq;this.send({t:'eq_delete',id:p.id});
       this.eqLocal(Object.assign({},e,{current:e.builtins.length?e.builtins[0].id:e.current,custom:e.custom.filter(x=>x.id!==p.id)}),2500);},
     eqSave(){const p=curEq();if(p)this.send({t:'eq_gains',id:p.id,gains:S.gains});},
+    accessoryScan(){const model=byId('accessoryModel').value;byId('accessoryDevices').innerHTML='';return T.core.invoke('accessory_scan',{model}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryConnect(id){T.core.invoke('accessory_connect',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryMode(mode){T.core.invoke('accessory_set_noise',{mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryRefresh(){T.core.invoke('accessory_refresh').catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryDisconnect(){T.core.invoke('accessory_disconnect').catch(e=>renderAccessory({status:'error',error:String(e)}));},
   };
+  const accessoryModes={
+    'edifier-w820nb-plus':[['off',$t('device_hub_mode_off')],['anc',$t('anc_seg_anc')],['transparency',$t('device_hub_mode_transparency')]],
+    'baseus-bowie-30':[['off',$t('device_hub_mode_off')],['commute',$t('device_hub_mode_commute')],['indoor',$t('device_hub_mode_indoor')],['outdoor',$t('device_hub_mode_outdoor')],['transparency',$t('device_hub_mode_transparency')]],
+  };
+  let accessoryState={status:'disconnected',devices:[]};
+  function renderAccessory(s){
+    accessoryState=Object.assign({},accessoryState,s||{});
+    const status=byId('accessoryStatus'),list=byId('accessoryDevices'),controls=byId('accessoryControls');if(!status||!list||!controls)return;
+    const label={scanning:$t('accessory_scanning'),found:$t('accessory_connect'),connected:$t('conn_on'),disconnected:$t('conn_off'),'not-found':$t('accessory_no_devices'),error:accessoryState.error||$t('accessory_no_devices')}[accessoryState.status]||accessoryState.status||'';
+    status.textContent=label;
+    if(Array.isArray(accessoryState.devices))list.innerHTML=accessoryState.devices.map(d=>`<button class="row press" data-act="accconnect" data-v="${esc(d.id)}">${ic('devices')}<div class="txt"><div class="t">${esc(d.name)}</div><div class="s">${esc($t('accessory_connect'))}</div></div>${ic('chev','ch')}</button>`).join('');
+    const connected=accessoryState.status==='connected';controls.hidden=!connected;
+    if(!connected)return;
+    byId('accessoryName').textContent=accessoryState.name||'DeviceDeck';
+    byId('accessoryBattery').textContent=accessoryState.battery==null?'–':`${accessoryState.battery}%`;
+    const noise=(accessoryModes[accessoryState.model]||[]).find(([id])=>id===accessoryState.noise);
+    byId('accessoryNoise').textContent=noise?noise[1]:'–';
+    const modes=byId('accessoryModes');
+    modes.innerHTML=(accessoryModes[accessoryState.model]||[]).map(([id,title])=>`<button class="row press" role="radio" aria-checked="${id===accessoryState.noise}" data-act="accmode" data-v="${id}"><div class="txt"><div class="t">${esc(title)}</div></div>${id===accessoryState.noise?ic('check','ch'):ic('chev','ch')}</button>`).join('');
+    pixelize(controls);
+  }
+  T.event.listen('accessory',e=>renderAccessory(e.payload));
+  byId('accessoryModel').addEventListener('change',()=>{byId('accessoryDevices').innerHTML='';byId('accessoryControls').hidden=true;byId('accessoryStatus').textContent=$t('accessory_no_devices');});
   // The EQ page follows the buds: their bands, presets and custom slots.
   const takeEq=eq=>{
     QBLIVE.eq=eq.builtins.length||eq.hasCustom?eq:null;if(!QBLIVE.eq)return;
