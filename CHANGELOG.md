@@ -1,6 +1,10 @@
 # Changelog
 
-- Windows/Linux: add Baseus EP10 Pro battery and Off/ANC/Transparency controls over paired RFCOMM/SPP in DeviceDeck's existing cross-brand hub; add battery-only Bowie MF1 SPP profile. Noise writes require acknowledgement and mode readback. Hardware validation remains pending.
+## 0.1.0-alpha.6 — 2026-11-09
+
+- Windows/Linux: add Baseus EP10 Pro battery and Off/ANC/Transparency controls over paired RFCOMM/SPP in DeviceDeck's existing cross-brand hub; add battery-only Bowie MF1 SPP profile. Noise writes require acknowledgement and mode readback.
+- Standard SPP connection targets Baseus's Bluetooth Serial Port service directly. MF1 exposes battery only until more command mappings are evidenced.
+- New headset paths passed Android/Desktop CI. Physical-device validation remains pending.
 
 ## 0.1.0-alpha.5
 
@@ -12,7 +16,7 @@
 
 - Android: add Baseus EP10 Pro SPP battery and Off/ANC/Transparency controls, with acknowledgement and readback; add Bowie MF1 left/right battery readings over SPP in the same DeviceDeck device hub.
 - Android: add original vector illustrations for earbuds, over-ear headphones, and Blade 2 in the shared device screen; localize pairing guidance in English and Russian.
-- Windows/Linux continues to ship in the same DeviceDeck release with the existing BLE accessory hub; macOS has an independent 0.7.0-alpha.5 release line.
+- Windows/Linux continues to ship in the same DeviceDeck release with the existing BLE accessory hub; macOS has an independent 0.7.0-alpha.6 release line.
 - New Baseus SPP features have CI coverage but require checks against named physical models and firmware.
 
 ## 0.1.0-alpha.3
