@@ -20,6 +20,7 @@ const MAX_RX_BUFFER: usize = 4096;
 enum Model {
     EdifierW820NbPlus,
     BaseusBowie30,
+    BaseusBlade2,
 }
 
 impl Model {
@@ -27,6 +28,7 @@ impl Model {
         match value {
             "edifier-w820nb-plus" => Ok(Self::EdifierW820NbPlus),
             "baseus-bowie-30" => Ok(Self::BaseusBowie30),
+            "baseus-blade-2" => Ok(Self::BaseusBlade2),
             _ => Err("Unsupported DeviceDeck BLE profile".into()),
         }
     }
@@ -34,25 +36,27 @@ impl Model {
         match self {
             Self::EdifierW820NbPlus => "edifier-w820nb-plus",
             Self::BaseusBowie30 => "baseus-bowie-30",
+            Self::BaseusBlade2 => "baseus-blade-2",
         }
     }
     fn name(self) -> &'static str {
         match self {
             Self::EdifierW820NbPlus => "EDIFIER W820NB Plus",
             Self::BaseusBowie30 => "Baseus Bowie 30",
+            Self::BaseusBlade2 => "Baseus Blade 2",
         }
     }
     fn write_uuid(self) -> Uuid {
         Uuid::parse_str(match self {
             Self::EdifierW820NbPlus => EDIFIER_WRITE,
-            Self::BaseusBowie30 => BASEUS_WRITE,
+            Self::BaseusBowie30 | Self::BaseusBlade2 => BASEUS_WRITE,
         })
         .unwrap()
     }
     fn notify_uuid(self) -> Uuid {
         Uuid::parse_str(match self {
             Self::EdifierW820NbPlus => EDIFIER_NOTIFY,
-            Self::BaseusBowie30 => BASEUS_NOTIFY,
+            Self::BaseusBowie30 | Self::BaseusBlade2 => BASEUS_NOTIFY,
         })
         .unwrap()
     }
@@ -69,6 +73,14 @@ impl Model {
             Self::BaseusBowie30 => ["baseus bowie 30", "bowie 30"]
                 .iter()
                 .any(|n| name.eq_ignore_ascii_case(n)),
+            Self::BaseusBlade2 => [
+                "baseus blade 2",
+                "baseus blade 2-140",
+                "blade 2",
+                "blade 2-140",
+            ]
+            .iter()
+            .any(|n| name.eq_ignore_ascii_case(n)),
         }
     }
 }
@@ -99,18 +111,26 @@ struct AccessorySession {
     decoder: Decoder,
     battery: Option<u8>,
     noise: Option<String>,
+    power: HashMap<u16, PowerStatus>,
     device_name: String,
 }
 
 enum Decoder {
     Edifier(Vec<u8>),
     Baseus(Vec<u8>),
+    BaseusPower(Vec<u8>),
+}
+
+#[derive(Clone, Copy, Debug)]
+struct PowerStatus {
+    multiplier: u8,
+    value: u16,
 }
 
 #[derive(Debug)]
 struct Frame {
     header: u8,
-    command: u8,
+    command: u16,
     payload: Vec<u8>,
 }
 
@@ -127,10 +147,13 @@ impl AccessorySession {
                 decode_edifier_stream(buffer, bytes)
             }
             (Decoder::Baseus(buffer), Model::BaseusBowie30) => decode_baseus_stream(buffer, bytes),
+            (Decoder::BaseusPower(buffer), Model::BaseusBlade2) => {
+                decode_power_stream(buffer, bytes)
+            }
             _ => vec![],
         }
     }
-    async fn request(&mut self, packet: &[u8], expected: u8) -> Result<Frame, String> {
+    async fn request(&mut self, packet: &[u8], expected: u16) -> Result<Frame, String> {
         self.write(packet).await?;
         tokio::time::timeout(Duration::from_secs(3), async {
             while let Some(bytes) = self.rx.recv().await {
@@ -202,6 +225,23 @@ impl AccessorySession {
                     .into(),
                 );
             }
+            Model::BaseusBlade2 => {
+                let mut codes: Vec<u16> = (0x0001..=0x000D).collect();
+                codes.extend([
+                    0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x001E, 0x001F, 0x0020,
+                    0x0022, 0x0023,
+                ]);
+                if self.device_name.contains("140") {
+                    codes.extend([0x0024, 0x0025, 0x0026]);
+                    codes.extend(0x0028..=0x002D);
+                    codes.extend(0x0031..=0x0036);
+                }
+                for code in codes {
+                    self.read_power(code).await?;
+                }
+                self.battery = None;
+                self.noise = None;
+            }
         }
         Ok(())
     }
@@ -265,11 +305,60 @@ impl AccessorySession {
                     return Err("Baseus mode did not match readback".into());
                 }
             }
+            Model::BaseusBlade2 => {
+                return Err("Blade 2 is a power accessory; noise modes are not supported".into())
+            }
         }
         Ok(())
     }
+    async fn read_power(&mut self, code: u16) -> Result<PowerStatus, String> {
+        let frame = self.request(&encode_power_read(code), code).await?;
+        if frame.payload.len() != 3 {
+            return Err(format!("Invalid Blade 2 status response for 0x{code:04X}"));
+        }
+        let status = PowerStatus {
+            multiplier: frame.payload[0],
+            value: u16::from_be_bytes([frame.payload[1], frame.payload[2]]),
+        };
+        self.power.insert(code, status);
+        Ok(status)
+    }
+    async fn set_power(&mut self, code: u16, value: u16) -> Result<(), String> {
+        let valid = match code {
+            0x0020 => value <= 2,
+            0x0022 => value <= 1,
+            0x001E | 0x001F => value <= 1440,
+            _ => false,
+        };
+        if !valid {
+            return Err("Unsupported Blade 2 setting or value".into());
+        }
+        self.write(&encode_power_write(code, value)).await?;
+        let actual = self.read_power(code).await?;
+        if actual.value != value {
+            return Err("Blade 2 setting did not match device readback".into());
+        }
+        Ok(())
+    }
+    async fn set_power_text(&self, text: &str) -> Result<(), String> {
+        let bytes = text.as_bytes();
+        if text.trim().is_empty() || bytes.len() > 255 {
+            return Err("Display text must contain 1–255 UTF-8 bytes".into());
+        }
+        self.write(&encode_power_text(bytes)).await
+    }
     fn snapshot(&self, status: &str) -> Value {
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise })
+        let power: HashMap<String, Value> = self
+            .power
+            .iter()
+            .map(|(code, v)| {
+                (
+                    format!("{code:04X}"),
+                    json!({"multiplier":v.multiplier,"value":v.value}),
+                )
+            })
+            .collect();
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "power": power })
     }
 }
 
@@ -313,7 +402,7 @@ fn decode_edifier_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
         if u16::from_be_bytes([raw[size - 2], raw[size - 1]]) == sum && raw[1] >= 1 {
             frames.push(Frame {
                 header: raw[0],
-                command: raw[2],
+                command: raw[2] as u16,
                 payload: raw[3..size - 2].to_vec(),
             });
             buffer.drain(..size);
@@ -355,10 +444,91 @@ fn decode_baseus_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
         }
         frames.push(Frame {
             header: 0xAA,
-            command,
+            command: command as u16,
             payload: buffer[2..size].to_vec(),
         });
         buffer.drain(..size);
+    }
+    frames
+}
+
+fn encode_power_read(code: u16) -> Vec<u8> {
+    power_crc(
+        vec![0x9A, 0xAA, 0x03]
+            .into_iter()
+            .chain(code.to_be_bytes())
+            .chain([0, 1])
+            .collect(),
+    )
+}
+fn encode_power_write(code: u16, value: u16) -> Vec<u8> {
+    power_crc(
+        vec![0x9A, 0xAA, 0x10]
+            .into_iter()
+            .chain(code.to_be_bytes())
+            .chain([0, 1, 2, 1])
+            .chain(value.to_be_bytes())
+            .collect(),
+    )
+}
+fn encode_power_text(text: &[u8]) -> Vec<u8> {
+    power_crc(
+        vec![0x9A, 0xAA, 0x10, 0, 0x30, 0, 1, text.len() as u8, 1]
+            .into_iter()
+            .chain(text.iter().copied())
+            .collect(),
+    )
+}
+fn power_crc(mut bytes: Vec<u8>) -> Vec<u8> {
+    let crc = crc16(&bytes);
+    bytes.extend_from_slice(&crc.to_be_bytes());
+    bytes
+}
+fn crc16(bytes: &[u8]) -> u16 {
+    let mut crc = 0xFFFFu16;
+    for byte in bytes {
+        crc ^= *byte as u16;
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 {
+                (crc >> 1) ^ 0xA001
+            } else {
+                crc >> 1
+            };
+        }
+    }
+    crc
+}
+fn decode_power_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
+    if buffer.len().saturating_add(input.len()) > MAX_RX_BUFFER {
+        buffer.clear();
+    }
+    buffer.extend_from_slice(input);
+    let mut frames = Vec::new();
+    while buffer.len() >= 2 {
+        let Some(start) = buffer.windows(2).position(|pair| pair == [0x9A, 0xAA]) else {
+            let keep = buffer.last() == Some(&0x9A);
+            *buffer = if keep { vec![0x9A] } else { Vec::new() };
+            break;
+        };
+        if start > 0 {
+            buffer.drain(..start);
+        }
+        if buffer.len() < 11 {
+            break;
+        }
+        let raw = &buffer[..11];
+        let expected = u16::from_be_bytes([raw[9], raw[10]]);
+        if raw[2] == 0x03 && crc16(&raw[..9]) == expected && raw[5] == 0 {
+            let code = u16::from_be_bytes([raw[3], raw[4]]);
+            frames.push(Frame {
+                header: 0x9A,
+                command: code,
+                payload: raw[6..9].to_vec(),
+            });
+            buffer.drain(..11);
+        } else {
+            buffer.remove(0);
+        }
     }
     frames
 }
@@ -497,11 +667,14 @@ pub async fn accessory_connect(
         rx,
         decoder: if model == Model::EdifierW820NbPlus {
             Decoder::Edifier(Vec::new())
+        } else if model == Model::BaseusBlade2 {
+            Decoder::BaseusPower(Vec::new())
         } else {
             Decoder::Baseus(Vec::new())
         },
         battery: None,
         noise: None,
+        power: HashMap::new(),
         device_name: name,
     };
     session.refresh().await?;
@@ -534,6 +707,42 @@ pub async fn accessory_set_noise(
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_noise(&mode).await?;
     let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_power(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    code: u16,
+    value: u16,
+) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    if session.model != Model::BaseusBlade2 {
+        return Err("Connected device is not a Blade 2 powerbank".into());
+    }
+    session.set_power(code, value).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_power_text(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    text: String,
+) -> Result<Value, String> {
+    let active = hub.session.lock().await;
+    let session = active.as_ref().ok_or("No BLE device is connected")?;
+    if session.model != Model::BaseusBlade2 {
+        return Err("Connected device is not a Blade 2 powerbank".into());
+    }
+    session.set_power_text(&text).await?;
+    let mut result = session.snapshot("connected");
+    result["message"] = json!("Display text sent; the protocol provides no text readback here");
     emit(&app, result.clone());
     Ok(result)
 }
@@ -579,5 +788,21 @@ mod tests {
             [0x02, 0x33]
         );
         assert_eq!(frames[0].payload, [80, 0, 75, 1]);
+    }
+
+    #[test]
+    fn blade2_power_codec_matches_crc_and_decodes_streamed_status() {
+        assert_eq!(crc16(b"123456789"), 0x4B37);
+        assert_eq!(
+            encode_power_read(0x0020),
+            [0x9A, 0xAA, 0x03, 0, 0x20, 0, 1, 0x09, 0xBD]
+        );
+        let frame = [0x9A, 0xAA, 0x03, 0, 0x20, 0, 1, 0, 2, 0x97, 0x30];
+        let mut buffer = Vec::new();
+        assert!(decode_power_stream(&mut buffer, &frame[..4]).is_empty());
+        let decoded = decode_power_stream(&mut buffer, &frame[4..]);
+        assert_eq!(decoded.len(), 1);
+        assert_eq!(decoded[0].command, 0x0020);
+        assert_eq!(decoded[0].payload, [1, 0, 2]);
     }
 }

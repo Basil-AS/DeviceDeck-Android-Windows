@@ -22,6 +22,8 @@ const I={
   devices:'<path d="M4,6h18V4H4C2.9,4 2,4.9 2,6v11H0v3h14v-3H4V6zM23,8h-6c-0.55,0 -1,0.45 -1,1v10c0,0.55 0.45,1 1,1h6c0.55,0 1,-0.45 1,-1V9c0,-0.55 -0.45,-1 -1,-1zM22,17h-4v-7h4v7z" fill="#fff"/>',
   gesture:'<path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-0.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56 0.79 2.93 2 3.74zM18.84 15.87l-4.54-2.26c-0.17-0.07-0.35-0.11-0.54-0.11H13v-6c0-0.83-0.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-0.72c-0.08-0.01-0.15-0.03-0.24-0.03-0.31 0-0.59 0.13-0.79 0.33l-0.79 0.8 4.94 4.94c0.27 0.27 0.65 0.44 1.06 0.44h6.79c0.75 0 1.33-0.55 1.44-1.28l0.75-5.27c0.01-0.07 0.02-0.14 0.02-0.2 0-0.62-0.38-1.16-0.91-1.38z" fill="#fff"/>',
   earbud:'<path d="M17,8V19a1.5,1.5 0,0 1,-3,0V12.58A5,5 0,1 1,17,8z" fill="#fff" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>',
+  headphones:'<path d="M4,13v-2a8,8 0,0 1,16,0v2M4,13h3v7H5a2,2 0,0 1,-2,-2v-3a2,2 0,0 1,1,-2zM20,13h-3v7h2a2,2 0,0 0,2,-2v-3a2,2 0,0 0,-1,-2z" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  powerbank:'<path d="M8,2h8v3h2a2,2 0,0 1,2 2v13a2,2 0,0 1,-2 2H6a2,2 0,0 1,-2 -2V7a2,2 0,0 1,2 -2h2z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M8,9h8v5H8zM9,18h6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
   find:'<path d="M12 1.8C7.4 1.8 3.7 5.5 3.7 10.1 3.7 16.3 12 22.4 12 22.4s8.3-6.1 8.3-12.3c0-4.6-3.7-8.3-8.3-8.3zm0 10.6c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3z" fill="#fff"/>',
   power:'<path d="M12,3v8 M6.5,6.5a8,8 0,1 0,11 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
   dev:'<path d="M6.4,6.6L12.2,12L6.4,17.4" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="square"/><path d="M13.6,15.9h6v2.2h-6z" fill="#fff"/>',
@@ -389,15 +391,24 @@ function buildWindow(){
       <select class="field" id="accessoryModel" aria-label="${$t('accessory_choose_model')}">
         <option value="edifier-w820nb-plus">EDIFIER W820NB Plus</option>
         <option value="baseus-bowie-30">Baseus Bowie 30</option>
+        <option value="baseus-blade-2">Baseus Blade 2</option>
       </select>
       <div class="ph"><span class="s" id="accessoryStatus" aria-live="polite" style="flex:1;margin:0">${$t('accessory_no_devices')}</span><button class="btn pri press" data-act="accscan">${$t('accessory_scan')}</button></div>
     </div>
     <div class="group" id="accessoryDevices"></div>
     <div class="card pad" id="accessoryControls" hidden>
-      <div class="t" id="accessoryName">–</div>
-      <div class="row">${ic('battery')}<div class="txt"><div class="t">${$t('accessory_battery')}</div></div><span class="v" id="accessoryBattery">–</span></div>
-      <div class="row">${ic('anc')}<div class="txt"><div class="t">${$t('accessory_noise')}</div></div><span class="v" id="accessoryNoise">–</span></div>
-      <div class="lbl">${$t('accessory_noise')}</div><div class="group" id="accessoryModes"></div>
+      <div class="ph" id="accessoryHeading"><span id="accessoryProfileIcon">${ic('devices')}</span><div class="t" id="accessoryName">–</div></div>
+      <div class="row" id="accessoryBatteryRow">${ic('battery')}<div class="txt"><div class="t">${$t('accessory_battery')}</div></div><span class="v" id="accessoryBattery">–</span></div>
+      <div class="row" id="accessoryNoiseRow">${ic('anc')}<div class="txt"><div class="t">${$t('accessory_noise')}</div></div><span class="v" id="accessoryNoise">–</span></div>
+      <div id="accessoryNoiseSection"><div class="lbl">${$t('accessory_noise')}</div><div class="group" id="accessoryModes"></div></div>
+      <div id="accessoryPowerPanel" hidden>
+        <div class="lbl">${$t('device_hub_powerbank_waiting')}</div><div class="group" id="accessoryPowerMetrics"></div>
+        <div class="lbl">${$t('device_hub_powerbank_theme')}</div><button class="row press" data-act="accpowertheme"><div class="txt"><div class="t">${$t('device_hub_powerbank_theme')}</div></div><span class="v" id="accessoryPowerTheme">–</span></button>
+        <button class="row press" data-act="accpowersaver"><div class="txt"><div class="t">${$t('device_hub_powerbank_saver')}</div></div><span class="v" id="accessoryPowerSaver">–</span></button>
+        <div class="lbl">${$t('device_hub_powerbank_text_hint')}</div><input class="field" id="accessoryPowerText" type="text" maxlength="255" aria-label="${$t('device_hub_powerbank_text_hint')}"><button class="btn press" data-act="accpowertext">${$t('device_hub_powerbank_set_text')}</button>
+        <div class="lbl">${$t('device_hub_powerbank_reminder_hint')}</div><input class="field" id="accessoryPowerReminder" type="number" min="0" max="1440" aria-label="${$t('device_hub_powerbank_reminder_hint')}"><button class="btn press" data-act="accpowerreminder">${$t('device_hub_powerbank_set_reminder')}</button>
+        <div class="lbl">${$t('device_hub_powerbank_shutdown_hint')}</div><input class="field" id="accessoryPowerShutdown" type="number" min="0" max="1440" aria-label="${$t('device_hub_powerbank_shutdown_hint')}"><button class="btn press" data-act="accpowershutdown">${$t('device_hub_powerbank_set_shutdown')}</button>
+      </div>
       <div class="ph"><button class="btn press" data-act="accrefresh">${$t('accessory_refresh')}</button><button class="btn press" data-act="accdisconnect">${$t('accessory_disconnect')}</button></div>
     </div>
   </section>
@@ -727,6 +738,10 @@ document.addEventListener('click',ev=>{
   if(a==='accmode'){window.QBLIVE&&QBLIVE.accessoryMode(v);return;}
   if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
   if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
+  if(a==='accpowertheme'){const old=Number(accessoryState.power?.['0020']?.value??-1);if(old>=0&&old<=2)QBLIVE.accessoryPower(0x20,(old+1)%3);else toast($t('device_hub_powerbank_waiting'));return;}
+  if(a==='accpowersaver'){const old=Number(accessoryState.power?.['0022']?.value??-1);if(old>=0&&old<=1)QBLIVE.accessoryPower(0x22,old===0?1:0);else toast($t('device_hub_powerbank_waiting'));return;}
+  if(a==='accpowertext'){const text=byId('accessoryPowerText').value;if(text.trim())QBLIVE.accessoryPowerText(text);return;}
+  if(a==='accpowerreminder'||a==='accpowershutdown'){const id=a==='accpowerreminder'?'accessoryPowerReminder':'accessoryPowerShutdown';const value=Number(byId(id).value);if(Number.isInteger(value)&&value>=0&&value<=1440)QBLIVE.accessoryPower(a==='accpowerreminder'?0x1e:0x1f,value);else toast($t('device_hub_powerbank_reminder_hint'));return;}
   if(a==='glassbg'){reveal(ev,()=>{S.glassBg=v;apply();});return;}
   if(a==='swatch'){const c=+v;if(S.colorMode==='accent')S.accent=c;else{const pr=S.presets.find(x=>x.id===S.active);if(pr)pr[TOK[S.editTok][0]]=c;}remember(c);reveal(ev,()=>{apply();renderColorPanel();});return;}
   if(a==='newpreset'){const p=palette(),id='p'+Date.now();S.presets.push({id,name:`Palette ${S.presets.length+1}`,bg:p.bg,card:p.card,accent:p.accent,text:p.text,text2:p.text2,outline:p.outline});S.active=id;S.editTok=2;apply();renderColorPanel();return;}
@@ -879,6 +894,8 @@ if(window.__TAURI__){
     accessoryScan(){const model=byId('accessoryModel').value;byId('accessoryDevices').innerHTML='';return T.core.invoke('accessory_scan',{model}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryConnect(id){T.core.invoke('accessory_connect',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryMode(mode){T.core.invoke('accessory_set_noise',{mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryRefresh(){T.core.invoke('accessory_refresh').catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryDisconnect(){T.core.invoke('accessory_disconnect').catch(e=>renderAccessory({status:'error',error:String(e)}));},
   };
@@ -886,21 +903,40 @@ if(window.__TAURI__){
     'edifier-w820nb-plus':[['off',$t('device_hub_mode_off')],['anc',$t('anc_seg_anc')],['transparency',$t('device_hub_mode_transparency')]],
     'baseus-bowie-30':[['off',$t('device_hub_mode_off')],['commute',$t('device_hub_mode_commute')],['indoor',$t('device_hub_mode_indoor')],['outdoor',$t('device_hub_mode_outdoor')],['transparency',$t('device_hub_mode_transparency')]],
   };
+  const powerMetricLabel=code=>{
+    if(code>=1&&code<=12){const port=(code<=3||code>=7&&code<=9)?'USB-C 1':'USB-C 2',dir=code<=6?'OUT':'IN',metric=['voltage','current','power'][(code-1)%3];return `${port} ${dir} ${metric}`;}
+    const labels={13:'Temperature',16:'Power status flags',17:'Error code',18:'Negotiated protocol',19:'Module status',20:'Energy',21:'Remaining time',22:'Charge time',30:$t('device_hub_powerbank_reminder'),31:$t('device_hub_powerbank_shutdown'),35:'Module version',36:'DC module version',37:'Cell temperature',38:'Cell cycles'};
+    if(code>=40&&code<=45)return `Cell ${code-39} voltage`;if(code>=49&&code<=54)return `Cell ${code-48} current`;return labels[code]||null;
+  };
+  const powerMetricValue=(code,entry)=>{const v=Number(entry.value),m=Number(entry.multiplier);if([13,37].includes(code))return `${v-100} °C`;if(code===16)return `0x${v.toString(16).toUpperCase().padStart(4,'0')}`;if(code===18)return `#${v}`;if([21,22,30,31].includes(code))return `${v} min`;if(code>=40&&code<=45)return `${(v/1000).toFixed(2)} V`;if(code>=49&&code<=54)return `${(v/1000).toFixed(2)} A`;if(code>=1&&code<=12){const unit=['V','A','W'][(code-1)%3];return m?`${(v/m).toFixed(2)} ${unit}`:`${v} (raw)`;}return m?`${(v/m).toFixed(2)}`:`${v} (raw)`;};
   let accessoryState={status:'disconnected',devices:[]};
   function renderAccessory(s){
+    const oldModel=accessoryState.model;
     accessoryState=Object.assign({},accessoryState,s||{});
+    if(s&&s.model&&s.model!==oldModel)accessoryState.power={};
     const status=byId('accessoryStatus'),list=byId('accessoryDevices'),controls=byId('accessoryControls');if(!status||!list||!controls)return;
     const label={scanning:$t('accessory_scanning'),found:$t('accessory_connect'),connected:$t('conn_on'),disconnected:$t('conn_off'),'not-found':$t('accessory_no_devices'),error:accessoryState.error||$t('accessory_no_devices')}[accessoryState.status]||accessoryState.status||'';
     status.textContent=label;
-    if(Array.isArray(accessoryState.devices))list.innerHTML=accessoryState.devices.map(d=>`<button class="row press" data-act="accconnect" data-v="${esc(d.id)}">${ic('devices')}<div class="txt"><div class="t">${esc(d.name)}</div><div class="s">${esc($t('accessory_connect'))}</div></div>${ic('chev','ch')}</button>`).join('');
+    const icon=accessoryState.model==='baseus-blade-2'?'powerbank':accessoryState.model==='edifier-w820nb-plus'?'headphones':'earbud';
+    if(Array.isArray(accessoryState.devices))list.innerHTML=accessoryState.devices.map(d=>`<button class="row press" data-act="accconnect" data-v="${esc(d.id)}">${ic(icon)}<div class="txt"><div class="t">${esc(d.name)}</div><div class="s">${esc($t('accessory_connect'))}</div></div>${ic('chev','ch')}</button>`).join('');
     const connected=accessoryState.status==='connected';controls.hidden=!connected;
     if(!connected)return;
     byId('accessoryName').textContent=accessoryState.name||'DeviceDeck';
+    byId('accessoryProfileIcon').innerHTML=ic(icon);
+    const isPower=accessoryState.model==='baseus-blade-2';
+    byId('accessoryBatteryRow').hidden=isPower;byId('accessoryNoiseRow').hidden=isPower;byId('accessoryNoiseSection').hidden=isPower;byId('accessoryPowerPanel').hidden=!isPower;
     byId('accessoryBattery').textContent=accessoryState.battery==null?'–':`${accessoryState.battery}%`;
     const noise=(accessoryModes[accessoryState.model]||[]).find(([id])=>id===accessoryState.noise);
     byId('accessoryNoise').textContent=noise?noise[1]:'–';
     const modes=byId('accessoryModes');
     modes.innerHTML=(accessoryModes[accessoryState.model]||[]).map(([id,title])=>`<button class="row press" role="radio" aria-checked="${id===accessoryState.noise}" data-act="accmode" data-v="${id}"><div class="txt"><div class="t">${esc(title)}</div></div>${id===accessoryState.noise?ic('check','ch'):ic('chev','ch')}</button>`).join('');
+    const power=accessoryState.power||{};
+    const metrics=Object.entries(power).map(([hex,value])=>{const code=parseInt(hex,16),label=powerMetricLabel(code);return label?`<div class="row"><div class="txt"><div class="t">${esc(label)}</div></div><span class="v">${esc(powerMetricValue(code,value))}</span></div>`:'';}).filter(Boolean).join('');
+    byId('accessoryPowerMetrics').innerHTML=metrics||`<div class="row"><div class="txt"><div class="s">${$t('device_hub_powerbank_waiting')}</div></div></div>`;
+    byId('accessoryPowerTheme').textContent=power['0020']?`${Number(power['0020'].value)+1}/3`:'–';
+    byId('accessoryPowerSaver').textContent=power['0022']?Number(power['0022'].value)===1?$t('device_hub_ready'):$t('device_hub_mode_off'):'–';
+    if(power['001E']&&document.activeElement!==byId('accessoryPowerReminder'))byId('accessoryPowerReminder').value=power['001E'].value;
+    if(power['001F']&&document.activeElement!==byId('accessoryPowerShutdown'))byId('accessoryPowerShutdown').value=power['001F'].value;
     pixelize(controls);
   }
   T.event.listen('accessory',e=>renderAccessory(e.payload));
