@@ -1,4 +1,4 @@
-//! Cross-brand BLE/GATT device hub for the existing DeviceDeck desktop app.
+//! Cross-brand Bluetooth device hub for the existing DeviceDeck desktop app.
 use btleplug::api::{Central, Manager as _, Peripheral as _, ScanFilter, WriteType};
 use btleplug::platform::{Manager, Peripheral};
 use futures::StreamExt;
@@ -21,6 +21,8 @@ enum Model {
     EdifierW820NbPlus,
     BaseusBowie30,
     BaseusBlade2,
+    BaseusEp10Pro,
+    BaseusBowieMf1,
 }
 
 impl Model {
@@ -29,6 +31,8 @@ impl Model {
             "edifier-w820nb-plus" => Ok(Self::EdifierW820NbPlus),
             "baseus-bowie-30" => Ok(Self::BaseusBowie30),
             "baseus-blade-2" => Ok(Self::BaseusBlade2),
+            "baseus-ep10-pro" => Ok(Self::BaseusEp10Pro),
+            "baseus-bowie-mf1" => Ok(Self::BaseusBowieMf1),
             _ => Err("Unsupported DeviceDeck BLE profile".into()),
         }
     }
@@ -37,6 +41,8 @@ impl Model {
             Self::EdifierW820NbPlus => "edifier-w820nb-plus",
             Self::BaseusBowie30 => "baseus-bowie-30",
             Self::BaseusBlade2 => "baseus-blade-2",
+            Self::BaseusEp10Pro => "baseus-ep10-pro",
+            Self::BaseusBowieMf1 => "baseus-bowie-mf1",
         }
     }
     fn name(self) -> &'static str {
@@ -44,12 +50,15 @@ impl Model {
             Self::EdifierW820NbPlus => "EDIFIER W820NB Plus",
             Self::BaseusBowie30 => "Baseus Bowie 30",
             Self::BaseusBlade2 => "Baseus Blade 2",
+            Self::BaseusEp10Pro => "Baseus EP10 Pro",
+            Self::BaseusBowieMf1 => "Baseus Bowie MF1",
         }
     }
     fn write_uuid(self) -> Uuid {
         Uuid::parse_str(match self {
             Self::EdifierW820NbPlus => EDIFIER_WRITE,
             Self::BaseusBowie30 | Self::BaseusBlade2 => BASEUS_WRITE,
+            Self::BaseusEp10Pro | Self::BaseusBowieMf1 => BASEUS_WRITE,
         })
         .unwrap()
     }
@@ -57,6 +66,7 @@ impl Model {
         Uuid::parse_str(match self {
             Self::EdifierW820NbPlus => EDIFIER_NOTIFY,
             Self::BaseusBowie30 | Self::BaseusBlade2 => BASEUS_NOTIFY,
+            Self::BaseusEp10Pro | Self::BaseusBowieMf1 => BASEUS_NOTIFY,
         })
         .unwrap()
     }
@@ -81,22 +91,140 @@ impl Model {
             ]
             .iter()
             .any(|n| name.eq_ignore_ascii_case(n)),
+            Self::BaseusEp10Pro | Self::BaseusBowieMf1 => false,
+        }
+    }
+
+    fn uses_spp(self) -> bool {
+        matches!(self, Self::BaseusEp10Pro | Self::BaseusBowieMf1)
+    }
+
+    fn matches_spp_name(self, name: &str) -> bool {
+        let name = name.to_ascii_lowercase();
+        match self {
+            Self::BaseusEp10Pro => {
+                name.contains("baseus") && name.contains("ep10") || name.contains("ep10 pro")
+            }
+            Self::BaseusBowieMf1 => name.contains("bowie mf1") || name.contains("baseus mf1"),
+            _ => false,
         }
     }
 }
 
 pub struct AccessoryHub {
     found: Mutex<HashMap<String, (Peripheral, Model, String)>>,
+    spp_found: Mutex<HashMap<String, (u64, Model, String)>>,
     session: tokio::sync::Mutex<Option<AccessorySession>>,
+    spp_session: tokio::sync::Mutex<Option<BaseusSppSession>>,
 }
 
 impl AccessoryHub {
     fn new() -> Self {
         Self {
             found: Mutex::new(HashMap::new()),
+            spp_found: Mutex::new(HashMap::new()),
             session: tokio::sync::Mutex::new(None),
+            spp_session: tokio::sync::Mutex::new(None),
         }
     }
+}
+
+struct BaseusSppSession {
+    model: Model,
+    link: crate::bt::Link,
+    buffer: Vec<u8>,
+    battery: Option<(u8, u8)>,
+    noise: Option<String>,
+    device_name: String,
+}
+
+impl BaseusSppSession {
+    fn request(&mut self, command: u8, payload: &[u8]) -> Result<Frame, String> {
+        let request = encode_baseus_spp_request(command, payload);
+        self.link.write(&request)?;
+        let deadline = std::time::Instant::now() + Duration::from_millis(2500);
+        let mut bytes = [0u8; 128];
+        while std::time::Instant::now() < deadline {
+            match self.link.read(&mut bytes)? {
+                0 => std::thread::sleep(Duration::from_millis(5)),
+                n => {
+                    if let Some(frame) = decode_baseus_stream(&mut self.buffer, &bytes[..n])
+                        .into_iter()
+                        .find(|frame| frame.command == command as u16)
+                    {
+                        return Ok(frame);
+                    }
+                }
+            }
+        }
+        Err(format!(
+            "Baseus headset did not answer command 0x{command:02X}"
+        ))
+    }
+
+    fn refresh(&mut self) -> Result<(), String> {
+        let battery = self.request(0x02, &[])?;
+        if battery.payload.len() != 4
+            || battery.payload[0] > 100
+            || battery.payload[1] != 0
+            || battery.payload[2] > 100
+            || battery.payload[3] != 1
+        {
+            return Err("Unrecognized Baseus battery response".into());
+        }
+        self.battery = Some((battery.payload[0], battery.payload[2]));
+        if self.model == Model::BaseusEp10Pro {
+            self.read_noise()?;
+        }
+        Ok(())
+    }
+
+    fn read_noise(&mut self) -> Result<(), String> {
+        let frame = self.request(0x33, &[])?;
+        self.noise = Some(
+            match frame.payload.first().copied() {
+                Some(0) => "off",
+                Some(1) => "anc",
+                Some(2) => "transparency",
+                _ => return Err("Unknown Baseus noise state".into()),
+            }
+            .into(),
+        );
+        Ok(())
+    }
+
+    fn set_noise(&mut self, mode: &str) -> Result<(), String> {
+        if self.model != Model::BaseusEp10Pro {
+            return Err("Noise controls are not mapped for this model".into());
+        }
+        let (wire_mode, wire_type) = match mode {
+            "off" => (0, 0xFF),
+            "anc" => (1, 101),
+            "transparency" => (2, 0xFF),
+            _ => return Err("Unsupported Baseus noise mode".into()),
+        };
+        let ack = self.request(0x34, &[wire_mode, wire_type])?;
+        if ack.payload.first() != Some(&1) {
+            return Err("Baseus rejected the noise mode".into());
+        }
+        self.read_noise()?;
+        if self.noise.as_deref() != Some(mode) {
+            return Err("Baseus noise mode did not match readback".into());
+        }
+        Ok(())
+    }
+
+    fn snapshot(&self, status: &str) -> Value {
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name,
+            "battery": self.battery.map(|(left, right)| json!({"left": left, "right": right})),
+            "noise": self.noise, "power": {} })
+    }
+}
+
+fn encode_baseus_spp_request(command: u8, payload: &[u8]) -> Vec<u8> {
+    let mut request = vec![0xBA, command];
+    request.extend_from_slice(payload);
+    request
 }
 
 pub fn start(app: &AppHandle) {
@@ -242,6 +370,9 @@ impl AccessorySession {
                 self.battery = None;
                 self.noise = None;
             }
+            Model::BaseusEp10Pro | Model::BaseusBowieMf1 => {
+                return Err("Baseus SPP profiles use the paired-device session".into());
+            }
         }
         Ok(())
     }
@@ -307,6 +438,9 @@ impl AccessorySession {
             }
             Model::BaseusBlade2 => {
                 return Err("Blade 2 is a power accessory; noise modes are not supported".into())
+            }
+            Model::BaseusEp10Pro | Model::BaseusBowieMf1 => {
+                return Err("Baseus SPP profiles use the paired-device session".into())
             }
         }
         Ok(())
@@ -544,10 +678,39 @@ pub async fn accessory_scan(
     model: String,
 ) -> Result<Value, String> {
     let model = Model::parse(&model)?;
+    hub.found.lock().unwrap().clear();
+    hub.spp_found.lock().unwrap().clear();
     emit(
         &app,
         json!({ "status": "scanning", "model": model.id(), "devices": [] }),
     );
+    if model.uses_spp() {
+        // RFCOMM services are not advertisements. Query the system's paired-device list,
+        // then let the model-specific SPP session validate that the service really answers.
+        let paired = tokio::task::spawn_blocking(crate::bt::paired)
+            .await
+            .map_err(|e| format!("Could not enumerate paired Bluetooth devices: {e}"))?;
+        let mut devices = Vec::new();
+        for device in paired {
+            if !model.matches_spp_name(&device.name) {
+                continue;
+            }
+            let id = format!("{:012X}", device.addr);
+            hub.spp_found
+                .lock()
+                .unwrap()
+                .insert(id.clone(), (device.addr, model, device.name.clone()));
+            devices.push(json!({ "id": id, "name": device.name }));
+        }
+        let status = if devices.is_empty() {
+            "not-found"
+        } else {
+            "found"
+        };
+        let result = json!({ "status": status, "model": model.id(), "devices": devices });
+        emit(&app, result.clone());
+        return Ok(result);
+    }
     let manager = Manager::new()
         .await
         .map_err(|e| format!("Bluetooth unavailable: {e}"))?;
@@ -610,6 +773,31 @@ pub async fn accessory_connect(
     hub: State<'_, AccessoryHub>,
     id: String,
 ) -> Result<Value, String> {
+    let spp = hub.spp_found.lock().unwrap().get(&id).cloned();
+    if let Some((addr, model, name)) = spp {
+        emit(
+            &app,
+            json!({ "status": "connecting", "model": model.id(), "name": name }),
+        );
+        *hub.session.lock().await = None;
+        *hub.spp_session.lock().await = None;
+        let link = tokio::task::spawn_blocking(move || crate::bt::connect(addr))
+            .await
+            .map_err(|e| format!("Could not start Bluetooth SPP connection: {e}"))??;
+        let mut session = BaseusSppSession {
+            model,
+            link,
+            buffer: Vec::new(),
+            battery: None,
+            noise: None,
+            device_name: name,
+        };
+        session.refresh()?;
+        let result = session.snapshot("connected");
+        *hub.spp_session.lock().await = Some(session);
+        emit(&app, result.clone());
+        return Ok(result);
+    }
     let (peripheral, model, name) = hub
         .found
         .lock()
@@ -622,6 +810,7 @@ pub async fn accessory_connect(
         json!({ "status": "connecting", "model": model.id(), "name": name }),
     );
     let mut active = hub.session.lock().await;
+    *hub.spp_session.lock().await = None;
     *active = None;
     if !peripheral.is_connected().await.unwrap_or(false) {
         peripheral
@@ -689,6 +878,14 @@ pub async fn accessory_refresh(
     app: AppHandle,
     hub: State<'_, AccessoryHub>,
 ) -> Result<Value, String> {
+    let mut spp = hub.spp_session.lock().await;
+    if let Some(session) = spp.as_mut() {
+        session.refresh()?;
+        let result = session.snapshot("connected");
+        emit(&app, result.clone());
+        return Ok(result);
+    }
+    drop(spp);
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.refresh().await?;
@@ -703,6 +900,14 @@ pub async fn accessory_set_noise(
     hub: State<'_, AccessoryHub>,
     mode: String,
 ) -> Result<Value, String> {
+    let mut spp = hub.spp_session.lock().await;
+    if let Some(session) = spp.as_mut() {
+        session.set_noise(&mode)?;
+        let result = session.snapshot("connected");
+        emit(&app, result.clone());
+        return Ok(result);
+    }
+    drop(spp);
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_noise(&mode).await?;
@@ -718,6 +923,9 @@ pub async fn accessory_set_power(
     code: u16,
     value: u16,
 ) -> Result<Value, String> {
+    if hub.spp_session.lock().await.is_some() {
+        return Err("Connected device is a headset, not a Blade 2 powerbank".into());
+    }
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     if session.model != Model::BaseusBlade2 {
@@ -735,6 +943,9 @@ pub async fn accessory_set_power_text(
     hub: State<'_, AccessoryHub>,
     text: String,
 ) -> Result<Value, String> {
+    if hub.spp_session.lock().await.is_some() {
+        return Err("Connected device is a headset, not a Blade 2 powerbank".into());
+    }
     let active = hub.session.lock().await;
     let session = active.as_ref().ok_or("No BLE device is connected")?;
     if session.model != Model::BaseusBlade2 {
@@ -752,6 +963,7 @@ pub async fn accessory_disconnect(
     app: AppHandle,
     hub: State<'_, AccessoryHub>,
 ) -> Result<(), String> {
+    hub.spp_session.lock().await.take();
     if let Some(session) = hub.session.lock().await.take() {
         session
             .peripheral
@@ -766,6 +978,26 @@ pub async fn accessory_disconnect(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn baseus_spp_profiles_match_paired_model_names() {
+        assert!(Model::parse("baseus-ep10-pro")
+            .unwrap()
+            .matches_spp_name("Baseus Bass EP10 Pro"));
+        assert!(Model::parse("baseus-ep10-pro")
+            .unwrap()
+            .matches_spp_name("EP10 Pro"));
+        assert!(Model::parse("baseus-bowie-mf1")
+            .unwrap()
+            .matches_spp_name("Baseus Bowie MF1"));
+        assert!(!Model::parse("baseus-bowie-mf1")
+            .unwrap()
+            .matches_spp_name("Baseus Bowie 30"));
+        assert_eq!(
+            encode_baseus_spp_request(0x34, &[1, 101]),
+            [0xBA, 0x34, 1, 101]
+        );
+    }
+
     #[test]
     fn edifier_decoder_handles_concatenated_valid_frames() {
         let a = encode_edifier_header(0xBB, &[0xD0]);
