@@ -148,7 +148,7 @@ class DeviceHubActivity : Activity() {
         bladeTextInput = EditText(this).apply {
             hint = getString(R.string.device_hub_powerbank_text_hint)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            singleLine = true
+            maxLines = 1
         }
         powerControls.addView(bladeTextInput)
         powerControls.addView(accessoryAction(getString(R.string.device_hub_powerbank_set_text), palette, dp) {
@@ -535,7 +535,7 @@ class DeviceHubActivity : Activity() {
     private fun timerInput(hintRes: Int): EditText = EditText(this).apply {
         hint = getString(hintRes)
         inputType = InputType.TYPE_CLASS_NUMBER
-        singleLine = true
+        maxLines = 1
     }
 
     private fun accessoryAction(label: String, palette: Palette, dp: (Float) -> Int, action: () -> Unit): TextView = TextView(this).apply {
