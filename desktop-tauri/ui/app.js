@@ -391,6 +391,8 @@ function buildWindow(){
       <select class="field" id="accessoryModel" aria-label="${$t('accessory_choose_model')}">
         <option value="edifier-w820nb-plus">EDIFIER W820NB Plus</option>
         <option value="baseus-bowie-30">Baseus Bowie 30</option>
+        <option value="baseus-ep10-pro">Baseus EP10 Pro</option>
+        <option value="baseus-bowie-mf1">Baseus Bowie MF1</option>
         <option value="baseus-blade-2">Baseus Blade 2</option>
       </select>
       <div class="ph"><span class="s" id="accessoryStatus" aria-live="polite" style="flex:1;margin:0">${$t('accessory_no_devices')}</span><button class="btn pri press" data-act="accscan">${$t('accessory_scan')}</button></div>
@@ -902,6 +904,7 @@ if(window.__TAURI__){
   const accessoryModes={
     'edifier-w820nb-plus':[['off',$t('device_hub_mode_off')],['anc',$t('anc_seg_anc')],['transparency',$t('device_hub_mode_transparency')]],
     'baseus-bowie-30':[['off',$t('device_hub_mode_off')],['commute',$t('device_hub_mode_commute')],['indoor',$t('device_hub_mode_indoor')],['outdoor',$t('device_hub_mode_outdoor')],['transparency',$t('device_hub_mode_transparency')]],
+    'baseus-ep10-pro':[['off',$t('device_hub_mode_off')],['anc',$t('anc_seg_anc')],['transparency',$t('device_hub_mode_transparency')]],
   };
   const powerMetricLabel=code=>{
     if(code>=1&&code<=12){const port=(code<=3||code>=7&&code<=9)?'USB-C 1':'USB-C 2',dir=code<=6?'OUT':'IN',metric=['voltage','current','power'][(code-1)%3];return `${port} ${dir} ${metric}`;}
@@ -924,8 +927,10 @@ if(window.__TAURI__){
     byId('accessoryName').textContent=accessoryState.name||'DeviceDeck';
     byId('accessoryProfileIcon').innerHTML=ic(icon);
     const isPower=accessoryState.model==='baseus-blade-2';
-    byId('accessoryBatteryRow').hidden=isPower;byId('accessoryNoiseRow').hidden=isPower;byId('accessoryNoiseSection').hidden=isPower;byId('accessoryPowerPanel').hidden=!isPower;
-    byId('accessoryBattery').textContent=accessoryState.battery==null?'–':`${accessoryState.battery}%`;
+    const hasNoise=(accessoryModes[accessoryState.model]||[]).length>0;
+    byId('accessoryBatteryRow').hidden=isPower;byId('accessoryNoiseRow').hidden=isPower||!hasNoise;byId('accessoryNoiseSection').hidden=isPower||!hasNoise;byId('accessoryPowerPanel').hidden=!isPower;
+    const battery=accessoryState.battery;
+    byId('accessoryBattery').textContent=battery==null?'–':(typeof battery==='object'?`L ${battery.left}% · R ${battery.right}%`:`${battery}%`);
     const noise=(accessoryModes[accessoryState.model]||[]).find(([id])=>id===accessoryState.noise);
     byId('accessoryNoise').textContent=noise?noise[1]:'–';
     const modes=byId('accessoryModes');

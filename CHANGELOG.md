@@ -1,5 +1,7 @@
 # Changelog
 
+- Windows/Linux: add Baseus EP10 Pro battery and Off/ANC/Transparency controls over paired RFCOMM/SPP in DeviceDeck's existing cross-brand hub; add battery-only Bowie MF1 SPP profile. Noise writes require acknowledgement and mode readback. Hardware validation remains pending.
+
 ## 0.1.0-alpha.5
 
 - Windows/Linux: add Baseus Blade 2 as a power accessory in DeviceDeck's existing shared device hub, with telemetry, screen theme/saver, display text, reminder and shutdown controls.
