@@ -13,16 +13,22 @@ import android.widget.TextView
 import com.spizganed.quickbuds.R
 import com.spizganed.quickbuds.bluetooth.BaseusBowie30Session
 import com.spizganed.quickbuds.bluetooth.BleGattScanner
+import com.spizganed.quickbuds.bluetooth.EdifierW820NbPlusSession
 import com.spizganed.quickbuds.bluetooth.DeviceGattProfiles
 
 /** One in-app home for cross-brand accessory sessions. More device profiles are added here. */
 class DeviceHubActivity : Activity() {
+    private enum class DeviceKind { BASEUS_BOWIE_30, EDIFIER_W820NB_PLUS }
     private val handler = Handler(Looper.getMainLooper())
     private var scanner: BleGattScanner? = null
-    private var session: BaseusBowie30Session? = null
+    private var baseusSession: BaseusBowie30Session? = null
+    private var edifierSession: EdifierW820NbPlusSession? = null
+    private var selectedDevice = DeviceKind.BASEUS_BOWIE_30
     private var foundDevice: BluetoothDevice? = null
     private var ready = false
     private var currentState = BaseusBowie30Session.State()
+    private var edifierState = EdifierW820NbPlusSession.State()
+    private lateinit var deviceName: TextView
     private lateinit var status: TextView
     private lateinit var battery: TextView
     private lateinit var noise: TextView
@@ -32,7 +38,7 @@ class DeviceHubActivity : Activity() {
     private var seenAny = false
 
     private val scanTimeout = Runnable {
-        if (!seenAny && session == null) status.setText(R.string.device_hub_none)
+        if (!seenAny && baseusSession == null && edifierSession == null) status.setText(R.string.device_hub_none)
         scanButton.isEnabled = true
         scanButton.setText(R.string.device_hub_scan)
     }
@@ -55,12 +61,13 @@ class DeviceHubActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16f), dp(14f), dp(16f), dp(14f))
         }
-        card.addView(TextView(this).apply {
+        deviceName = TextView(this).apply {
             text = "Baseus Bowie 30"
             textSize = 18f
             typeface = ThemeRes.medium(this@DeviceHubActivity)
             setTextColor(palette.text)
-        })
+        }
+        card.addView(deviceName)
         status = TextView(this).apply {
             setText(R.string.device_hub_scan)
             textSize = 14f
@@ -97,6 +104,22 @@ class DeviceHubActivity : Activity() {
             setPadding(0, dp(12f), 0, 0)
         })
         root.addView(card)
+
+        val devicePicker = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        listOf(DeviceKind.BASEUS_BOWIE_30 to "Bowie 30", DeviceKind.EDIFIER_W820NB_PLUS to "W820NB Plus").forEachIndexed { index, (kind, label) ->
+            devicePicker.addView(TextView(this).apply {
+                text = label
+                textSize = 14f
+                gravity = Gravity.CENTER
+                setPadding(dp(12f), dp(12f), dp(12f), dp(12f))
+                setTextColor(palette.text)
+                background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { selectDevice(kind) }
+            }, LinearLayout.LayoutParams(0, -2, 1f).apply { if (index > 0) marginStart = dp(8f) })
+        }
+        root.addView(devicePicker, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10f) })
 
         deviceRow = TextView(this).apply {
             textSize = 15f
@@ -157,8 +180,8 @@ class DeviceHubActivity : Activity() {
                         if (active) p.accent else p.card, if (active) null else p.outline, 14f))
                     isClickable = true
                     isFocusable = true
-                    isEnabled = ready && currentState.noise != null
-                    setOnClickListener { session?.setNoise(mode) }
+                    isEnabled = ready && currentState.noise != null && selectedDevice == DeviceKind.BASEUS_BOWIE_30
+                    setOnClickListener { baseusSession?.setNoise(mode) }
                 }, LinearLayout.LayoutParams(0, dp(44f), 1f).apply {
                     if (index > 0) marginStart = dp(5f)
                     if (rowIndex > 0) topMargin = dp(6f)
@@ -170,8 +193,7 @@ class DeviceHubActivity : Activity() {
 
     private fun startScan() {
         scanner?.stop()
-        session?.close()
-        session = null
+        closeSessions()
         foundDevice = null
         ready = false
         seenAny = false
@@ -182,10 +204,11 @@ class DeviceHubActivity : Activity() {
         status.setText(R.string.device_hub_scanning)
         scanButton.isEnabled = false
         scanButton.setText(R.string.device_hub_scanning)
-        val profile = DeviceGattProfiles.baseusShared.copy(
-            displayName = "Baseus Bowie 30",
-            acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"),
-        )
+        val profile = when (selectedDevice) {
+            DeviceKind.BASEUS_BOWIE_30 -> DeviceGattProfiles.baseusShared.copy(
+                displayName = "Baseus Bowie 30", acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"))
+            DeviceKind.EDIFIER_W820NB_PLUS -> DeviceGattProfiles.edifierW820NbPlus
+        }
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
             override fun onDevice(device: BluetoothDevice, profile: com.spizganed.quickbuds.bluetooth.DeviceGattProfile) {
                 if (foundDevice != null) return
@@ -212,44 +235,102 @@ class DeviceHubActivity : Activity() {
 
     private fun connect(device: BluetoothDevice) {
         scanner?.stop()
-        session?.close()
+        closeSessions()
         ready = false
         deviceRow.visibility = View.GONE
         status.text = "Connecting…"
         scanButton.isEnabled = false
         scanButton.setText(R.string.device_hub_scanning)
-        session = BaseusBowie30Session(this, device, object : BaseusBowie30Session.Listener {
+        if (selectedDevice == DeviceKind.BASEUS_BOWIE_30) connectBaseus(device) else connectEdifier(device)
+    }
+
+    private fun connectBaseus(device: BluetoothDevice) {
+        baseusSession = BaseusBowie30Session(this, device, object : BaseusBowie30Session.Listener {
             override fun onState(state: BaseusBowie30Session.State) {
                 currentState = state
-                battery.text = state.leftBattery?.let { left ->
-                    "${getString(R.string.device_hub_battery)}  ·  L $left%   R ${state.rightBattery ?: "—"}%"
-                } ?: getString(R.string.device_hub_battery)
+                battery.text = state.leftBattery?.let { "${getString(R.string.device_hub_battery)}  ·  L $it%   R ${state.rightBattery ?: "—"}%" }
+                    ?: getString(R.string.device_hub_battery)
                 battery.visibility = if (state.leftBattery == null) View.GONE else View.VISIBLE
                 noise.text = "Noise control  ·  ${state.noise?.let(::noiseLabel) ?: "—"}"
                 noise.visibility = if (state.noise == null) View.GONE else View.VISIBLE
                 renderModes()
             }
-
             override fun onStatus(text: String) { status.text = text }
-            override fun onReady() {
-                ready = true
-                controls.visibility = View.VISIBLE
-                status.setText(R.string.device_hub_ready)
-                scanButton.isEnabled = true
-                scanButton.setText(R.string.device_hub_refresh)
-                scanButton.setOnClickListener { session?.refresh() }
-                renderModes()
-            }
-            override fun onClosed(reason: String) {
-                ready = false
-                controls.visibility = View.GONE
-                status.text = reason
-                scanButton.isEnabled = true
-                scanButton.setText(R.string.device_hub_scan)
-                scanButton.setOnClickListener { startScan() }
-                renderModes()
-            }
+            override fun onReady() = connected()
+            override fun onClosed(reason: String) = disconnected(reason)
         })
+    }
+
+    private fun connectEdifier(device: BluetoothDevice) {
+        edifierSession = EdifierW820NbPlusSession(this, device, object : EdifierW820NbPlusSession.Listener {
+            override fun onState(state: EdifierW820NbPlusSession.State) {
+                edifierState = state
+                battery.text = state.batteryPercent?.let { "${getString(R.string.device_hub_battery)}  ·  $it%" } ?: getString(R.string.device_hub_battery)
+                battery.visibility = if (state.batteryPercent == null) View.GONE else View.VISIBLE
+                noise.text = "Noise control  ·  ${state.noise?.title ?: "—"}"
+                noise.visibility = if (state.noise == null) View.GONE else View.VISIBLE
+                renderModes()
+            }
+            override fun onStatus(text: String) { status.text = text }
+            override fun onReady() = connected()
+            override fun onClosed(reason: String) = disconnected(reason)
+        })
+    }
+
+    private fun connected() {
+        ready = true
+        controls.visibility = View.VISIBLE
+        status.setText(R.string.device_hub_ready)
+        scanButton.isEnabled = true
+        scanButton.setText(R.string.device_hub_refresh)
+        scanButton.setOnClickListener { baseusSession?.refresh() ?: edifierSession?.refresh() }
+        renderModes()
+    }
+
+    private fun disconnected(reason: String) {
+        ready = false
+        controls.visibility = View.GONE
+        status.text = reason
+        scanButton.isEnabled = true
+        scanButton.setText(R.string.device_hub_scan)
+        scanButton.setOnClickListener { startScan() }
+        renderModes()
+    }
+
+    private fun closeSessions() {
+        baseusSession?.close(); baseusSession = null
+        edifierSession?.close(); edifierSession = null
+    }
+
+    private fun selectDevice(kind: DeviceKind) {
+        if (selectedDevice == kind) return
+        scanner?.stop(); closeSessions()
+        selectedDevice = kind
+        foundDevice = null; ready = false
+        currentState = BaseusBowie30Session.State(); edifierState = EdifierW820NbPlusSession.State()
+        deviceName.text = if (kind == DeviceKind.BASEUS_BOWIE_30) "Baseus Bowie 30" else "EDIFIER W820NB Plus"
+        deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE
+        if (kind == DeviceKind.BASEUS_BOWIE_30) addModes(controls, BaseusBowie30Session.Noise.entries)
+        else addEdifierModes()
+        battery.visibility = View.GONE; noise.visibility = View.GONE
+        status.setText(R.string.device_hub_scan)
+        scanButton.setText(R.string.device_hub_scan); scanButton.setOnClickListener { startScan() }
+        renderModes()
+    }
+
+    private fun addEdifierModes() {
+        val p = ThemeRes.palette(this)
+        EdifierW820NbPlusSession.Noise.entries.forEachIndexed { index, mode ->
+            controls.addView(TextView(this).apply {
+                text = mode.title; textSize = 13f; gravity = Gravity.CENTER
+                setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+                setTextColor(p.text); isClickable = true; isFocusable = true
+                background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                setOnClickListener { edifierSession?.setNoise(mode) }
+            }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, -2).apply {
+                if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f)
+            })
+        }
     }
 
     private fun noiseLabel(mode: BaseusBowie30Session.Noise): String = when (mode) {
@@ -262,6 +343,19 @@ class DeviceHubActivity : Activity() {
 
     private fun renderModes() {
         if (!::controls.isInitialized) return
+        if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
+            for (index in 0 until controls.childCount) {
+                val chip = controls.getChildAt(index) as? TextView ?: continue
+                val mode = EdifierW820NbPlusSession.Noise.entries.getOrNull(index) ?: continue
+                val palette = ThemeRes.palette(this)
+                val selected = edifierState.noise == mode
+                chip.setTextColor(if (selected) ThemeRes.onFill(this) else palette.text)
+                chip.background = ThemeRes.ripple(this, ThemeRes.shape(this, if (selected) palette.accent else palette.card,
+                    if (selected) null else palette.outline, 14f))
+                chip.isEnabled = ready && edifierState.noise != null
+            }
+            return
+        }
         for (row in 0 until controls.childCount) {
             val rowView = controls.getChildAt(row) as? LinearLayout ?: continue
             for (column in 0 until rowView.childCount) {
@@ -281,7 +375,7 @@ class DeviceHubActivity : Activity() {
     override fun onDestroy() {
         handler.removeCallbacks(scanTimeout)
         scanner?.stop()
-        session?.close()
+        closeSessions()
         super.onDestroy()
     }
 }
