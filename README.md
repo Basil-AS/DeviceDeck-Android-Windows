@@ -40,7 +40,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-Android and Windows/Linux are at 0.1.0-alpha.4. Android adds Baseus EP10 Pro battery/noise controls and Bowie MF1 battery readings over Bluetooth SPP, plus illustrations in the unified accessory hub. Device behavior remains unverified on physical hardware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
+Android and Windows/Linux are at 0.1.0-alpha.5. DeviceDeck keeps Edifier and Baseus products in one shared device hub; Windows/Linux adds Baseus Blade 2 power telemetry and screen/timer controls. Device behavior remains unverified on physical hardware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |
