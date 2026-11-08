@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.BluetoothStatusCodes
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
@@ -159,7 +160,7 @@ class BleGattLink private constructor(
             BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE else BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
         state = State.ENABLING_NOTIFICATIONS
         val started = if (Build.VERSION.SDK_INT >= 33) {
-            gatt.writeDescriptor(cccd, value) == BluetoothGatt.GATT_SUCCESS
+            gatt.writeDescriptor(cccd, value) == BluetoothStatusCodes.SUCCESS
         } else {
             @Suppress("DEPRECATION")
             cccd.value = value
