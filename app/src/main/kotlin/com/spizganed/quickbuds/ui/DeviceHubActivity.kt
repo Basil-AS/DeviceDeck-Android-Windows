@@ -41,6 +41,7 @@ class DeviceHubActivity : Activity() {
     private var edifierState = EdifierW820NbPlusSession.State()
     private var blade2State = BaseusBlade2Session.State()
     private lateinit var deviceName: TextView
+    private lateinit var deviceIllustration: ImageView
     private lateinit var status: TextView
     private lateinit var battery: TextView
     private lateinit var noise: TextView
@@ -80,6 +81,12 @@ class DeviceHubActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16f), dp(14f), dp(16f), dp(14f))
         }
+        deviceIllustration = ImageView(this).apply {
+            setImageResource(R.drawable.ic_device_earbuds)
+            contentDescription = getString(R.string.device_hub_earbuds_illustration)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+        card.addView(deviceIllustration, LinearLayout.LayoutParams(dp(72f), dp(60f)).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = dp(6f) })
         deviceName = TextView(this).apply {
             text = "Baseus Bowie 30"
             textSize = 18f
@@ -464,6 +471,17 @@ class DeviceHubActivity : Activity() {
             DeviceKind.EDIFIER_W820NB_PLUS -> "EDIFIER W820NB Plus"
             DeviceKind.BASEUS_EP10_PRO -> "Baseus EP10 Pro"
             DeviceKind.BASEUS_BOWIE_MF1 -> "Baseus Bowie MF1"
+        }
+        val illustration = when (kind) {
+            DeviceKind.BASEUS_BOWIE_30, DeviceKind.BASEUS_EP10_PRO -> R.drawable.ic_device_earbuds
+            DeviceKind.BASEUS_BOWIE_MF1, DeviceKind.EDIFIER_W820NB_PLUS -> R.drawable.ic_device_headphones
+            DeviceKind.BASEUS_BLADE_2 -> R.drawable.ic_baseus_blade2
+        }
+        deviceIllustration.setImageResource(illustration)
+        deviceIllustration.contentDescription = when (kind) {
+            DeviceKind.BASEUS_BOWIE_30, DeviceKind.BASEUS_EP10_PRO -> getString(R.string.device_hub_earbuds_illustration)
+            DeviceKind.BASEUS_BOWIE_MF1, DeviceKind.EDIFIER_W820NB_PLUS -> getString(R.string.device_hub_headphones_illustration)
+            DeviceKind.BASEUS_BLADE_2 -> getString(R.string.device_hub_powerbank_illustration)
         }
         deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE
         if (kind == DeviceKind.BASEUS_BOWIE_30) addModes(controls, BaseusBowie30Session.Noise.entries)

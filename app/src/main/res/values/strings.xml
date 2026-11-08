@@ -8,6 +8,9 @@
     <string name="device_hub_scan_hint" translatable="false">Keep the device nearby and awake. DeviceDeck controls it in this app.</string>
     <string name="device_hub_spp_pair_hint" translatable="false">Pair this headset in Android Bluetooth settings, then tap Scan again.</string>
     <string name="device_hub_spp_found" translatable="false">Paired SPP device found · tap its row to connect</string>
+    <string name="device_hub_earbuds_illustration" translatable="false">Wireless earbuds</string>
+    <string name="device_hub_headphones_illustration" translatable="false">Over-ear headphones</string>
+    <string name="device_hub_powerbank_illustration" translatable="false">Baseus Blade 2 power bank</string>
     <string name="device_hub_battery" translatable="false">Battery</string>
     <string name="device_hub_ready" translatable="false">Connected</string>
     <string name="device_hub_verified_note" translatable="false">Command mapping comes from the vendor app and still needs a hardware check.</string>
