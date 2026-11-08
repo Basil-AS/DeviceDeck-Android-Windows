@@ -1,10 +1,11 @@
 //! RFCOMM link to the buds. Windows: Winsock Bluetooth, built into Windows (no driver, no service).
 //! Linux: BlueZ (D-Bus for the paired list, kernel RFCOMM socket, channel from the buds' SDP record).
 
-/// 079A first: the one Buds 4 answers. 1107 for other models.
-const SPP_UUIDS: [u128; 2] = [
+/// Vendor services used by inherited realme devices, followed by the standard SPP service used by Baseus.
+const SPP_UUIDS: [u128; 3] = [
     0x0000079A_D102_11E1_9B23_00025B00A5A5,
     0x00001107_D102_11E1_9B23_00025B00A5A5,
+    0x00001101_0000_1000_8000_00805F9B34FB,
 ];
 
 pub struct Device {
@@ -12,7 +13,7 @@ pub struct Device {
     pub name: String,
     /// The system has an ACL link to it (audio connected).
     pub connected: bool,
-    /// It offers one of [SPP_UUIDS] (the system's cached service list): the vendor's control service.
+    /// It offers one of [SPP_UUIDS] (the system's cached service list): a supported control service.
     pub vendor: bool,
 }
 
@@ -213,7 +214,7 @@ mod imp {
         }
     }
 
-    /// "0000079a-d102-11e1-9b23-00025b00a5a5" (BlueZ's form, any case) is one of [SPP_UUIDS].
+    /// A Bluetooth service UUID in BlueZ's format (any case) is one of [SPP_UUIDS].
     fn is_vendor_uuid(s: &str) -> bool {
         let hex: String = s.chars().filter(|c| c.is_ascii_hexdigit()).collect();
         u128::from_str_radix(&hex, 16).is_ok_and(|u| SPP_UUIDS.contains(&u))
@@ -319,6 +320,7 @@ mod imp {
         fn vendor_uuids() {
             assert!(is_vendor_uuid("0000079a-d102-11e1-9b23-00025b00a5a5"));
             assert!(is_vendor_uuid("{00001107-D102-11E1-9B23-00025B00A5A5}"));
+            assert!(is_vendor_uuid("00001101-0000-1000-8000-00805f9b34fb"));
             assert!(!is_vendor_uuid("0000110b-0000-1000-8000-00805f9b34fb"));
         }
 
