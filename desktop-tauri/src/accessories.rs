@@ -33,7 +33,7 @@ impl Model {
             "baseus-blade-2" => Ok(Self::BaseusBlade2),
             "baseus-ep10-pro" => Ok(Self::BaseusEp10Pro),
             "baseus-bowie-mf1" => Ok(Self::BaseusBowieMf1),
-            _ => Err("Unsupported DeviceDeck BLE profile".into()),
+            _ => Err("Unsupported DeviceDeck device profile".into()),
         }
     }
     fn id(self) -> &'static str {
