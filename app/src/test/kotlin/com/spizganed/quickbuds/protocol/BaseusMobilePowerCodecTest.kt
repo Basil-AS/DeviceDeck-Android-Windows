@@ -38,7 +38,7 @@ class BaseusMobilePowerCodecTest {
         val parsed = decoder.feed(frame.copyOfRange(5, frame.size)).single()
         assertEquals(0x000D, parsed.code)
         assertEquals(100, parsed.value)
-        assertEquals(100.0, parsed.scaled(), 0.0)
+        assertEquals(100.0, parsed.scaled()!!, 0.0)
 
         val damaged = frame.copyOf().also { it[8] = 99 }
         assertNull(BaseusMobilePowerCodec.decodeStatus(damaged))
