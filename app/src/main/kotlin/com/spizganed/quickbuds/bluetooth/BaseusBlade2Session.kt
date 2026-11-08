@@ -26,6 +26,12 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
     private var ready = false
     private var state = State()
     private val profile = DeviceGattProfiles.baseusBlade2
+    private val isBlade2_140 = try {
+        device.name?.contains("140", ignoreCase = true) == true
+    } catch (_: SecurityException) {
+        // If Android withholds BLUETOOTH_CONNECT, don't infer the 140-only feature set.
+        false
+    }
     private val link = BleGattLink.connect(context, device, profile, object : BleGattLink.Listener {
         override fun onReady(mtu: Int) {
             ready = true
@@ -82,7 +88,7 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
         codes += listOf(0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x001E, 0x001F, 0x0020, 0x0022, 0x0023)
         // The app requests these only on its Blade 2-140 branch; don't probe them
         // on the regular Blade 2 profile by inference.
-        if (device.name?.contains("140", ignoreCase = true) == true) {
+        if (isBlade2_140) {
             codes += listOf(0x0024, 0x0025, 0x0026)
             codes += 0x0028..0x002D
             codes += 0x0031..0x0036
