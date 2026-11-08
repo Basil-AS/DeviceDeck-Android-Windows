@@ -10,24 +10,31 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.EditText
+import android.widget.ImageView
+import android.text.InputType
 import com.spizganed.quickbuds.R
 import com.spizganed.quickbuds.bluetooth.BaseusBowie30Session
+import com.spizganed.quickbuds.bluetooth.BaseusBlade2Session
 import com.spizganed.quickbuds.bluetooth.BleGattScanner
 import com.spizganed.quickbuds.bluetooth.EdifierW820NbPlusSession
 import com.spizganed.quickbuds.bluetooth.DeviceGattProfiles
+import com.spizganed.quickbuds.protocol.baseus.BaseusMobilePowerCodec
 
 /** One in-app home for cross-brand accessory sessions. More device profiles are added here. */
 class DeviceHubActivity : Activity() {
-    private enum class DeviceKind { BASEUS_BOWIE_30, EDIFIER_W820NB_PLUS }
+    private enum class DeviceKind { BASEUS_BOWIE_30, BASEUS_BLADE_2, EDIFIER_W820NB_PLUS }
     private val handler = Handler(Looper.getMainLooper())
     private var scanner: BleGattScanner? = null
     private var baseusSession: BaseusBowie30Session? = null
     private var edifierSession: EdifierW820NbPlusSession? = null
+    private var blade2Session: BaseusBlade2Session? = null
     private var selectedDevice = DeviceKind.BASEUS_BOWIE_30
     private var foundDevice: BluetoothDevice? = null
     private var ready = false
     private var currentState = BaseusBowie30Session.State()
     private var edifierState = EdifierW820NbPlusSession.State()
+    private var blade2State = BaseusBlade2Session.State()
     private lateinit var deviceName: TextView
     private lateinit var status: TextView
     private lateinit var battery: TextView
@@ -35,6 +42,13 @@ class DeviceHubActivity : Activity() {
     private lateinit var controls: LinearLayout
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
+    private lateinit var powerControls: LinearLayout
+    private lateinit var powerMetrics: TextView
+    private lateinit var bladeTheme: TextView
+    private lateinit var bladeSaver: TextView
+    private lateinit var bladeTextInput: EditText
+    private lateinit var bladeReminderInput: EditText
+    private lateinit var bladeShutdownInput: EditText
     private var seenAny = false
 
     private val scanTimeout = Runnable {
@@ -97,6 +111,60 @@ class DeviceHubActivity : Activity() {
         addModes(controls, listOf(BaseusBowie30Session.Noise.OFF, BaseusBowie30Session.Noise.COMMUTE,
             BaseusBowie30Session.Noise.INDOOR, BaseusBowie30Session.Noise.OUTDOOR, BaseusBowie30Session.Noise.TRANSPARENCY))
         card.addView(controls)
+
+        powerControls = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            setPadding(0, dp(8f), 0, 0)
+        }
+        powerControls.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_baseus_blade2)
+            contentDescription = "Baseus Blade 2 power bank"
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }, LinearLayout.LayoutParams(dp(76f), dp(90f)).apply { gravity = Gravity.CENTER_HORIZONTAL })
+        powerMetrics = TextView(this).apply {
+            textSize = 13f
+            setTextColor(palette.text)
+            typeface = android.graphics.Typeface.MONOSPACE
+            setText(R.string.device_hub_powerbank_waiting)
+            setPadding(0, dp(8f), 0, dp(8f))
+        }
+        powerControls.addView(powerMetrics)
+        bladeTheme = TextView(this).apply {
+            setText(R.string.device_hub_powerbank_theme)
+            styleAccessoryAction(this, palette, dp)
+            setOnClickListener { blade2Session?.setTheme(((blade2State.values[0x0020]?.value ?: -1) + 1).mod(3)) }
+        }
+        powerControls.addView(bladeTheme)
+        bladeSaver = TextView(this).apply {
+            setText(R.string.device_hub_powerbank_saver)
+            styleAccessoryAction(this, palette, dp)
+            setOnClickListener {
+                val enabled = blade2State.values[0x0022]?.value ?: 0
+                blade2Session?.setScreenSaver(enabled == 0)
+            }
+        }
+        powerControls.addView(bladeSaver)
+        bladeTextInput = EditText(this).apply {
+            hint = getString(R.string.device_hub_powerbank_text_hint)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            singleLine = true
+        }
+        powerControls.addView(bladeTextInput)
+        powerControls.addView(accessoryAction(getString(R.string.device_hub_powerbank_set_text), palette, dp) {
+            blade2Session?.setScreenText(bladeTextInput.text.toString())
+        })
+        bladeReminderInput = timerInput(R.string.device_hub_powerbank_reminder_hint)
+        powerControls.addView(bladeReminderInput)
+        powerControls.addView(accessoryAction(getString(R.string.device_hub_powerbank_set_reminder), palette, dp) {
+            blade2Session?.setCountdown(0x001E, bladeReminderInput.text.toString().toIntOrNull() ?: -1)
+        })
+        bladeShutdownInput = timerInput(R.string.device_hub_powerbank_shutdown_hint)
+        powerControls.addView(bladeShutdownInput)
+        powerControls.addView(accessoryAction(getString(R.string.device_hub_powerbank_set_shutdown), palette, dp) {
+            blade2Session?.setCountdown(0x001F, bladeShutdownInput.text.toString().toIntOrNull() ?: -1)
+        })
+        card.addView(powerControls)
         card.addView(TextView(this).apply {
             setText(R.string.device_hub_verified_note)
             textSize = 12f
@@ -106,7 +174,7 @@ class DeviceHubActivity : Activity() {
         root.addView(card)
 
         val devicePicker = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        listOf(DeviceKind.BASEUS_BOWIE_30 to "Bowie 30", DeviceKind.EDIFIER_W820NB_PLUS to "W820NB Plus").forEachIndexed { index, (kind, label) ->
+        listOf(DeviceKind.BASEUS_BOWIE_30 to "Bowie 30", DeviceKind.BASEUS_BLADE_2 to "Blade 2", DeviceKind.EDIFIER_W820NB_PLUS to "W820NB Plus").forEachIndexed { index, (kind, label) ->
             devicePicker.addView(TextView(this).apply {
                 text = label
                 textSize = 14f
@@ -201,12 +269,14 @@ class DeviceHubActivity : Activity() {
         controls.visibility = View.GONE
         battery.visibility = View.GONE
         noise.visibility = View.GONE
+        powerControls.visibility = View.GONE
         status.setText(R.string.device_hub_scanning)
         scanButton.isEnabled = false
         scanButton.setText(R.string.device_hub_scanning)
         val profile = when (selectedDevice) {
             DeviceKind.BASEUS_BOWIE_30 -> DeviceGattProfiles.baseusShared.copy(
                 displayName = "Baseus Bowie 30", acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"))
+            DeviceKind.BASEUS_BLADE_2 -> DeviceGattProfiles.baseusBlade2
             DeviceKind.EDIFIER_W820NB_PLUS -> DeviceGattProfiles.edifierW820NbPlus
         }
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
@@ -241,7 +311,11 @@ class DeviceHubActivity : Activity() {
         status.text = "Connecting…"
         scanButton.isEnabled = false
         scanButton.setText(R.string.device_hub_scanning)
-        if (selectedDevice == DeviceKind.BASEUS_BOWIE_30) connectBaseus(device) else connectEdifier(device)
+        when (selectedDevice) {
+            DeviceKind.BASEUS_BOWIE_30 -> connectBaseus(device)
+            DeviceKind.BASEUS_BLADE_2 -> connectBlade2(device)
+            DeviceKind.EDIFIER_W820NB_PLUS -> connectEdifier(device)
+        }
     }
 
     private fun connectBaseus(device: BluetoothDevice) {
@@ -277,19 +351,37 @@ class DeviceHubActivity : Activity() {
         })
     }
 
+    private fun connectBlade2(device: BluetoothDevice) {
+        blade2Session = BaseusBlade2Session(this, device, object : BaseusBlade2Session.Listener {
+            override fun onState(state: BaseusBlade2Session.State) {
+                blade2State = state
+                renderBlade2(state)
+            }
+            override fun onStatus(text: String) { status.text = text }
+            override fun onReady() = connected()
+            override fun onClosed(reason: String) = disconnected(reason)
+        })
+    }
+
     private fun connected() {
         ready = true
-        controls.visibility = View.VISIBLE
+        controls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2) View.GONE else View.VISIBLE
+        powerControls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2) View.VISIBLE else View.GONE
         status.setText(R.string.device_hub_ready)
         scanButton.isEnabled = true
         scanButton.setText(R.string.device_hub_refresh)
-        scanButton.setOnClickListener { baseusSession?.refresh() ?: edifierSession?.refresh() }
+        scanButton.setOnClickListener { when (selectedDevice) {
+            DeviceKind.BASEUS_BOWIE_30 -> baseusSession?.refresh()
+            DeviceKind.BASEUS_BLADE_2 -> blade2Session?.refresh()
+            DeviceKind.EDIFIER_W820NB_PLUS -> edifierSession?.refresh()
+        } }
         renderModes()
     }
 
     private fun disconnected(reason: String) {
         ready = false
         controls.visibility = View.GONE
+        powerControls.visibility = View.GONE
         status.text = reason
         scanButton.isEnabled = true
         scanButton.setText(R.string.device_hub_scan)
@@ -300,6 +392,7 @@ class DeviceHubActivity : Activity() {
     private fun closeSessions() {
         baseusSession?.close(); baseusSession = null
         edifierSession?.close(); edifierSession = null
+        blade2Session?.close(); blade2Session = null
     }
 
     private fun selectDevice(kind: DeviceKind) {
@@ -308,10 +401,16 @@ class DeviceHubActivity : Activity() {
         selectedDevice = kind
         foundDevice = null; ready = false
         currentState = BaseusBowie30Session.State(); edifierState = EdifierW820NbPlusSession.State()
-        deviceName.text = if (kind == DeviceKind.BASEUS_BOWIE_30) "Baseus Bowie 30" else "EDIFIER W820NB Plus"
+        blade2State = BaseusBlade2Session.State()
+        deviceName.text = when (kind) {
+            DeviceKind.BASEUS_BOWIE_30 -> "Baseus Bowie 30"
+            DeviceKind.BASEUS_BLADE_2 -> "Baseus Blade 2"
+            DeviceKind.EDIFIER_W820NB_PLUS -> "EDIFIER W820NB Plus"
+        }
         deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE
         if (kind == DeviceKind.BASEUS_BOWIE_30) addModes(controls, BaseusBowie30Session.Noise.entries)
-        else addEdifierModes()
+        else if (kind == DeviceKind.EDIFIER_W820NB_PLUS) addEdifierModes()
+        powerControls.visibility = View.GONE
         battery.visibility = View.GONE; noise.visibility = View.GONE
         status.setText(R.string.device_hub_scan)
         scanButton.setText(R.string.device_hub_scan); scanButton.setOnClickListener { startScan() }
@@ -343,6 +442,7 @@ class DeviceHubActivity : Activity() {
 
     private fun renderModes() {
         if (!::controls.isInitialized) return
+        if (selectedDevice == DeviceKind.BASEUS_BLADE_2) return
         if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
             for (index in 0 until controls.childCount) {
                 val chip = controls.getChildAt(index) as? TextView ?: continue
@@ -370,6 +470,88 @@ class DeviceHubActivity : Activity() {
                 chip.isEnabled = ready && currentState.noise != null
             }
         }
+    }
+
+    private fun renderBlade2(state: BaseusBlade2Session.State) {
+        if (!::powerMetrics.isInitialized) return
+        val entries = state.values.toSortedMap().mapNotNull { (code, value) ->
+            val label = powerMetricLabel(code) ?: return@mapNotNull null
+            val shown = when (code) {
+                0x000D, 0x0025 -> "${value.value - 100} °C"
+                0x0010 -> "0x${value.value.toString(16).uppercase().padStart(4, '0')}"
+                0x0012 -> "#${value.value}"
+                0x0023, 0x0024 -> "${value.value}"
+                else -> value.scaled()?.let { "${"%.2f".format(java.util.Locale.ROOT, it)} ${powerMetricUnit(code)}" } ?: "${value.value} (raw)"
+            }
+            "$label  ·  $shown"
+        }
+        powerMetrics.text = entries.joinToString("\n").ifEmpty { getString(R.string.device_hub_powerbank_waiting) }
+        val theme = state.values[0x0020]?.value
+        bladeTheme.text = getString(R.string.device_hub_powerbank_theme) + "  ·  " + (theme?.let { "${it + 1}/3" } ?: "—")
+        val saver = state.values[0x0022]?.value
+        bladeSaver.text = getString(R.string.device_hub_powerbank_saver) + "  ·  " + when (saver) {
+            0 -> getString(R.string.device_hub_mode_off)
+            1 -> getString(R.string.device_hub_ready)
+            else -> "—"
+        }
+        state.values[0x001E]?.let { if (!bladeReminderInput.hasFocus()) bladeReminderInput.setText(it.value.toString()) }
+        state.values[0x001F]?.let { if (!bladeShutdownInput.hasFocus()) bladeShutdownInput.setText(it.value.toString()) }
+    }
+
+    private fun powerMetricLabel(code: Int): String? = when (code) {
+        in 0x0001..0x000C -> {
+            val port = if (code in 1..3 || code in 7..9) "USB-C 1" else "USB-C 2"
+            val direction = if (code in 1..6) "OUT" else "IN"
+            val metric = when ((code - 1) % 3) { 0 -> "voltage"; 1 -> "current"; else -> "power" }
+            "$port $direction $metric"
+        }
+        0x000D -> "Temperature"
+        0x0010 -> "Power status flags"
+        0x0011 -> "Error code"
+        0x0012 -> "Negotiated protocol"
+        0x0013 -> "Module status"
+        0x0014 -> "Energy (app-scaled)"
+        0x0015 -> "Remaining time"
+        0x0016 -> "Charge time"
+        0x001E -> getString(R.string.device_hub_powerbank_reminder)
+        0x001F -> getString(R.string.device_hub_powerbank_shutdown)
+        0x0023 -> "Module version"
+        0x0024 -> "DC module version"
+        0x0025 -> "Cell temperature"
+        0x0026 -> "Cell cycles"
+        in 0x0028..0x002D -> "Cell ${code - 0x0027} voltage"
+        in 0x0031..0x0036 -> "Cell ${code - 0x0030} current"
+        else -> null
+    }
+
+    private fun powerMetricUnit(code: Int): String = when (code) {
+        in 0x0001..0x000C -> when ((code - 1) % 3) { 0 -> "V"; 1 -> "A"; else -> "W" }
+        0x0015, 0x0016, 0x001E, 0x001F -> "min"
+        in 0x0028..0x002D -> "mV"
+        in 0x0031..0x0036 -> "mA"
+        else -> "raw/scale"
+    }
+
+    private fun timerInput(hintRes: Int): EditText = EditText(this).apply {
+        hint = getString(hintRes)
+        inputType = InputType.TYPE_CLASS_NUMBER
+        singleLine = true
+    }
+
+    private fun accessoryAction(label: String, palette: Palette, dp: (Float) -> Int, action: () -> Unit): TextView = TextView(this).apply {
+        text = label
+        styleAccessoryAction(this, palette, dp)
+        setOnClickListener { action() }
+    }
+
+    private fun styleAccessoryAction(view: TextView, palette: Palette, dp: (Float) -> Int) {
+        view.textSize = 13f
+        view.gravity = Gravity.CENTER
+        view.setTextColor(palette.text)
+        view.setPadding(dp(10f), dp(11f), dp(10f), dp(11f))
+        view.background = ThemeRes.ripple(this, ThemeRes.card(this, 14f))
+        view.isClickable = true
+        view.isFocusable = true
     }
 
     override fun onDestroy() {

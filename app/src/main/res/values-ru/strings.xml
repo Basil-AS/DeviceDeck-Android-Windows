@@ -2,10 +2,10 @@
 <!-- Machine-drafted translation (2026-09-27). Keys follow values/strings.xml. -->
 <resources>
     <string name="device_hub_title" translatable="false">Другие устройства</string>
-    <string name="device_hub_scan" translatable="false">Найти Baseus Bowie 30</string>
+    <string name="device_hub_scan" translatable="false">Найти устройство</string>
     <string name="device_hub_scanning" translatable="false">Поиск поблизости…</string>
     <string name="device_hub_refresh" translatable="false">Обновить статус</string>
-    <string name="device_hub_scan_hint" translatable="false">Держите наушники рядом и включёнными. Управление доступно в DeviceDeck.</string>
+    <string name="device_hub_scan_hint" translatable="false">Держите устройство рядом и включённым. Управляйте им в DeviceDeck.</string>
     <string name="device_hub_battery" translatable="false">Заряд</string>
     <string name="device_hub_ready" translatable="false">Подключено</string>
     <string name="device_hub_verified_note" translatable="false">Команды извлечены из приложения производителя; работу нужно проверить на наушниках.</string>
@@ -15,6 +15,17 @@
     <string name="device_hub_mode_outdoor" translatable="false">Улица</string>
     <string name="device_hub_mode_off" translatable="false">Выкл.</string>
     <string name="device_hub_mode_transparency" translatable="false">Прозрачность</string>
+    <string name="device_hub_powerbank_waiting" translatable="false">Ожидание данных Blade 2…</string>
+    <string name="device_hub_powerbank_theme" translatable="false">Тема экрана</string>
+    <string name="device_hub_powerbank_saver" translatable="false">Заставка экрана</string>
+    <string name="device_hub_powerbank_text_hint" translatable="false">Текст для экрана</string>
+    <string name="device_hub_powerbank_set_text" translatable="false">Отправить текст на экран</string>
+    <string name="device_hub_powerbank_reminder_hint" translatable="false">Таймер напоминания · минуты (0–1440)</string>
+    <string name="device_hub_powerbank_set_reminder" translatable="false">Установить напоминание</string>
+    <string name="device_hub_powerbank_shutdown_hint" translatable="false">Автоотключение · минуты (0–1440)</string>
+    <string name="device_hub_powerbank_set_shutdown" translatable="false">Установить автоотключение</string>
+    <string name="device_hub_powerbank_reminder" translatable="false">Таймер напоминания</string>
+    <string name="device_hub_powerbank_shutdown" translatable="false">Автоотключение</string>
     <string name="accessory_title" translatable="false">Другие устройства</string>
     <string name="accessory_choose_model" translatable="false">Выберите устройство</string>
     <string name="accessory_scan" translatable="false">Найти устройства</string>

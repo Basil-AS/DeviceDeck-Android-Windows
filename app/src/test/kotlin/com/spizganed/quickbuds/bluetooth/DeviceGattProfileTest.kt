@@ -25,4 +25,14 @@ class DeviceGattProfileTest {
         assertTrue(profile.matchesName("Blade 2-140"))
         assertFalse(profile.matchesName("Baseus Power Bank"))
     }
+
+    @Test fun blade2ProfileUsesTheSharedTransportButOnlyBlade2Names() {
+        val profile = DeviceGattProfiles.baseusBlade2
+        assertEquals(DeviceGattProfiles.baseusShared.service, profile.service)
+        assertEquals(DeviceGattProfiles.baseusShared.write, profile.write)
+        assertEquals(DeviceGattProfiles.baseusShared.notify, profile.notify)
+        assertTrue(profile.matchesName("Baseus Blade 2-140"))
+        assertTrue(profile.matchesName("Blade 2"))
+        assertFalse(profile.matchesName("Baseus Bowie 30"))
+    }
 }
