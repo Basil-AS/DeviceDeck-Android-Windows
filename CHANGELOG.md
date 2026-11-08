@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.5
+
+- Windows/Linux: add Baseus Blade 2 as a power accessory in DeviceDeck's existing shared device hub, with telemetry, screen theme/saver, display text, reminder and shutdown controls.
+- Desktop numeric settings require readback; custom display text is reported as sent because the inspected protocol does not provide a text readback.
+- Hardware behavior still needs round-trip validation on Blade 2 and Blade 2-140.
+
 ## 0.1.0-alpha.4
 
 - Android: add Baseus EP10 Pro SPP battery and Off/ANC/Transparency controls, with acknowledgement and readback; add Bowie MF1 left/right battery readings over SPP in the same DeviceDeck device hub.
