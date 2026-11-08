@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-drafted translation (2026-09-27). Keys follow values/strings.xml. -->
 <resources>
+    <string name="device_hub_title" translatable="false">Другие устройства</string>
+    <string name="device_hub_scan" translatable="false">Найти Baseus Bowie 30</string>
+    <string name="device_hub_scanning" translatable="false">Поиск поблизости…</string>
+    <string name="device_hub_refresh" translatable="false">Обновить статус</string>
+    <string name="device_hub_scan_hint" translatable="false">Держите наушники рядом и включёнными. Управление доступно в DeviceDeck.</string>
+    <string name="device_hub_battery" translatable="false">Заряд</string>
+    <string name="device_hub_ready" translatable="false">Подключено</string>
+    <string name="device_hub_verified_note" translatable="false">Команды извлечены из приложения производителя; работу нужно проверить на наушниках.</string>
+    <string name="device_hub_none" translatable="false">Устройство не найдено. Включите Bluetooth и попробуйте ещё раз.</string>
+    <string name="device_hub_mode_commute" translatable="false">Поездка</string>
+    <string name="device_hub_mode_indoor" translatable="false">Помещение</string>
+    <string name="device_hub_mode_outdoor" translatable="false">Улица</string>
+    <string name="device_hub_mode_off" translatable="false">Выкл.</string>
+    <string name="device_hub_mode_transparency" translatable="false">Прозрачность</string>
     <string name="action_dev_tools">Инструменты разработчика</string>
     <string name="desktop_nav_overview">Обзор</string>
     <string name="desktop_nav_app_settings">Настройки приложения</string>
