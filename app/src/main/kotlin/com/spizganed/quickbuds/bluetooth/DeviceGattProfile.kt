@@ -40,4 +40,10 @@ object DeviceGattProfiles {
         notify = UUID.fromString("654B749C-E37F-AE1F-EBAB-40CA133E3690"),
         acceptedNames = setOf("Baseus Bowie 30", "Bowie 30", "Baseus Blade 2", "Blade 2", "Blade 2-140"),
     )
+
+    val baseusBlade2 = baseusShared.copy(
+        id = "baseus:blade-2",
+        displayName = "Baseus Blade 2",
+        acceptedNames = setOf("Baseus Blade 2", "Blade 2", "Blade 2-140", "Baseus Blade 2-140"),
+    )
 }
