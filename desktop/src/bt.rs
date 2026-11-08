@@ -5,8 +5,9 @@
 const SPP_UUIDS: [u128; 3] = [
     0x0000079A_D102_11E1_9B23_00025B00A5A5,
     0x00001107_D102_11E1_9B23_00025B00A5A5,
-    0x00001101_0000_1000_8000_00805F9B34FB,
+    STANDARD_SPP_UUID,
 ];
+pub const STANDARD_SPP_UUID: u128 = 0x00001101_0000_1000_8000_00805F9B34FB;
 
 pub struct Device {
     pub addr: u64,
@@ -17,7 +18,7 @@ pub struct Device {
     pub vendor: bool,
 }
 
-pub use imp::{bring_up, connect, paired, Link};
+pub use imp::{bring_up, connect, connect_service, paired, Link};
 
 #[cfg(windows)]
 mod imp {
@@ -119,12 +120,21 @@ mod imp {
         }
     }
 
-    pub fn connect(addr: u64) -> Result<Link, String> {
+    fn startup() {
         static WSA: std::sync::Once = std::sync::Once::new();
         WSA.call_once(|| unsafe {
             let mut wsa: WSADATA = zeroed();
             WSAStartup(0x0202, &mut wsa);
         });
+    }
+
+    pub fn connect_service(addr: u64, uuid: u128) -> Result<Link, String> {
+        startup();
+        connect_uuid(addr, uuid)
+    }
+
+    pub fn connect(addr: u64) -> Result<Link, String> {
+        startup();
         let mut last = String::new();
         for uuid in SPP_UUIDS {
             match connect_uuid(addr, uuid) {
@@ -299,6 +309,10 @@ mod imp {
         }
         set_timeout(fd, 50);
         Ok(link)
+    }
+
+    pub fn connect_service(addr: u64, uuid: u128) -> Result<Link, String> {
+        connect_uuid(addr, uuid)
     }
 
     pub fn connect(addr: u64) -> Result<Link, String> {

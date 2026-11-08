@@ -781,9 +781,11 @@ pub async fn accessory_connect(
         );
         *hub.session.lock().await = None;
         *hub.spp_session.lock().await = None;
-        let link = tokio::task::spawn_blocking(move || crate::bt::connect(addr))
-            .await
-            .map_err(|e| format!("Could not start Bluetooth SPP connection: {e}"))??;
+        let link = tokio::task::spawn_blocking(move || {
+            crate::bt::connect_service(addr, crate::bt::STANDARD_SPP_UUID)
+        })
+        .await
+        .map_err(|e| format!("Could not start Bluetooth SPP connection: {e}"))??;
         let mut session = BaseusSppSession {
             model,
             link,
