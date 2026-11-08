@@ -2,7 +2,7 @@
 
 # DeviceDeck
 
-**An alternative to HeyMelody and realme Link for your OnePlus, OPPO and realme earbuds.**
+**One cross-platform control app for headphones, earbuds and Bluetooth accessories.**
 
 Android · Windows · Linux
 
@@ -14,8 +14,7 @@ Android · Windows · Linux
 
 </div>
 
-DeviceDeck is an open-source alternative to HeyMelody and realme Link. It talks to supported devices over
-Bluetooth. It is an early fork build; the requested Edifier W820NB Plus and Baseus device features are not complete.
+DeviceDeck is one application per platform. Edifier, realme, Baseus and other vendor devices appear as profiles in the same app and release channel. Device features vary by model and firmware; the umbrella [support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md) tracks what is implemented and what still needs device testing.
 
 ## Supported earbuds
 
@@ -41,7 +40,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-The Android and Windows/Linux version is 0.1.0-alpha.3. It adds initial Edifier W820NB Plus and Baseus Bowie 30 controls across Android and Windows/Linux, plus Baseus Blade 2/Blade 2-140 power telemetry and display settings on Android. Device behavior is not yet verified on physical hardware, and several model features remain incomplete; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair devices in system Bluetooth settings first; DeviceDeck connects to paired devices but does not pair them.
+Android and Windows/Linux are at 0.1.0-alpha.4. Android adds Baseus EP10 Pro battery/noise controls and Bowie MF1 battery readings over Bluetooth SPP, plus illustrations in the unified accessory hub. Device behavior remains unverified on physical hardware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |
