@@ -6,6 +6,8 @@
     <string name="device_hub_scanning" translatable="false">Поиск поблизости…</string>
     <string name="device_hub_refresh" translatable="false">Обновить статус</string>
     <string name="device_hub_scan_hint" translatable="false">Держите устройство рядом и включённым. Управляйте им в DeviceDeck.</string>
+    <string name="device_hub_spp_pair_hint" translatable="false">Сначала подключите наушники в настройках Bluetooth Android, затем нажмите «Найти устройство».</string>
+    <string name="device_hub_spp_found" translatable="false">Наушники сопряжены · нажмите строку, чтобы подключиться</string>
     <string name="device_hub_battery" translatable="false">Заряд</string>
     <string name="device_hub_ready" translatable="false">Подключено</string>
     <string name="device_hub_verified_note" translatable="false">Команды извлечены из приложения производителя; работу нужно проверить на наушниках.</string>
