@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add an isolated Edifier frame encoder, checksum validator and streaming decoder for the vendor AA/BB/CC framing. This is protocol infrastructure only; no Android BLE transport, W820NB Plus controls, or hardware verification is included yet.
+
 ## 0.1.0-alpha.2
 
 - Windows/Linux desktop known-issues page now warns that the realme Buds Air 7 Pro spatial-audio toggle may not produce a spatial effect, based on the documented device report.

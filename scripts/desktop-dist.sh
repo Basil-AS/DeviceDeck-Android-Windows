@@ -28,21 +28,39 @@ fi
 
 # Linux. QB_NATIVE=1 builds in place, for CI, which already runs in Ubuntu 24.04 with the packages of the Containerfile.
 build='cargo tauri build --bundles appimage'
-if [ -n "${QB_NATIVE:-}" ]; then
-  (cd "$app" && CARGO_TARGET_DIR=target/ubuntu22 APPIMAGE_EXTRACT_AND_RUN=1 NO_STRIP=1 $build)
-else
-  img=quickbuds-build:tauri
-  want=$(sha256sum "$root/scripts/desktop-build.Containerfile" | cut -c1-12)
-  [ "$(podman image inspect -f '{{index .Labels "cf"}}' "$img" 2>/dev/null)" = "$want" ] ||
-    podman build -q -t "$img" --label "cf=$want" -f "$root/scripts/desktop-build.Containerfile" "$root/scripts" >/dev/null
-  podman run --rm --userns=keep-id -v "$root:/repo" -v quickbuds-cargo:/cargo-reg -w /repo/desktop-tauri --user root \
-    -e CARGO_HOME=/cargo-reg -e CARGO_TARGET_DIR=/repo/desktop-tauri/target/ubuntu22 -e APPIMAGE_EXTRACT_AND_RUN=1 -e NO_STRIP=1 \
-    "$img" bash -c '
-      set -e
-      export PATH=/cargo/bin:$PATH
-      '"$build"'
-      chown -R '"$(id -u):$(id -g)"' /repo/desktop-tauri/target/ubuntu22 /cargo-reg'
-fi
+build_linux() {
+  if [ -n "${QB_NATIVE:-}" ]; then
+    (cd "$app" && CARGO_TARGET_DIR=target/ubuntu22 APPIMAGE_EXTRACT_AND_RUN=1 NO_STRIP=1 $build)
+  else
+    img=quickbuds-build:tauri
+    want=$(sha256sum "$root/scripts/desktop-build.Containerfile" | cut -c1-12)
+    [ "$(podman image inspect -f '{{index .Labels "cf"}}' "$img" 2>/dev/null)" = "$want" ] ||
+      podman build -q -t "$img" --label "cf=$want" -f "$root/scripts/desktop-build.Containerfile" "$root/scripts" >/dev/null
+    podman run --rm --userns=keep-id -v "$root:/repo" -v quickbuds-cargo:/cargo-reg -w /repo/desktop-tauri --user root \
+      -e CARGO_HOME=/cargo-reg -e CARGO_TARGET_DIR=/repo/desktop-tauri/target/ubuntu22 -e APPIMAGE_EXTRACT_AND_RUN=1 -e NO_STRIP=1 \
+      "$img" bash -c '
+        set -e
+        export PATH=/cargo/bin:$PATH
+        '"$build"'
+        chown -R '"$(id -u):$(id -g)"' /repo/desktop-tauri/target/ubuntu22 /cargo-reg'
+  fi
+}
+
+# Tauri downloads AppRun while bundling. Retry the packaging step for transient
+# upstream errors (e.g. GitHub Assets returning HTTP 504), keeping the build failure
+# visible if all attempts fail.
+max_attempts=3
+for attempt in $(seq 1 "$max_attempts"); do
+  if build_linux; then
+    break
+  fi
+  if [ "$attempt" -eq "$max_attempts" ]; then
+    echo "AppImage packaging failed after $max_attempts attempts." >&2
+    exit 1
+  fi
+  echo "AppImage packaging attempt $attempt failed; retrying in $((attempt * 10))s." >&2
+  sleep $((attempt * 10))
+done
 cp "$app"/target/ubuntu22/release/bundle/appimage/*.AppImage "$dist/DeviceDeck-linux-x64.AppImage"
 if [ -n "${winpid:-}" ]; then wait "$winpid" || { cat "$winlog"; exit 1; }; tail -2 "$winlog"; fi
 ls -la "$dist"
