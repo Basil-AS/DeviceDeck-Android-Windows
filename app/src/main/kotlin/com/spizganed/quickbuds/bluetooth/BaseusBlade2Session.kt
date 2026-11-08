@@ -80,8 +80,13 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
         val codes = mutableListOf<Int>()
         codes += 0x0001..0x000D
         codes += listOf(0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x001E, 0x001F, 0x0020, 0x0022, 0x0023)
-        // These codes are called out only for Blade 2-140; don't probe them by inference.
-        if (device.name?.contains("140", ignoreCase = true) == true) codes += listOf(0x0024, 0x0025, 0x0026)
+        // The app requests these only on its Blade 2-140 branch; don't probe them
+        // on the regular Blade 2 profile by inference.
+        if (device.name?.contains("140", ignoreCase = true) == true) {
+            codes += listOf(0x0024, 0x0025, 0x0026)
+            codes += 0x0028..0x002D
+            codes += 0x0031..0x0036
+        }
         codes.forEach(::read)
     }
 
