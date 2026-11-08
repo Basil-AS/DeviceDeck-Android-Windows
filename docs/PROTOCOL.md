@@ -1229,3 +1229,8 @@ The writes are `0x0408`, `0x0414`, `0x0419`, `0x041D`, `0x041F`, `0x042B`, `0x04
 - Other models' ANC bits, gesture writes and `[VENDOR]` features: unverified until an owner reads a write back.
 
 **Code:** `protocol/Commands.kt` (hold mask, level form), `protocol/Anc.kt`, `protocol/Gestures.kt`; `core/src/msg.rs`.
+# Edifier framing (Android foundation)
+
+`app/src/main/kotlin/com/spizganed/quickbuds/protocol/edifier/EdifierFrameCodec.kt` implements the observed frame envelope used by the Edifier vendor client: `header | payload length | payload | 16-bit checksum`. Host frames begin with `0xAA`; device state and acknowledgement frames use `0xBB` and `0xCC`. The checksum is an additive 16-bit sum seeded with `0x2019`, not a CRC. The codec accepts fragmented and concatenated byte streams and resynchronizes after invalid candidates.
+
+Evidence: algorithm and framing were transcribed from the locally supplied open-source mEDIFIER client source archive. The unit vectors are calculated from that implementation, not captured from a physical W820NB Plus. This codec only establishes framing; it does not establish command availability, model compatibility, BLE transport behavior, or working controls. See the umbrella repository's research and support matrix for device-specific evidence.
