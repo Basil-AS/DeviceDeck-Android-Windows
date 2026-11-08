@@ -337,6 +337,12 @@ class MainActivity : Activity(), BudsConnectionManager.Listener {
                 if (ThemeRes.material(this@MainActivity)) R.attr.appColorTextSecondary else R.attr.appColorAccent)))
             setOnClickListener { startActivity(Intent(this@MainActivity, ModelActivity::class.java)) }
         }
+        findViewById<ImageButton>(R.id.btnDevices).apply {
+            background = ThemeRes.ripple(this@MainActivity, ThemeRes.iconButton(this@MainActivity))
+            setImageDrawable(ThemeRes.tint(this@MainActivity, R.drawable.ic_devices, ThemeRes.color(this@MainActivity,
+                if (ThemeRes.material(this@MainActivity)) R.attr.appColorTextSecondary else R.attr.appColorAccent)))
+            setOnClickListener { startActivity(Intent(this@MainActivity, DeviceHubActivity::class.java)) }
+        }
         showModelName()
         btnSettings = findViewById<ImageButton>(R.id.btnSettings)
         btnDevTools = findViewById<ImageButton>(R.id.btnDevTools)

@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">DeviceDeck</string>
+    <string name="device_hub_title" translatable="false">More devices</string>
+    <string name="device_hub_scan" translatable="false">Scan for Baseus Bowie 30</string>
+    <string name="device_hub_scanning" translatable="false">Scanning nearby…</string>
+    <string name="device_hub_refresh" translatable="false">Refresh status</string>
+    <string name="device_hub_scan_hint" translatable="false">Keep the headphones nearby and awake. DeviceDeck controls them in this app.</string>
+    <string name="device_hub_battery" translatable="false">Battery</string>
+    <string name="device_hub_ready" translatable="false">Connected</string>
+    <string name="device_hub_verified_note" translatable="false">Command mapping comes from the vendor app and still needs a hardware check.</string>
+    <string name="device_hub_none" translatable="false">No supported device found. Make sure Bluetooth is on and try again.</string>
+    <string name="device_hub_mode_commute" translatable="false">Commute</string>
+    <string name="device_hub_mode_indoor" translatable="false">Indoor</string>
+    <string name="device_hub_mode_outdoor" translatable="false">Outdoor</string>
+    <string name="device_hub_mode_off" translatable="false">Off</string>
+    <string name="device_hub_mode_transparency" translatable="false">Transparency</string>
 
     <!-- Device title shown before the buds report their name. -->
     <string name="default_device_name" translatable="false">OnePlus Buds 4</string>

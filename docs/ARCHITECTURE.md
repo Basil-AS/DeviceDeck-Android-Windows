@@ -28,7 +28,7 @@ The device is the source of truth; DeviceDeck is a local control interface.
 
 ## Connections and protocols
 
-The current Android and desktop device-control screens implement the inherited OPPO/realme protocol. Android's `app/.../protocol/` contains the Kotlin codec and feature-sync engine. The Android source now also has a generic, name-gated GATT link and catalogued Edifier/Baseus GATT endpoint profiles; these are transport infrastructure only and are not yet routed into the user-facing device flow. The desktop uses `core/` and platform link code. Other vendors require their own protocol session and controls; do not route an Edifier or Baseus device through OPPO framing merely because an app database lists it.
+The current primary Android and desktop device-control screens implement the inherited OPPO/realme protocol. Android's `app/.../protocol/` contains the Kotlin codec and feature-sync engine. The Android app also has a shared GATT link and catalogued Edifier/Baseus endpoint profiles. The in-app **More devices** hub now connects to Baseus Bowie 30 and offers battery status plus Off/Commute/Indoor/Outdoor/Transparency controls with ACK and readback; these commands are sourced from the vendor app but are not hardware-verified. Edifier and Blade 2 still have transport profiles only, without device sessions or controls. The desktop uses `core/` and platform link code. Other vendors require their own protocol session and controls; do not route an Edifier or Baseus device through OPPO framing merely because an app database lists it.
 
 ## Reports, privacy and updates
 
