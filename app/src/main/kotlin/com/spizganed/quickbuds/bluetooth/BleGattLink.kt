@@ -308,13 +308,13 @@ class BleGattScanner private constructor(
             val device = result.device ?: return
             val advertisedName = result.scanRecord?.deviceName ?: runCatching { device.name }.getOrNull()
             if (!profile.matchesName(advertisedName)) return
-            main.post {
+            handler.post {
                 if (running && seen.add(device.address)) listener.onDevice(device, profile)
             }
         }
 
         override fun onScanFailed(errorCode: Int) {
-            main.post {
+            handler.post {
                 stop()
                 listener.onScanError("Bluetooth LE scan failed (code $errorCode)")
             }
