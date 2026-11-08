@@ -15,6 +15,16 @@
     <string name="device_hub_mode_outdoor" translatable="false">Улица</string>
     <string name="device_hub_mode_off" translatable="false">Выкл.</string>
     <string name="device_hub_mode_transparency" translatable="false">Прозрачность</string>
+    <string name="accessory_title" translatable="false">Другие устройства</string>
+    <string name="accessory_choose_model" translatable="false">Выберите устройство</string>
+    <string name="accessory_scan" translatable="false">Найти устройства</string>
+    <string name="accessory_scanning" translatable="false">Поиск поблизости…</string>
+    <string name="accessory_no_devices" translatable="false">Поддерживаемое устройство не найдено. Включите его и повторите поиск.</string>
+    <string name="accessory_connect" translatable="false">Подключить</string>
+    <string name="accessory_refresh" translatable="false">Обновить состояние</string>
+    <string name="accessory_disconnect" translatable="false">Отключить</string>
+    <string name="accessory_battery" translatable="false">Заряд</string>
+    <string name="accessory_noise" translatable="false">Шумоподавление</string>
     <string name="action_dev_tools">Инструменты разработчика</string>
     <string name="desktop_nav_overview">Обзор</string>
     <string name="desktop_nav_app_settings">Настройки приложения</string>
