@@ -183,6 +183,7 @@ class DeviceHubActivity : Activity() {
         scanButton.isEnabled = false
         scanButton.setText(R.string.device_hub_scanning)
         val profile = DeviceGattProfiles.baseusShared.copy(
+            displayName = "Baseus Bowie 30",
             acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"),
         )
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
@@ -190,7 +191,7 @@ class DeviceHubActivity : Activity() {
                 if (foundDevice != null) return
                 seenAny = true
                 foundDevice = device
-                deviceRow.text = "${device.name ?: profile.displayName}  ·  ${getString(R.string.conn_action_connect)}"
+                deviceRow.text = "${profile.displayName}  ·  ${getString(R.string.conn_action_connect)}"
                 deviceRow.visibility = View.VISIBLE
                 status.text = "Device found · tap its row to connect"
                 scanner?.stop()
