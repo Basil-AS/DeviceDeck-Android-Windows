@@ -233,7 +233,7 @@ class BleGattLink private constructor(
             BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT else BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
         writePending = true
         val started = if (Build.VERSION.SDK_INT >= 33) {
-            link.writeCharacteristic(characteristic, bytes, writeType) == BluetoothGatt.GATT_SUCCESS
+            link.writeCharacteristic(characteristic, bytes, writeType) == BluetoothStatusCodes.SUCCESS
         } else {
             @Suppress("DEPRECATION")
             characteristic.writeType = writeType
