@@ -41,7 +41,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-The current app version is 0.1.0-alpha.2. It is an early DeviceDeck fork build; support for the requested Edifier and Baseus models is not complete. Pair devices in system Bluetooth settings first; DeviceDeck connects to paired devices but does not pair them.
+The Android and Windows/Linux version is 0.1.0-alpha.3. It adds initial Edifier W820NB Plus and Baseus Bowie 30 controls across Android and Windows/Linux, plus Baseus Blade 2/Blade 2-140 power telemetry and display settings on Android. Device behavior is not yet verified on physical hardware, and several model features remain incomplete; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair devices in system Bluetooth settings first; DeviceDeck connects to paired devices but does not pair them.
 
 | Platform | How |
 | --- | --- |

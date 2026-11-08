@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">DeviceDeck</string>
+    <string name="device_hub_title" translatable="false">More devices</string>
+    <string name="device_hub_scan" translatable="false">Scan for device</string>
+    <string name="device_hub_scanning" translatable="false">Scanning nearby…</string>
+    <string name="device_hub_refresh" translatable="false">Refresh status</string>
+    <string name="device_hub_scan_hint" translatable="false">Keep the device nearby and awake. DeviceDeck controls it in this app.</string>
+    <string name="device_hub_battery" translatable="false">Battery</string>
+    <string name="device_hub_ready" translatable="false">Connected</string>
+    <string name="device_hub_verified_note" translatable="false">Command mapping comes from the vendor app and still needs a hardware check.</string>
+    <string name="device_hub_none" translatable="false">No supported device found. Make sure Bluetooth is on and try again.</string>
+    <string name="device_hub_mode_commute" translatable="false">Commute</string>
+    <string name="device_hub_mode_indoor" translatable="false">Indoor</string>
+    <string name="device_hub_mode_outdoor" translatable="false">Outdoor</string>
+    <string name="device_hub_mode_off" translatable="false">Off</string>
+    <string name="device_hub_mode_transparency" translatable="false">Transparency</string>
+    <string name="device_hub_powerbank_waiting" translatable="false">Waiting for Blade 2 telemetry…</string>
+    <string name="device_hub_powerbank_theme" translatable="false">Screen theme</string>
+    <string name="device_hub_powerbank_saver" translatable="false">Screen saver</string>
+    <string name="device_hub_powerbank_text_hint" translatable="false">Text for the display</string>
+    <string name="device_hub_powerbank_set_text" translatable="false">Send display text</string>
+    <string name="device_hub_powerbank_reminder_hint" translatable="false">Reminder timer · minutes (0–1440)</string>
+    <string name="device_hub_powerbank_set_reminder" translatable="false">Set reminder timer</string>
+    <string name="device_hub_powerbank_shutdown_hint" translatable="false">Auto shutdown · minutes (0–1440)</string>
+    <string name="device_hub_powerbank_set_shutdown" translatable="false">Set auto shutdown</string>
+    <string name="device_hub_powerbank_reminder" translatable="false">Reminder timer</string>
+    <string name="device_hub_powerbank_shutdown" translatable="false">Auto shutdown</string>
+    <string name="accessory_title" translatable="false">More devices</string>
+    <string name="accessory_choose_model" translatable="false">Choose a device</string>
+    <string name="accessory_scan" translatable="false">Scan for devices</string>
+    <string name="accessory_scanning" translatable="false">Scanning nearby…</string>
+    <string name="accessory_no_devices" translatable="false">No supported device found. Wake it and try again.</string>
+    <string name="accessory_connect" translatable="false">Connect</string>
+    <string name="accessory_refresh" translatable="false">Refresh status</string>
+    <string name="accessory_disconnect" translatable="false">Disconnect</string>
+    <string name="accessory_battery" translatable="false">Battery</string>
+    <string name="accessory_noise" translatable="false">Noise control</string>
 
     <!-- Device title shown before the buds report their name. -->
     <string name="default_device_name" translatable="false">OnePlus Buds 4</string>
