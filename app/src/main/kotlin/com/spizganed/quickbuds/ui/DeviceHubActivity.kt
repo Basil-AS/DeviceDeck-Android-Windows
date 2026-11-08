@@ -1,7 +1,9 @@
 package com.spizganed.quickbuds.ui
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,6 +18,7 @@ import android.text.InputType
 import com.spizganed.quickbuds.R
 import com.spizganed.quickbuds.bluetooth.BaseusBowie30Session
 import com.spizganed.quickbuds.bluetooth.BaseusBlade2Session
+import com.spizganed.quickbuds.bluetooth.BaseusSppSession
 import com.spizganed.quickbuds.bluetooth.BleGattScanner
 import com.spizganed.quickbuds.bluetooth.EdifierW820NbPlusSession
 import com.spizganed.quickbuds.bluetooth.DeviceGattProfiles
@@ -23,12 +26,14 @@ import com.spizganed.quickbuds.protocol.baseus.BaseusMobilePowerCodec
 
 /** One in-app home for cross-brand accessory sessions. More device profiles are added here. */
 class DeviceHubActivity : Activity() {
-    private enum class DeviceKind { BASEUS_BOWIE_30, BASEUS_BLADE_2, EDIFIER_W820NB_PLUS }
+    private enum class DeviceKind { BASEUS_BOWIE_30, BASEUS_BLADE_2, EDIFIER_W820NB_PLUS, BASEUS_EP10_PRO, BASEUS_BOWIE_MF1 }
     private val handler = Handler(Looper.getMainLooper())
     private var scanner: BleGattScanner? = null
     private var baseusSession: BaseusBowie30Session? = null
     private var edifierSession: EdifierW820NbPlusSession? = null
     private var blade2Session: BaseusBlade2Session? = null
+    private var baseusSppSession: BaseusSppSession? = null
+    private var sppState = BaseusSppSession.State()
     private var selectedDevice = DeviceKind.BASEUS_BOWIE_30
     private var foundDevice: BluetoothDevice? = null
     private var ready = false
@@ -36,6 +41,7 @@ class DeviceHubActivity : Activity() {
     private var edifierState = EdifierW820NbPlusSession.State()
     private var blade2State = BaseusBlade2Session.State()
     private lateinit var deviceName: TextView
+    private lateinit var deviceIllustration: ImageView
     private lateinit var status: TextView
     private lateinit var battery: TextView
     private lateinit var noise: TextView
@@ -75,6 +81,12 @@ class DeviceHubActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16f), dp(14f), dp(16f), dp(14f))
         }
+        deviceIllustration = ImageView(this).apply {
+            setImageResource(R.drawable.ic_device_earbuds)
+            contentDescription = getString(R.string.device_hub_earbuds_illustration)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+        card.addView(deviceIllustration, LinearLayout.LayoutParams(dp(72f), dp(60f)).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = dp(6f) })
         deviceName = TextView(this).apply {
             text = "Baseus Bowie 30"
             textSize = 18f
@@ -174,18 +186,20 @@ class DeviceHubActivity : Activity() {
         root.addView(card)
 
         val devicePicker = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        listOf(DeviceKind.BASEUS_BOWIE_30 to "Bowie 30", DeviceKind.BASEUS_BLADE_2 to "Blade 2", DeviceKind.EDIFIER_W820NB_PLUS to "W820NB Plus").forEachIndexed { index, (kind, label) ->
-            devicePicker.addView(TextView(this).apply {
-                text = label
-                textSize = 14f
-                gravity = Gravity.CENTER
-                setPadding(dp(12f), dp(12f), dp(12f), dp(12f))
-                setTextColor(palette.text)
-                background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
-                isClickable = true
-                isFocusable = true
-                setOnClickListener { selectDevice(kind) }
-            }, LinearLayout.LayoutParams(0, -2, 1f).apply { if (index > 0) marginStart = dp(8f) })
+        listOf(DeviceKind.BASEUS_BOWIE_30 to "Bowie 30", DeviceKind.BASEUS_BLADE_2 to "Blade 2",
+            DeviceKind.EDIFIER_W820NB_PLUS to "W820NB Plus", DeviceKind.BASEUS_EP10_PRO to "EP10 Pro",
+            DeviceKind.BASEUS_BOWIE_MF1 to "Bowie MF1").chunked(3).forEachIndexed { rowIndex, entries ->
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            entries.forEachIndexed { index, (kind, label) ->
+                row.addView(TextView(this).apply {
+                    text = label; textSize = 14f; gravity = Gravity.CENTER
+                    setPadding(dp(8f), dp(12f), dp(8f), dp(12f)); setTextColor(palette.text)
+                    background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                    isClickable = true; isFocusable = true
+                    setOnClickListener { selectDevice(kind) }
+                }, LinearLayout.LayoutParams(0, -2, 1f).apply { if (index > 0) marginStart = dp(8f) })
+            }
+            devicePicker.addView(row, LinearLayout.LayoutParams(-1, -2).apply { if (rowIndex > 0) topMargin = dp(8f) })
         }
         root.addView(devicePicker, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10f) })
 
@@ -259,6 +273,7 @@ class DeviceHubActivity : Activity() {
         }
     }
 
+    @SuppressLint("MissingPermission") // BLUETOOTH_CONNECT is requested by the parent app before opening this hub.
     private fun startScan() {
         scanner?.stop()
         closeSessions()
@@ -273,11 +288,32 @@ class DeviceHubActivity : Activity() {
         status.setText(R.string.device_hub_scanning)
         scanButton.isEnabled = false
         scanButton.setText(R.string.device_hub_scanning)
+        if (selectedDevice == DeviceKind.BASEUS_EP10_PRO || selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) {
+            val expected = if (selectedDevice == DeviceKind.BASEUS_EP10_PRO)
+                listOf("baseus bass ep10 pro", "bass ep10 pro", "baseus ep10 pro", "ep10 pro")
+            else listOf("baseus bowie mf1", "bowie mf1")
+            val adapter = getSystemService(BluetoothManager::class.java)?.adapter
+            val paired = runCatching { adapter?.bondedDevices.orEmpty().firstOrNull { device ->
+                val name = runCatching { device.name }.getOrNull()?.trim()?.lowercase() ?: return@firstOrNull false
+                expected.any { name == it }
+            } }.getOrNull()
+            scanButton.isEnabled = true; scanButton.setText(R.string.device_hub_scan)
+            if (paired == null) {
+                status.setText(R.string.device_hub_spp_pair_hint)
+            } else {
+                seenAny = true; foundDevice = paired
+                deviceRow.text = "${runCatching { paired.name }.getOrNull() ?: deviceName.text}  ·  ${getString(R.string.conn_action_connect)}"
+                deviceRow.visibility = View.VISIBLE
+                status.setText(R.string.device_hub_spp_found)
+            }
+            return
+        }
         val profile = when (selectedDevice) {
             DeviceKind.BASEUS_BOWIE_30 -> DeviceGattProfiles.baseusShared.copy(
                 displayName = "Baseus Bowie 30", acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"))
             DeviceKind.BASEUS_BLADE_2 -> DeviceGattProfiles.baseusBlade2
             DeviceKind.EDIFIER_W820NB_PLUS -> DeviceGattProfiles.edifierW820NbPlus
+            DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> error("SPP devices do not use BLE discovery")
         }
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
             override fun onDevice(device: BluetoothDevice, profile: com.spizganed.quickbuds.bluetooth.DeviceGattProfile) {
@@ -315,6 +351,8 @@ class DeviceHubActivity : Activity() {
             DeviceKind.BASEUS_BOWIE_30 -> connectBaseus(device)
             DeviceKind.BASEUS_BLADE_2 -> connectBlade2(device)
             DeviceKind.EDIFIER_W820NB_PLUS -> connectEdifier(device)
+            DeviceKind.BASEUS_EP10_PRO -> connectBaseusSpp(device, BaseusSppSession.Model.EP10_PRO)
+            DeviceKind.BASEUS_BOWIE_MF1 -> connectBaseusSpp(device, BaseusSppSession.Model.BOWIE_MF1)
         }
     }
 
@@ -363,9 +401,31 @@ class DeviceHubActivity : Activity() {
         })
     }
 
+    private fun connectBaseusSpp(device: BluetoothDevice, model: BaseusSppSession.Model) {
+        baseusSppSession = BaseusSppSession(device, model, object : BaseusSppSession.Listener {
+            override fun onState(state: BaseusSppSession.State) {
+                sppState = state
+                battery.text = "${getString(R.string.device_hub_battery)}  ·  L ${state.leftBattery ?: "—"}%   R ${state.rightBattery ?: "—"}%"
+                battery.visibility = if (state.leftBattery == null) View.GONE else View.VISIBLE
+                noise.text = "Noise control  ·  ${state.noise?.let(::sppNoiseLabel) ?: "—"}"
+                noise.visibility = if (state.noise == null) View.GONE else View.VISIBLE
+                renderModes()
+            }
+            override fun onStatus(text: String) { status.text = text }
+            override fun onReady() = connected()
+            override fun onClosed(reason: String) = disconnected(reason)
+        }).also { it.connect() }
+    }
+
+    private fun sppNoiseLabel(mode: BaseusSppSession.Noise): String = when (mode) {
+        BaseusSppSession.Noise.OFF -> getString(R.string.device_hub_mode_off)
+        BaseusSppSession.Noise.ANC -> "ANC"
+        BaseusSppSession.Noise.TRANSPARENCY -> getString(R.string.device_hub_mode_transparency)
+    }
+
     private fun connected() {
         ready = true
-        controls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2) View.GONE else View.VISIBLE
+        controls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2 || selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) View.GONE else View.VISIBLE
         powerControls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2) View.VISIBLE else View.GONE
         status.setText(R.string.device_hub_ready)
         scanButton.isEnabled = true
@@ -374,6 +434,7 @@ class DeviceHubActivity : Activity() {
             DeviceKind.BASEUS_BOWIE_30 -> baseusSession?.refresh()
             DeviceKind.BASEUS_BLADE_2 -> blade2Session?.refresh()
             DeviceKind.EDIFIER_W820NB_PLUS -> edifierSession?.refresh()
+            DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> baseusSppSession?.refresh()
         } }
         renderModes()
     }
@@ -393,6 +454,7 @@ class DeviceHubActivity : Activity() {
         baseusSession?.close(); baseusSession = null
         edifierSession?.close(); edifierSession = null
         blade2Session?.close(); blade2Session = null
+        baseusSppSession?.close(); baseusSppSession = null
     }
 
     private fun selectDevice(kind: DeviceKind) {
@@ -402,14 +464,29 @@ class DeviceHubActivity : Activity() {
         foundDevice = null; ready = false
         currentState = BaseusBowie30Session.State(); edifierState = EdifierW820NbPlusSession.State()
         blade2State = BaseusBlade2Session.State()
+        sppState = BaseusSppSession.State()
         deviceName.text = when (kind) {
             DeviceKind.BASEUS_BOWIE_30 -> "Baseus Bowie 30"
             DeviceKind.BASEUS_BLADE_2 -> "Baseus Blade 2"
             DeviceKind.EDIFIER_W820NB_PLUS -> "EDIFIER W820NB Plus"
+            DeviceKind.BASEUS_EP10_PRO -> "Baseus EP10 Pro"
+            DeviceKind.BASEUS_BOWIE_MF1 -> "Baseus Bowie MF1"
+        }
+        val illustration = when (kind) {
+            DeviceKind.BASEUS_BOWIE_30, DeviceKind.BASEUS_EP10_PRO -> R.drawable.ic_device_earbuds
+            DeviceKind.BASEUS_BOWIE_MF1, DeviceKind.EDIFIER_W820NB_PLUS -> R.drawable.ic_device_headphones
+            DeviceKind.BASEUS_BLADE_2 -> R.drawable.ic_baseus_blade2
+        }
+        deviceIllustration.setImageResource(illustration)
+        deviceIllustration.contentDescription = when (kind) {
+            DeviceKind.BASEUS_BOWIE_30, DeviceKind.BASEUS_EP10_PRO -> getString(R.string.device_hub_earbuds_illustration)
+            DeviceKind.BASEUS_BOWIE_MF1, DeviceKind.EDIFIER_W820NB_PLUS -> getString(R.string.device_hub_headphones_illustration)
+            DeviceKind.BASEUS_BLADE_2 -> getString(R.string.device_hub_powerbank_illustration)
         }
         deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE
         if (kind == DeviceKind.BASEUS_BOWIE_30) addModes(controls, BaseusBowie30Session.Noise.entries)
         else if (kind == DeviceKind.EDIFIER_W820NB_PLUS) addEdifierModes()
+        else if (kind == DeviceKind.BASEUS_EP10_PRO) addSppModes()
         powerControls.visibility = View.GONE
         battery.visibility = View.GONE; noise.visibility = View.GONE
         status.setText(R.string.device_hub_scan)
@@ -429,6 +506,19 @@ class DeviceHubActivity : Activity() {
             }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, -2).apply {
                 if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f)
             })
+        }
+    }
+
+    private fun addSppModes() {
+        val palette = ThemeRes.palette(this)
+        BaseusSppSession.Noise.entries.forEachIndexed { index, mode ->
+            controls.addView(TextView(this).apply {
+                text = sppNoiseLabel(mode); textSize = 13f; gravity = Gravity.CENTER
+                setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+                setTextColor(palette.text); isClickable = true; isFocusable = true
+                background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                setOnClickListener { baseusSppSession?.setNoise(mode) }
+            }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
         }
     }
 
@@ -456,6 +546,20 @@ class DeviceHubActivity : Activity() {
             }
             return
         }
+        if (selectedDevice == DeviceKind.BASEUS_EP10_PRO) {
+            for (index in 0 until controls.childCount) {
+                val chip = controls.getChildAt(index) as? TextView ?: continue
+                val mode = BaseusSppSession.Noise.entries.getOrNull(index) ?: continue
+                val palette = ThemeRes.palette(this)
+                val selected = sppState.noise == mode
+                chip.setTextColor(if (selected) ThemeRes.onFill(this) else palette.text)
+                chip.background = ThemeRes.ripple(this, ThemeRes.shape(this, if (selected) palette.accent else palette.card,
+                    if (selected) null else palette.outline, 14f))
+                chip.isEnabled = ready && sppState.noise != null
+            }
+            return
+        }
+        if (selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) return
         for (row in 0 until controls.childCount) {
             val rowView = controls.getChildAt(row) as? LinearLayout ?: continue
             for (column in 0 until rowView.childCount) {
