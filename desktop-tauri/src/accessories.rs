@@ -241,6 +241,8 @@ struct AccessorySession {
     noise: Option<String>,
     eq_presets: Vec<EdifierEqPreset>,
     selected_eq: Option<u8>,
+    sleep_timer_options: Vec<u16>,
+    sleep_timer_minutes: Option<u16>,
     power: HashMap<u16, PowerStatus>,
     device_name: String,
 }
@@ -321,18 +323,29 @@ impl AccessorySession {
     async fn refresh(&mut self) -> Result<(), String> {
         match self.model {
             Model::EdifierW820NbPlus => {
-                // D8 is a capability probe; the current desktop profile does not expose
-                // optional commands until its W820-specific flags have been validated.
                 let d8 = [0xD8];
                 if let Ok(capabilities) = self.request(&encode_edifier(&d8), 0xD8).await {
                     if let Some(profile) = capabilities.payload.get(13).copied() {
                         self.eq_presets = edifier_eq_presets(profile);
                     }
+                    self.sleep_timer_options = match capabilities.payload.get(9).copied() {
+                        Some(1) => vec![0, 10, 20, 30, 60, 90],
+                        Some(2) => vec![0, 5, 15, 30, 60, 180],
+                        _ => Vec::new(),
+                    };
                 }
                 if !self.eq_presets.is_empty() {
                     if let Ok(eq) = self.request(&encode_edifier(&[0xD5]), 0xD5).await {
                         if let Some(selected) = eq.payload.first().copied().filter(|id| self.eq_presets.iter().any(|p| p.id == *id)) {
                             self.selected_eq = Some(selected);
+                        }
+                    }
+                }
+                if !self.sleep_timer_options.is_empty() {
+                    if let Ok(timer) = self.request(&encode_edifier(&[0xD3]), 0xD3).await {
+                        if timer.payload.len() >= 2 {
+                            let minutes = u16::from_be_bytes([timer.payload[0], timer.payload[1]]);
+                            if self.sleep_timer_options.contains(&minutes) { self.sleep_timer_minutes = Some(minutes); }
                         }
                     }
                 }
@@ -490,6 +503,20 @@ impl AccessorySession {
         if actual != Some(id) { return Err("Edifier EQ preset did not match device readback".into()); }
         Ok(())
     }
+    async fn set_sleep_timer(&mut self, minutes: u16) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || !self.sleep_timer_options.contains(&minutes) {
+            return Err("Sleep timer value is not supported by this firmware".into());
+        }
+        let packet = if minutes == 0 { vec![0xD2] } else { vec![0xD1, (minutes >> 8) as u8, minutes as u8] };
+        let ack = self.request(&encode_edifier(&packet), if minutes == 0 { 0xD2 } else { 0xD1 }).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge the sleep timer".into()); }
+        let state = self.request(&encode_edifier(&[0xD3]), 0xD3).await?;
+        if state.payload.len() < 2 { return Err("Invalid sleep timer readback".into()); }
+        let actual = u16::from_be_bytes([state.payload[0], state.payload[1]]);
+        self.sleep_timer_minutes = Some(actual);
+        if actual != minutes { return Err("Sleep timer did not match device readback".into()); }
+        Ok(())
+    }
     async fn read_power(&mut self, code: u16) -> Result<PowerStatus, String> {
         let frame = self.request(&encode_power_read(code), code).await?;
         if frame.payload.len() != 3 {
@@ -537,7 +564,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "power": power })
     }
 }
 
@@ -912,6 +939,8 @@ pub async fn accessory_connect(
         noise: None,
         eq_presets: Vec::new(),
         selected_eq: None,
+        sleep_timer_options: Vec::new(),
+        sleep_timer_minutes: None,
         power: HashMap::new(),
         device_name: name,
     };
@@ -974,6 +1003,20 @@ pub async fn accessory_set_equalizer(
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_equalizer(id).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_sleep_timer(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    minutes: u16,
+) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_sleep_timer(minutes).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
