@@ -3,6 +3,7 @@
 ## 0.1.0-alpha.17 — 2026-11-09
 
 - Add Baseus Bowie MF1 legacy gesture assignment controls to the shared Android and Windows/Linux DeviceDeck hub. Query layouts with BA21, write paired left/right actions with BA22, require the vendor success acknowledgement, and confirm the selected layout by reading it back. Hardware verification remains pending.
+- Align the Windows/Linux package version with the shared alpha.17 release.
 
 ## 0.1.0-alpha.16 — 2026-11-09
 
