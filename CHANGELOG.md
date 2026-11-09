@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.21 — 2026-11-09
+
+- Add Baseus Bowie 30 BLE gesture assignments in the existing unified DeviceDeck device hub on Android, Windows, and Linux. Read with BA21 and apply BA22, then verify the paired settings by reading them again. Options follow the model-specific Baseus app profile. Physical-device verification remains open.
+
 ## 0.1.0-alpha.20 — 2026-11-09
 
 - Decode Baseus Blade 2 USB-C negotiated-protocol telemetry as per-port labels, including the separate Blade 2-140 protocol table, across Android and Windows/Linux.
