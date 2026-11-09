@@ -508,7 +508,10 @@ class DeviceHubActivity : Activity() {
             DeviceKind.BASEUS_BLADE_2 -> getString(R.string.device_hub_powerbank_illustration)
         }
         deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE
-        if (kind == DeviceKind.BASEUS_BOWIE_30) addModes(controls, BaseusBowie30Session.Noise.entries)
+        if (kind == DeviceKind.BASEUS_BOWIE_30) {
+            addModes(controls, BaseusBowie30Session.Noise.entries)
+            addSppGestureControls()
+        }
         else if (kind == DeviceKind.EDIFIER_W820NB_PLUS) addEdifierModes()
         else if (kind == DeviceKind.BASEUS_EP10_PRO) addSppModes()
         else if (kind == DeviceKind.BASEUS_BOWIE_MF1) addSppGestureControls()
@@ -887,7 +890,10 @@ class DeviceHubActivity : Activity() {
             renderSppGestures()
             return
         }
-        for (row in 0 until controls.childCount) {
+        if (selectedDevice == DeviceKind.BASEUS_BOWIE_30) {
+            renderBowie30Gestures()
+        }
+        for (row in 0 until (if (selectedDevice == DeviceKind.BASEUS_BOWIE_30) 1 else controls.childCount)) {
             val rowView = controls.getChildAt(row) as? LinearLayout ?: continue
             for (column in 0 until rowView.childCount) {
                 val chip = rowView.getChildAt(column) as? TextView ?: continue
@@ -901,6 +907,61 @@ class DeviceHubActivity : Activity() {
                 chip.isEnabled = ready && currentState.noise != null
             }
         }
+    }
+
+    private fun renderBowie30Gestures() {
+        if (!::sppGestureControls.isInitialized) return
+        sppGestureControls.removeAllViews()
+        if (currentState.gestures.isEmpty()) return
+        sppGestureControls.addView(TextView(this).apply {
+            text = if (resources.configuration.locales[0].language == "ru") "Жесты" else "Gestures"
+            textSize = 12f; setTextColor(ThemeRes.palette(this@DeviceHubActivity).textSecondary)
+        })
+        currentState.gestures.sortedWith(compareBy({ it.button }, { it.layout })).forEachIndexed { index, gesture ->
+            val russian = resources.configuration.locales[0].language == "ru"
+            val label = when (gesture.layout) {
+                0 -> if (russian) "Двойное нажатие" else "Double"
+                1 -> if (russian) "Тройное нажатие" else "Triple"
+                2 -> if (russian) "Удержание" else "Hold"
+                else -> if (russian) "Жест ${gesture.layout}" else "Gesture ${gesture.layout}"
+            }
+            val side = when {
+                russian && gesture.button == 0 -> "Слева"
+                russian -> "Справа"
+                gesture.button == 0 -> "Left"
+                else -> "Right"
+            }
+            sppGestureControls.addView(TextView(this).apply {
+                text = "$side · $label\n${baseusActionLabel(gesture.action)}"
+                textSize = 13f; gravity = Gravity.CENTER_VERTICAL
+                setPadding(ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 10f), ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 10f))
+                setTextColor(ThemeRes.palette(this@DeviceHubActivity).text)
+                isClickable = true; isFocusable = true; isEnabled = ready
+                background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                setOnClickListener { chooseBowie30Gesture(gesture) }
+            }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = ThemeRes.dp(this@DeviceHubActivity, if (index == 0) 6f else 4f) })
+        }
+    }
+
+    private fun chooseBowie30Gesture(gesture: BaseusBowie30Session.Gesture) {
+        val actions = listOf(0, 1, 2, 3, 4, 6)
+        val russian = resources.configuration.locales[0].language == "ru"
+        val layout = when (gesture.layout) {
+            0 -> if (russian) "Двойное нажатие" else "Double"
+            1 -> if (russian) "Тройное нажатие" else "Triple"
+            2 -> if (russian) "Удержание" else "Hold"
+            else -> if (russian) "Жест" else "Gesture"
+        }
+        val side = when {
+            russian && gesture.button == 0 -> "Слева"
+            russian -> "Справа"
+            gesture.button == 0 -> "Left"
+            else -> "Right"
+        }
+        AlertDialog.Builder(this)
+            .setTitle("$side · $layout")
+            .setItems(actions.map { baseusActionLabel(it) }.toTypedArray()) { _, which -> baseusSession?.setGesture(gesture, actions[which]) }
+            .show()
     }
 
     private fun renderSppGestures() {
