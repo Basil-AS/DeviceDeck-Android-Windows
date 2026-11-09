@@ -1,6 +1,6 @@
 # DeviceDeck Android and desktop architecture
 
-This repository is the Android, Windows and Linux application fork. It currently inherits the OnePlus/OPPO/realme implementation from QuickBuds; DeviceDeck-specific support for Edifier and Baseus is tracked separately and must not be inferred from a UI row or catalog entry. See the umbrella repository's support matrix and protocol research.
+This repository builds the Android, Windows and Linux versions of the single DeviceDeck app. It inherits the OnePlus/OPPO/realme implementation from QuickBuds and adds Edifier, Baseus, and other device profiles to the same app and release channels. Protocol modules and transports are separated internally by vendor/model; they are not separate user-facing apps. A catalog row alone does not establish working device support. See the umbrella repository's support matrix and protocol research.
 
 ## Platform layers
 
@@ -28,7 +28,7 @@ The device is the source of truth; DeviceDeck is a local control interface.
 
 ## Connections and protocols
 
-The current primary Android and desktop device-control screens implement the inherited OPPO/realme protocol. Android's `app/.../protocol/` contains the Kotlin codec and feature-sync engine. Android and desktop also provide a shared cross-brand DeviceDeck hub for BLE devices (Edifier W820NB Plus, Baseus Bowie 30, and Blade 2) and Baseus RFCOMM/SPP headsets (EP10 Pro, plus battery reading for Bowie MF1). Each vendor/model uses its own transport session and codec; a catalog entry alone does not imply runtime support. DeviceDeck does not route Edifier or Baseus commands through OPPO framing. Protocol research may be sourced from the Baseus reference checkout, but all user-facing controls and releases belong to the existing DeviceDeck apps.
+The current primary Android and desktop device-control screens implement the inherited OPPO/realme protocol. Android's `app/.../protocol/` contains the Kotlin codec and feature-sync engine. The same Android and desktop app also provides a shared cross-brand DeviceDeck hub for BLE devices (including Edifier W820NB Plus, Baseus Bowie 30, and Blade 2) and Baseus RFCOMM/SPP headsets (EP10 Pro, plus battery reading for Bowie MF1). Each vendor/model uses its own transport session and codec; these are internal modules within DeviceDeck, not separate apps. A catalog entry alone does not imply runtime support. DeviceDeck does not route Edifier or Baseus commands through OPPO framing. The Baseus reference checkout is research material only; all user-facing controls and releases belong to the existing unified DeviceDeck apps.
 
 ## Reports, privacy and updates
 
