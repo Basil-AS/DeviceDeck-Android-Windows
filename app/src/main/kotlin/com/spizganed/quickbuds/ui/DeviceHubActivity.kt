@@ -98,7 +98,7 @@ class DeviceHubActivity : Activity() {
             setPadding(dp(16f), dp(14f), dp(16f), dp(14f))
         }
         deviceIllustration = ImageView(this).apply {
-            setImageResource(R.drawable.ic_device_headphones)
+            setImageResource(R.drawable.ic_device_baseus_bowie30)
             contentDescription = getString(R.string.device_hub_headphones_illustration)
             scaleType = ImageView.ScaleType.FIT_CENTER
         }
@@ -500,16 +500,14 @@ class DeviceHubActivity : Activity() {
             DeviceKind.BASEUS_BOWIE_MF1 -> "Baseus Bowie MF1"
         }
         val illustration = when (kind) {
-            DeviceKind.BASEUS_BOWIE_30, DeviceKind.EDIFIER_W820NB_PLUS -> R.drawable.ic_device_headphones
-            DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> R.drawable.ic_device_earbuds
+            DeviceKind.BASEUS_BOWIE_30 -> R.drawable.ic_device_baseus_bowie30
+            DeviceKind.EDIFIER_W820NB_PLUS -> R.drawable.ic_device_edifier_w820nb_plus
+            DeviceKind.BASEUS_EP10_PRO -> R.drawable.ic_device_baseus_ep10_pro
+            DeviceKind.BASEUS_BOWIE_MF1 -> R.drawable.ic_device_baseus_bowie_mf1
             DeviceKind.BASEUS_BLADE_2 -> R.drawable.ic_baseus_blade2
         }
         deviceIllustration.setImageResource(illustration)
-        deviceIllustration.contentDescription = when (kind) {
-            DeviceKind.BASEUS_BOWIE_30, DeviceKind.EDIFIER_W820NB_PLUS -> getString(R.string.device_hub_headphones_illustration)
-            DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> getString(R.string.device_hub_earbuds_illustration)
-            DeviceKind.BASEUS_BLADE_2 -> getString(R.string.device_hub_powerbank_illustration)
-        }
+        deviceIllustration.contentDescription = deviceName.text
         deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE
         if (kind == DeviceKind.BASEUS_BOWIE_30) {
             addModes(controls, BaseusBowie30Session.Noise.entries)
