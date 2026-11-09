@@ -818,6 +818,7 @@ document.addEventListener('click',ev=>{
   if(a==='wall'){S.wall=+v;reveal(ev,()=>{apply();renderColorPanel();});return;}
 });
 document.addEventListener('change',e=>{const t=e.target;
+  if(t.matches('input[data-act="accchild"]')){const group=t.closest('div.row');const selected=[...group.querySelectorAll('input[data-act="accchild"]:checked')].map(x=>+x.value);if(selected.length<2){t.checked=true;toast('Select at least two modes.');return;}window.QBLIVE&&QBLIVE.accessoryGestureChildren(+t.dataset.button,+t.dataset.layout,selected);return;}
   if(t.matches('select[data-act="accgesture"]')){window.QBLIVE&&QBLIVE.accessoryGesture(+t.dataset.button,+t.dataset.layout,+t.value);return;}
   if(window.QBLIVE){if(t.id==='bassR'&&QBLIVE.eq)QBLIVE.send({t:'bass',level:S.bassLv,band:0});if(t.id==='alertR'&&QBLIVE.earbud)QBLIVE.send({t:'alert',v:S.alert});if(t.id==='tapR'&&QBLIVE.earbud)QBLIVE.send({t:'tap',v:stepped(t)});}
   if(t.classList&&t.classList.contains('range'))glide(t);
@@ -907,6 +908,7 @@ if(window.__TAURI__){
     accessoryConnect(id){T.core.invoke('accessory_connect',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryMode(mode){T.core.invoke('accessory_set_noise',{mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryGesture(button,layout,action){T.core.invoke('accessory_set_gesture',{button,layout,action}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryGestureChildren(button,layout,selected){T.core.invoke('accessory_set_gesture_children',{button,layout,selected}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryEqualizer(id){T.core.invoke('accessory_set_equalizer',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessorySleepTimer(minutes){T.core.invoke('accessory_set_sleep_timer',{minutes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryGameMode(enabled){T.core.invoke('accessory_set_game_mode',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -953,7 +955,7 @@ if(window.__TAURI__){
     const gestures=accessoryState.gestures||[];
     byId('accessoryGestureSection').hidden=accessoryState.model!=='baseus-ep10-pro'||gestures.length===0;
     const gestureNames={3:'Single press',0:'Double press',1:'Triple press',2:'Hold'},actionNames={0:'No action',1:'Play / pause',2:'Previous track',3:'Next track',4:'Voice assistant',6:'Cycle noise modes',11:'Volume up',12:'Volume down'};
-    byId('accessoryGestures').innerHTML=gestures.map(g=>{const options=g.layout===3?[0,1]:[0,1,2,3,4,6,11,12];return `<label class="row"><div class="txt"><div class="t">${g.button===0?'Left':'Right'} · ${gestureNames[g.layout]||'Gesture'}</div></div><select class="field" data-act="accgesture" data-button="${g.button}" data-layout="${g.layout}">${options.map(a=>`<option value="${a}" ${a===g.action?'selected':''}>${esc(actionNames[a]||`Action ${a}`)}</option>`).join('')}</select></label>`;}).join('');
+    byId('accessoryGestures').innerHTML=gestures.map(g=>{const options=g.layout===3?[0,1]:[0,1,2,3,4,6,11,12];const children=g.action===6?`<div class="row"><div class="txt"><div class="t">Cycle modes</div></div>${[[1,'ANC'],[2,'Transparency'],[0,'Normal']].map(([id,name])=>`<label><input type="checkbox" data-act="accchild" data-button="${g.button}" data-layout="${g.layout}" value="${id}" ${(g.children||[]).includes(id)?'checked':''}> ${name}</label>`).join('')}</div>`:'';return `<div><label class="row"><div class="txt"><div class="t">${g.button===0?'Left':'Right'} · ${gestureNames[g.layout]||'Gesture'}</div></div><select class="field" data-act="accgesture" data-button="${g.button}" data-layout="${g.layout}">${options.map(a=>`<option value="${a}" ${a===g.action?'selected':''}>${esc(actionNames[a]||`Action ${a}`)}</option>`).join('')}</select></label>${children}</div>`;}).join('');
     const presets=accessoryState.eqPresets||[];
     byId('accessoryEqSection').hidden=accessoryState.model!=='edifier-w820nb-plus'||presets.length===0;
     byId('accessoryEqPresets').innerHTML=presets.map(p=>`<button class="row press" role="radio" aria-checked="${p.id===accessoryState.selectedEq}" data-act="acceq" data-v="${p.id}"><div class="txt"><div class="t">${esc(p.name)}</div></div>${p.id===accessoryState.selectedEq?ic('check','ch'):ic('chev','ch')}</button>`).join('');

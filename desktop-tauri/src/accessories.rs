@@ -136,6 +136,7 @@ struct BaseusSppSession {
     battery: Option<(u8, u8)>,
     noise: Option<String>,
     gestures: Vec<(u8, u8, u8)>,
+    gesture_children: HashMap<String, Vec<u8>>,
     device_name: String,
 }
 
@@ -231,7 +232,27 @@ impl BaseusSppSession {
             }
         }
         self.gestures = mappings;
+        for (button, layout, action) in self.gestures.clone().into_iter().filter(|(_, _, action)| *action == 6) {
+            let frame = self.request(0x8E, &[button, layout, 6])?;
+            if frame.payload.len() < 4 || frame.payload[0] != button || frame.payload[1] != layout || frame.payload[2] != 6
+                || frame.payload[3] < 2 || frame.payload.len() != 4 + frame.payload[3] as usize { return Err("Unrecognized Baseus gesture child response".into()); }
+            let children = frame.payload[4..].to_vec();
+            if children.iter().any(|id| ![0,1,2].contains(id)) || children.iter().collect::<std::collections::HashSet<_>>().len() != children.len() { return Err("Invalid Baseus gesture child values".into()); }
+            self.gesture_children.insert(format!("{button}:{layout}"), children);
+        }
         Ok(())
+    }
+
+    fn set_gesture_children(&mut self, button: u8, layout: u8, selected: &[u8]) -> Result<(), String> {
+        if self.model != Model::BaseusEp10Pro || button > 1 || ![0,1,2,3].contains(&layout) || !(2..=3).contains(&selected.len())
+            || selected.iter().any(|id| ![0,1,2].contains(id)) || selected.iter().collect::<std::collections::HashSet<_>>().len() != selected.len()
+            || !self.gestures.contains(&(button, layout, 6)) { return Err("Unsupported Baseus gesture child selection".into()); }
+        let mut payload = vec![button, layout, 6, selected.len() as u8]; payload.extend_from_slice(selected);
+        let ack = self.request(0x8F, &payload)?;
+        if ack.payload.first() != Some(&1) { return Err("Baseus rejected gesture child selection".into()); }
+        let frame = self.request(0x8E, &[button, layout, 6])?;
+        if frame.payload.len() < 4 || frame.payload[0] != button || frame.payload[1] != layout || frame.payload[2] != 6 || frame.payload.len() != 4 + frame.payload[3] as usize || &frame.payload[4..] != selected { return Err("Baseus gesture child readback mismatch".into()); }
+        self.gesture_children.insert(format!("{button}:{layout}"), selected.to_vec()); Ok(())
     }
 
     fn set_gesture(&mut self, button: u8, layout: u8, action: u8) -> Result<(), String> {
@@ -250,7 +271,7 @@ impl BaseusSppSession {
     fn snapshot(&self, status: &str) -> Value {
         json!({ "status": status, "model": self.model.id(), "name": self.device_name,
             "battery": self.battery.map(|(left, right)| json!({"left": left, "right": right})),
-            "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action})).collect::<Vec<_>>(), "power": {} })
+            "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action,"children":self.gesture_children.get(&format!("{button}:{layout}"))})).collect::<Vec<_>>(), "power": {} })
     }
 }
 
@@ -957,6 +978,7 @@ pub async fn accessory_connect(
             battery: None,
             noise: None,
             gestures: Vec::new(),
+            gesture_children: HashMap::new(),
             device_name: name,
         };
         session.refresh()?;
@@ -1103,6 +1125,14 @@ pub async fn accessory_set_gesture(
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_gesture_children(app: AppHandle, hub: State<'_, AccessoryHub>, button: u8, layout: u8, selected: Vec<u8>) -> Result<Value, String> {
+    let mut spp = hub.spp_session.lock().await;
+    let session = spp.as_mut().ok_or("No Baseus SPP headset is connected")?;
+    session.set_gesture_children(button, layout, &selected)?;
+    let result = session.snapshot("connected"); emit(&app, result.clone()); Ok(result)
 }
 
 #[tauri::command]
