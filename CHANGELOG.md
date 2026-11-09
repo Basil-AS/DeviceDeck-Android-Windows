@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.11 — 2026-11-09
+
+- Android and Windows/Linux: add Baseus EP10 Pro gesture assignments to DeviceDeck's shared device hub. The “Cycle noise modes” action can choose Normal, ANC, and Transparency (at least two), with BA8E readback after BA8F writes.
+- Keep Android, Windows, and Linux in one DeviceDeck release line. Hardware round-trip validation remains pending.
+
 ## 0.1.0-alpha.10 — 2026-11-09
 
 - Android and Windows/Linux: add Baseus Blade 2 USB-C C1/C2 mode controls for Off, Output/Discharge, and Input/Charge. Read the fresh `0x0010` port state, use the APK-confirmed `0x0018`–`0x001B` command pairs, then confirm the requested mode with another `0x0010` read. Hardware behavior remains unverified.
