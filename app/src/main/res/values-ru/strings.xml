@@ -19,6 +19,8 @@
     <string name="device_hub_mode_indoor" translatable="false">Помещение</string>
     <string name="device_hub_mode_outdoor" translatable="false">Улица</string>
     <string name="device_hub_mode_off" translatable="false">Выкл.</string>
+    <string name="device_hub_mode_on" translatable="false">Вкл.</string>
+    <string name="device_hub_game_mode" translatable="false">Игровой режим</string>
     <string name="device_hub_sleep_timer" translatable="false">Таймер выключения</string>
     <string name="device_hub_minutes" translatable="false">%1$d мин</string>
     <string name="device_hub_mode_transparency" translatable="false">Прозрачность</string>

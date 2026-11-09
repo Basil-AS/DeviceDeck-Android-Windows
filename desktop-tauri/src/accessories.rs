@@ -243,6 +243,8 @@ struct AccessorySession {
     selected_eq: Option<u8>,
     sleep_timer_options: Vec<u16>,
     sleep_timer_minutes: Option<u16>,
+    game_mode_supported: bool,
+    game_mode: Option<bool>,
     power: HashMap<u16, PowerStatus>,
     device_name: String,
 }
@@ -333,6 +335,7 @@ impl AccessorySession {
                         Some(2) => vec![0, 5, 15, 30, 60, 180],
                         _ => Vec::new(),
                     };
+                    self.game_mode_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x40 != 0);
                 }
                 if !self.eq_presets.is_empty() {
                     if let Ok(eq) = self.request(&encode_edifier(&[0xD5]), 0xD5).await {
@@ -347,6 +350,11 @@ impl AccessorySession {
                             let minutes = u16::from_be_bytes([timer.payload[0], timer.payload[1]]);
                             if self.sleep_timer_options.contains(&minutes) { self.sleep_timer_minutes = Some(minutes); }
                         }
+                    }
+                }
+                if self.game_mode_supported {
+                    if let Ok(game) = self.request(&encode_edifier(&[0x08]), 0x08).await {
+                        self.game_mode = match game.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
                     }
                 }
                 let d0 = [0xD0];
@@ -517,6 +525,17 @@ impl AccessorySession {
         if actual != minutes { return Err("Sleep timer did not match device readback".into()); }
         Ok(())
     }
+    async fn set_game_mode(&mut self, enabled: bool) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || !self.game_mode_supported || self.game_mode.is_none() {
+            return Err("Game mode is not available in the reported Edifier profile".into());
+        }
+        let ack = self.request(&encode_edifier(&[0x09, u8::from(enabled)]), 0x09).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge game mode".into()); }
+        let state = self.request(&encode_edifier(&[0x08]), 0x08).await?;
+        self.game_mode = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+        if self.game_mode != Some(enabled) { return Err("Edifier game mode did not match device readback".into()); }
+        Ok(())
+    }
     async fn read_power(&mut self, code: u16) -> Result<PowerStatus, String> {
         let frame = self.request(&encode_power_read(code), code).await?;
         if frame.payload.len() != 3 {
@@ -564,7 +583,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "power": power })
     }
 }
 
@@ -941,6 +960,8 @@ pub async fn accessory_connect(
         selected_eq: None,
         sleep_timer_options: Vec::new(),
         sleep_timer_minutes: None,
+        game_mode_supported: false,
+        game_mode: None,
         power: HashMap::new(),
         device_name: name,
     };
@@ -1017,6 +1038,20 @@ pub async fn accessory_set_sleep_timer(
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_sleep_timer(minutes).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_game_mode(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    enabled: bool,
+) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_game_mode(enabled).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
