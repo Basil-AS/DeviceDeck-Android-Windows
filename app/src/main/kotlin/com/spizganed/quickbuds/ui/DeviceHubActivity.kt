@@ -55,6 +55,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierTimerControls: LinearLayout
     private lateinit var edifierGameModeControl: TextView
     private lateinit var edifierAutoPowerOffControl: TextView
+    private lateinit var edifierPromptToneControl: TextView
     private lateinit var edifierNameControl: TextView
     private lateinit var edifierTouchSensitivityControl: TextView
     private lateinit var edifierTapControls: LinearLayout
@@ -547,6 +548,14 @@ class DeviceHubActivity : Activity() {
             setOnClickListener { edifierState.gameModeEnabled?.let { edifierSession?.setGameMode(!it) } }
         }
         controls.addView(edifierGameModeControl)
+        edifierPromptToneControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener { edifierState.promptToneEnabled?.let { edifierSession?.setPromptToneSwitch(!it) } }
+        }
+        controls.addView(edifierPromptToneControl)
         edifierTouchSensitivityControl = TextView(this).apply {
             textSize = 13f; gravity = Gravity.CENTER
             setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
@@ -738,6 +747,18 @@ class DeviceHubActivity : Activity() {
                 edifierGameModeControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
                     if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
                 edifierGameModeControl.isEnabled = ready && supported
+            }
+            if (::edifierPromptToneControl.isInitialized) {
+                val supported = edifierState.promptToneSwitchSupported && edifierState.promptToneEnabled != null
+                val enabled = edifierState.promptToneEnabled == true
+                edifierPromptToneControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierPromptToneControl.text = getString(R.string.device_hub_prompt_tone) + " · " +
+                    getString(if (enabled) R.string.device_hub_mode_on else R.string.device_hub_mode_off)
+                val palette = ThemeRes.palette(this)
+                edifierPromptToneControl.setTextColor(if (enabled) ThemeRes.onFill(this) else palette.text)
+                edifierPromptToneControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
+                    if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
+                edifierPromptToneControl.isEnabled = ready && supported
             }
             if (::edifierAutoPowerOffControl.isInitialized) {
                 val supported = edifierState.autoPowerOffSupported && edifierState.autoPowerOffEnabled != null

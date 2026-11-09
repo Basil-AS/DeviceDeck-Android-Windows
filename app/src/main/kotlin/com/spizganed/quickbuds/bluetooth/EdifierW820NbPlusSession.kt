@@ -31,6 +31,8 @@ class EdifierW820NbPlusSession(
         val gameModeEnabled: Boolean? = null,
         val autoPowerOffSupported: Boolean = false,
         val autoPowerOffEnabled: Boolean? = null,
+        val promptToneSwitchSupported: Boolean = false,
+        val promptToneEnabled: Boolean? = null,
         val bluetoothNameSupported: Boolean = false,
         val bluetoothNameLimitBytes: Int = 0,
         val bluetoothName: String? = null,
@@ -68,7 +70,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1) {
+        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1 || timedOut?.command == 0xF9 || timedOut?.command == 0xFA) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -90,6 +92,7 @@ class EdifierW820NbPlusSession(
                 val touchSensitivitySupported = (payload.getOrNull(17)?.toInt()?.and(0x08) ?: 0) != 0
                 val touchControlsSupported = payload.getOrNull(16)?.toInt()?.and(0xFF) == 18
                 val autoPowerOffSupported = payload.getOrNull(8)?.toInt()?.and(0xFF) == 1
+                val promptToneSwitchSupported = (payload.getOrNull(17)?.toInt()?.and(0x02) ?: 0) != 0
                 val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
                     1, 6 -> 24; 2, 5 -> 30; 3 -> 29; 4 -> 35; else -> 0
@@ -101,6 +104,7 @@ class EdifierW820NbPlusSession(
                 }
                 state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions,
                     gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported,
+                    promptToneSwitchSupported = promptToneSwitchSupported,
                     bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit,
                     touchSensitivitySupported = touchSensitivitySupported,
                     touchControlsSupported = touchControlsSupported)
@@ -142,6 +146,7 @@ class EdifierW820NbPlusSession(
             if (state.sleepTimerOptions.isNotEmpty()) readSleepTimer()
             if (state.gameModeSupported) readGameMode()
             if (state.autoPowerOffSupported) readAutoPowerOff()
+            if (state.promptToneSwitchSupported) readPromptToneSwitch()
             if (state.bluetoothNameSupported) readBluetoothName()
             if (state.touchSensitivitySupported) readTouchSensitivity()
             if (state.touchControlsSupported) readTouchControls()
@@ -222,6 +227,21 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readAutoPowerOff(expected = enabled)
+        }
+        pump()
+    }
+
+    fun setPromptToneSwitch(enabled: Boolean) {
+        if (!ready || !state.promptToneSwitchSupported || state.promptToneEnabled == null) {
+            listener.onStatus("Prompt tone control is unavailable in the reported device profile")
+            return
+        }
+        enqueue(0xFA, byteArrayOf(if (enabled) 1 else 0)) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge the prompt tone setting")
+                return@enqueue
+            }
+            readPromptToneSwitch(expected = enabled)
         }
         pump()
     }
@@ -358,6 +378,16 @@ class EdifierW820NbPlusSession(
             state = state.copy(autoPowerOffEnabled = enabled)
             listener.onState(state)
             if (expected != null && expected != enabled) listener.onStatus("Automatic power-off was not confirmed by device readback")
+        }
+        pump()
+    }
+
+    private fun readPromptToneSwitch(expected: Boolean? = null) {
+        enqueue(0xF9) { frame ->
+            val value = frame.parameters().firstOrNull()?.toInt()?.and(0xFF)?.let { when (it) { 0 -> false; 1 -> true; else -> null } }
+            state = state.copy(promptToneEnabled = value)
+            listener.onState(state)
+            if (expected != null && value != expected) listener.onStatus("Prompt tone setting did not match device readback")
         }
         pump()
     }

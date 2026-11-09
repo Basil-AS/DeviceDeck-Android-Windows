@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.16 — 2026-11-09
+
+- Add the D8 B17 bit 1 gated EDIFIER W820NB Plus prompt tone switch to the shared Android and Windows/Linux DeviceDeck hub. F9 reads state and FA writes a one-byte switch, with F9 readback after each write. Static APK evidence supports this mapping; physical-device verification remains open.
+
 ## 0.1.0-alpha.15 — 2026-11-09
 
 - Android and Windows/Linux: add capability-gated EDIFIER W820NB Plus left/right tap and long-press assignment controls from D8 profile 18. Map play/pause, side-specific volume/track, voice assistant, game/sound mode, and 2–3 selected noise-cycle modes with F0 readback after F1 writes. Static APK mappings are implemented; physical headset verification remains open.

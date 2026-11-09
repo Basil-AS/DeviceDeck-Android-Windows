@@ -21,6 +21,7 @@
     <string name="device_hub_mode_off" translatable="false">Off</string>
     <string name="device_hub_mode_on" translatable="false">On</string>
     <string name="device_hub_game_mode" translatable="false">Game mode</string>
+    <string name="device_hub_prompt_tone" translatable="false">Headphone prompt tones</string>
     <string name="device_hub_auto_power_off" translatable="false">Auto power-off without audio</string>
     <string name="device_hub_auto_power_off_confirm" translatable="false">When enabled, the headphones may turn off automatically during silence. Turn it on?</string>
     <string name="device_hub_bluetooth_name" translatable="false">Bluetooth name</string>
