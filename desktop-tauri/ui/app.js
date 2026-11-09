@@ -421,6 +421,7 @@ function buildWindow(){
         <div class="lbl">${$t('device_hub_powerbank_text_hint')}</div><input class="field" id="accessoryPowerText" type="text" maxlength="255" aria-label="${$t('device_hub_powerbank_text_hint')}"><button class="btn press" data-act="accpowertext">${$t('device_hub_powerbank_set_text')}</button>
         <div class="lbl">${$t('device_hub_powerbank_reminder_hint')}</div><input class="field" id="accessoryPowerReminder" type="number" min="0" max="1440" aria-label="${$t('device_hub_powerbank_reminder_hint')}"><button class="btn press" data-act="accpowerreminder">${$t('device_hub_powerbank_set_reminder')}</button>
         <div class="lbl">${$t('device_hub_powerbank_shutdown_hint')}</div><input class="field" id="accessoryPowerShutdown" type="number" min="0" max="1440" aria-label="${$t('device_hub_powerbank_shutdown_hint')}"><button class="btn press" data-act="accpowershutdown">${$t('device_hub_powerbank_set_shutdown')}</button>
+        <button class="btn press" data-act="accpowerreset">${$t('device_hub_powerbank_reset')}</button>
       </div>
       <div class="ph"><button class="btn press" data-act="accrefresh">${$t('accessory_refresh')}</button><button class="btn press" data-act="accdisconnect">${$t('accessory_disconnect')}</button></div>
     </div>
@@ -764,6 +765,7 @@ document.addEventListener('click',ev=>{
   if(a==='accpowertheme'){const old=Number(accessoryState.power?.['0020']?.value??-1);if(old>=0&&old<=2)QBLIVE.accessoryPower(0x20,(old+1)%3);else toast($t('device_hub_powerbank_waiting'));return;}
   if(a==='accpowersaver'){const old=Number(accessoryState.power?.['0022']?.value??-1);if(old>=0&&old<=1)QBLIVE.accessoryPower(0x22,old===0?1:0);else toast($t('device_hub_powerbank_waiting'));return;}
   if(a==='accpowertext'){const text=byId('accessoryPowerText').value;if(text.trim())QBLIVE.accessoryPowerText(text);return;}
+  if(a==='accpowerreset'){confirmDialog($t('device_hub_powerbank_reset'),$t('device_hub_powerbank_reset_warning'),$t('device_hub_powerbank_reset_confirm'),()=>QBLIVE.accessoryReset());return;}
   if(a==='accpowerreminder'||a==='accpowershutdown'){const id=a==='accpowerreminder'?'accessoryPowerReminder':'accessoryPowerShutdown';const value=Number(byId(id).value);if(Number.isInteger(value)&&value>=0&&value<=1440)QBLIVE.accessoryPower(a==='accpowerreminder'?0x1e:0x1f,value);else toast($t('device_hub_powerbank_reminder_hint'));return;}
   if(a==='glassbg'){reveal(ev,()=>{S.glassBg=v;apply();});return;}
   if(a==='swatch'){const c=+v;if(S.colorMode==='accent')S.accent=c;else{const pr=S.presets.find(x=>x.id===S.active);if(pr)pr[TOK[S.editTok][0]]=c;}remember(c);reveal(ev,()=>{apply();renderColorPanel();});return;}
@@ -931,6 +933,7 @@ if(window.__TAURI__){
     accessoryTouchSensitivity(value){T.core.invoke('accessory_set_touch_sensitivity',{value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryTouchControl(index,action,modes){T.core.invoke('accessory_set_touch_control',{index,action,modes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryReset(){T.core.invoke('accessory_reset_power').then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPort(port,mode){T.core.invoke('accessory_set_port_mode',{port,mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryRefresh(){T.core.invoke('accessory_refresh').catch(e=>renderAccessory({status:'error',error:String(e)}));},

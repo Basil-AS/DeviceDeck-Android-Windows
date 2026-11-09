@@ -874,6 +874,14 @@ impl AccessorySession {
         }
         Ok(())
     }
+    async fn restore_power_defaults(&self) -> Result<(), String> {
+        if self.model != Model::BaseusBlade2 {
+            return Err("Connected device is not a Blade 2 powerbank".into());
+        }
+        // Baseus Intelligent's Blade 2 reset path writes 0000 to 000E. The app
+        // exposes no reset status/readback, so the caller must report this as sent.
+        self.write(&encode_power_write(0x000E, 0)).await
+    }
     async fn set_power_port_mode(&mut self, port: u8, mode: u8) -> Result<(), String> {
         if self.model != Model::BaseusBlade2 || !(1..=2).contains(&port) || mode > 2 {
             return Err("Unsupported Blade 2 port mode".into());
@@ -1553,6 +1561,23 @@ pub async fn accessory_set_power(
     }
     session.set_power(code, value).await?;
     let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_reset_power(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+) -> Result<Value, String> {
+    if hub.spp_session.lock().await.is_some() {
+        return Err("Connected device is a headset, not a Blade 2 powerbank".into());
+    }
+    let active = hub.session.lock().await;
+    let session = active.as_ref().ok_or("No BLE device is connected")?;
+    session.restore_power_defaults().await?;
+    let mut result = session.snapshot("connected");
+    result["message"] = json!("Factory-reset command sent; device acknowledgement is unavailable");
     emit(&app, result.clone());
     Ok(result)
 }

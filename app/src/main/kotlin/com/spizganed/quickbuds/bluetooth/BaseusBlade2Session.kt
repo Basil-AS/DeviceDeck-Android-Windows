@@ -103,6 +103,14 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
 
     fun setScreenSaver(enabled: Boolean) = writeAndRead(0x0022, if (enabled) 1 else 0)
 
+    /** Sends the factory-reset command found in Baseus Intelligent; firmware confirmation is unavailable. */
+    fun restoreDefaults() {
+        if (!ready) return
+        enqueue(Operation(BaseusMobilePowerCodec.writeU16(0x000E, 0), null) {
+            listener.onStatus("Reset command sent. The device does not report whether it completed.")
+        })
+    }
+
     fun setCountdown(code: Int, minutes: Int) {
         if (code !in setOf(0x001E, 0x001F) || minutes !in 0..1440) {
             listener.onStatus("Timer must be from 0 to 1440 minutes")
