@@ -9,7 +9,7 @@ import java.util.ArrayDeque
 
 /** Blade 2 power-device session inside DeviceDeck's shared accessory hub. */
 class BaseusBlade2Session(context: Context, private val device: BluetoothDevice, private val listener: Listener) {
-    data class State(val values: Map<Int, BaseusMobilePowerCodec.Status> = emptyMap())
+    data class State(val values: Map<Int, BaseusMobilePowerCodec.Status> = emptyMap(), val blade2_140: Boolean = false)
 
     interface Listener {
         fun onState(state: State)
@@ -24,7 +24,6 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
     private val queue = ArrayDeque<Operation>()
     private var pending: Operation? = null
     private var ready = false
-    private var state = State()
     private val profile = DeviceGattProfiles.baseusBlade2
     private val isBlade2_140 = try {
         device.name?.contains("140", ignoreCase = true) == true
@@ -32,6 +31,7 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
         // If Android withholds BLUETOOTH_CONNECT, don't infer the 140-only feature set.
         false
     }
+    private var state = State(blade2_140 = isBlade2_140)
     private val link = BleGattLink.connect(context, device, profile, object : BleGattLink.Listener {
         override fun onReady(mtu: Int) {
             ready = true

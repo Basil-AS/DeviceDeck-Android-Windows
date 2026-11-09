@@ -1016,7 +1016,7 @@ class DeviceHubActivity : Activity() {
             val shown = when (code) {
                 0x000D, 0x0025 -> "${value.value - 100} °C"
                 0x0010 -> "0x${value.value.toString(16).uppercase().padStart(4, '0')}"
-                0x0012 -> "#${value.value}"
+                0x0012 -> BaseusMobilePowerCodec.negotiatedProtocols(value.value, state.blade2_140) ?: "#${value.value}"
                 0x0023, 0x0024 -> "${value.value}"
                 else -> value.scaled()?.let { "${"%.2f".format(java.util.Locale.ROOT, it)} ${powerMetricUnit(code)}" } ?: "${value.value} (raw)"
             }
