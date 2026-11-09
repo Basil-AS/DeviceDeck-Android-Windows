@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.15 — 2026-11-09
+
+- Android and Windows/Linux: add capability-gated EDIFIER W820NB Plus left/right tap and long-press assignment controls from D8 profile 18. Map play/pause, side-specific volume/track, voice assistant, game/sound mode, and 2–3 selected noise-cycle modes with F0 readback after F1 writes. Static APK mappings are implemented; physical headset verification remains open.
+
 ## 0.1.0-alpha.14 — 2026-11-09
 
 - Android and Windows/Linux: add Edifier W820NB Plus touch-sensitivity read/write controls when D8 byte 17 bit 3 advertises support. Read FD before showing the control; accept only indexed profiles 1 (0–31) and 2 (0–15), then confirm FE writes with FD readback. This remains unverified on physical hardware.

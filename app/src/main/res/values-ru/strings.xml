@@ -26,6 +26,25 @@
     <string name="device_hub_bluetooth_name" translatable="false">Имя Bluetooth</string>
     <string name="device_hub_bluetooth_name_limit" translatable="false">Максимум %1$d байт UTF-8</string>
     <string name="device_hub_touch_sensitivity" translatable="false">Чувствительность сенсора</string>
+    <string name="device_hub_touch_left_tap" translatable="false">Слева · одно касание</string>
+    <string name="device_hub_touch_right_tap" translatable="false">Справа · одно касание</string>
+    <string name="device_hub_touch_left_hold" translatable="false">Слева · долгое нажатие</string>
+    <string name="device_hub_touch_right_hold" translatable="false">Справа · долгое нажатие</string>
+    <string name="device_hub_touch_play_pause" translatable="false">Воспроизведение / пауза</string>
+    <string name="device_hub_touch_volume_up" translatable="false">Громче</string>
+    <string name="device_hub_touch_volume_down" translatable="false">Тише</string>
+    <string name="device_hub_touch_previous" translatable="false">Предыдущий трек</string>
+    <string name="device_hub_touch_next" translatable="false">Следующий трек</string>
+    <string name="device_hub_touch_assistant" translatable="false">Голосовой помощник</string>
+    <string name="device_hub_touch_game" translatable="false">Игровой режим</string>
+    <string name="device_hub_touch_sound_mode" translatable="false">Звуковой режим</string>
+    <string name="device_hub_touch_cycle" translatable="false">Переключение режимов шумоподавления</string>
+    <string name="device_hub_touch_anc_high" translatable="false">Сильное шумоподавление</string>
+    <string name="device_hub_touch_anc_medium" translatable="false">Среднее шумоподавление</string>
+    <string name="device_hub_touch_ambient" translatable="false">Прозрачность</string>
+    <string name="device_hub_touch_normal" translatable="false">Обычный режим</string>
+    <string name="device_hub_touch_wind" translatable="false">Подавление ветра</string>
+    <string name="device_hub_touch_choose_two_three" translatable="false">Выберите два или три режима</string>
     <string name="device_hub_save" translatable="false">Сохранить</string>
     <string name="device_hub_unknown" translatable="false">Неизвестно</string>
     <string name="device_hub_sleep_timer" translatable="false">Таймер выключения</string>
