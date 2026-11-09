@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.9 — 2026-11-09
 
 - Android and Windows/Linux: expose W820NB Plus game mode only when D8 byte 17 bit 6 advertises it; query with 0x08 and confirm 0x09 writes with a fresh 0x08 readback.
 
