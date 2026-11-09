@@ -76,14 +76,30 @@ object ModelCatalog {
         else -> id
     }
 
+    fun matchesName(model: Model, name: String?): Boolean {
+        if (name == null) return false
+        if (model.name.equals(name, ignoreCase = true)) return true
+        val aliases = model.json.optJSONArray("aliases") ?: return false
+        return (0 until aliases.length()).any { aliases.optString(it).equals(name, ignoreCase = true) }
+    }
+
     fun find(models: List<Model>, id: String?, name: String?): Model? {
         // HeyMelody's order (PROTOCOL.md §6): name and id, then name (some buds reuse another model's id,
-        // issue #5), then id (a renamed device).
+        // issue #5), then id (a renamed device). DeviceDeck aliases are also valid names for their model.
         val byId = { m: Model -> id != null && m.id.equals(id, ignoreCase = true) }
-        val byName = { m: Model -> name != null && m.name == name }
+        val byName = { m: Model -> matchesName(m, name) }
         return models.firstOrNull { byName(it) && byId(it) } ?: models.firstOrNull(byName) ?: models.firstOrNull(byId)
-            ?: models.filter { name != null && squash(it.name) == squash(name) }.singleOrNull()
+            ?: models.filter { candidate ->
+                name != null && (listOf(candidate.name) + aliases(candidate)).any { squash(it) == squash(name) }
+            }.singleOrNull()
     }
+
+    fun aliases(model: Model): List<String> {
+        val aliases = model.json.optJSONArray("aliases") ?: return emptyList()
+        return (0 until aliases.length()).map { aliases.optString(it) }.filter(String::isNotBlank)
+    }
+
+    fun isKnownName(context: Context, name: String?): Boolean = all(context).any { matchesName(it, name) }
 
     /** A name without case, spaces and punctuation, so "OnePlus Buds3" and "oneplus buds 3" compare equal. Last resort only. */
     private fun squash(s: String) = s.lowercase().filter { it.isLetterOrDigit() }
@@ -95,8 +111,8 @@ object ModelCatalog {
         val name = p.getString(KEY_DEVICE_NAME, null)
         val models = all(context)
         return when {
-            models.any { it.name == name && id != null && it.id.equals(id, ignoreCase = true) } -> "name+id"
-            models.any { it.name == name } -> "name"
+            models.any { matchesName(it, name) && id != null && it.id.equals(id, ignoreCase = true) } -> "name+id"
+            models.any { matchesName(it, name) } -> "name"
             models.any { id != null && it.id.equals(id, ignoreCase = true) } -> "id"
             find(models, id, name) != null -> "squashed name"
             else -> "none"
