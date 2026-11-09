@@ -200,6 +200,9 @@ class DeviceHubActivity : Activity() {
         powerControls.addView(accessoryAction(getString(R.string.device_hub_powerbank_set_shutdown), palette, dp) {
             blade2Session?.setCountdown(0x001F, bladeShutdownInput.text.toString().toIntOrNull() ?: -1)
         })
+        powerControls.addView(accessoryAction(getString(R.string.device_hub_powerbank_reset), palette, dp) {
+            confirmBlade2Reset()
+        })
         card.addView(powerControls)
         card.addView(TextView(this).apply {
             setText(R.string.device_hub_verified_note)
@@ -1181,6 +1184,15 @@ class DeviceHubActivity : Activity() {
                 blade2Session?.setPortMode(port, selected)
             }
             .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun confirmBlade2Reset() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.device_hub_powerbank_reset)
+            .setMessage(R.string.device_hub_powerbank_reset_warning)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.device_hub_powerbank_reset_confirm) { _, _ -> blade2Session?.restoreDefaults() }
             .show()
     }
 

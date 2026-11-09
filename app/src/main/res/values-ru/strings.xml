@@ -60,6 +60,9 @@
     <string name="device_hub_powerbank_set_reminder" translatable="false">Установить напоминание</string>
     <string name="device_hub_powerbank_shutdown_hint" translatable="false">Автоотключение · минуты (0–1440)</string>
     <string name="device_hub_powerbank_set_shutdown" translatable="false">Установить автоотключение</string>
+    <string name="device_hub_powerbank_reset" translatable="false">Сбросить настройки</string>
+    <string name="device_hub_powerbank_reset_confirm" translatable="false">Сбросить</string>
+    <string name="device_hub_powerbank_reset_warning" translatable="false">Будет отправлена команда сброса из приложения Baseus. DeviceDeck не может проверить результат. Продолжайте, только если хотите сбросить настройки Blade 2.</string>
     <string name="device_hub_powerbank_reminder" translatable="false">Таймер напоминания</string>
     <string name="device_hub_powerbank_shutdown" translatable="false">Автоотключение</string>
     <string name="device_hub_powerbank_port1" translatable="false">Порт USB-C 1</string>
