@@ -37,7 +37,12 @@ class EdifierW820NbPlusSession(
         val touchSensitivitySupported: Boolean = false,
         val touchSensitivityIndex: Int? = null,
         val touchSensitivityValue: Int? = null,
+        val touchControlsSupported: Boolean = false,
+        val touchControls: List<TouchControl> = emptyList(),
     )
+
+    /** W820NB Plus control slots exposed by Connect's D8 tap profile 18. */
+    data class TouchControl(val index: Int, val action: Int, val noiseMask: Int? = null, val selectedNoise: Int? = null)
 
     interface Listener {
         fun onState(state: State)
@@ -63,7 +68,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE) {
+        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -83,6 +88,7 @@ class EdifierW820NbPlusSession(
                 val timerProfile = payload.getOrNull(9)?.toInt()?.and(0xFF) ?: 0
                 val gameModeSupported = (payload.getOrNull(17)?.toInt()?.and(0x40) ?: 0) != 0
                 val touchSensitivitySupported = (payload.getOrNull(17)?.toInt()?.and(0x08) ?: 0) != 0
+                val touchControlsSupported = payload.getOrNull(16)?.toInt()?.and(0xFF) == 18
                 val autoPowerOffSupported = payload.getOrNull(8)?.toInt()?.and(0xFF) == 1
                 val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
@@ -96,7 +102,8 @@ class EdifierW820NbPlusSession(
                 state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions,
                     gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported,
                     bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit,
-                    touchSensitivitySupported = touchSensitivitySupported)
+                    touchSensitivitySupported = touchSensitivitySupported,
+                    touchControlsSupported = touchControlsSupported)
                 listener.onState(state)
                 listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
                 refresh()
@@ -137,6 +144,7 @@ class EdifierW820NbPlusSession(
             if (state.autoPowerOffSupported) readAutoPowerOff()
             if (state.bluetoothNameSupported) readBluetoothName()
             if (state.touchSensitivitySupported) readTouchSensitivity()
+            if (state.touchControlsSupported) readTouchControls()
         }
         pump()
     }
@@ -248,6 +256,58 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readTouchSensitivity(expected = value)
+        }
+        pump()
+    }
+
+    fun setTouchControl(index: Int, action: Int, selectedNoiseModes: List<Int> = emptyList()) {
+        if (!ready || !state.touchControlsSupported || index !in 1..4 || action !in 1..6) return
+        val payload = if (action == 6) {
+            val unique = selectedNoiseModes.distinct()
+            if (unique.size !in 2..3 || unique.any { it !in 0..4 }) {
+                listener.onStatus("Choose two or three supported noise modes")
+                return
+            }
+            val mask = unique.fold(0) { bits, value -> bits or (1 shl value) }
+            byteArrayOf(index.toByte(), mask.toByte(), unique.last().toByte())
+        } else byteArrayOf(index.toByte(), action.toByte())
+        enqueue(0xF1, payload) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge the touch control")
+                return@enqueue
+            }
+            readTouchControl(index, expectedAction = action, expectedModes = selectedNoiseModes)
+        }
+        pump()
+    }
+
+    private fun readTouchControls() {
+        (1..4).forEach { readTouchControl(it) }
+    }
+
+    private fun readTouchControl(index: Int, expectedAction: Int? = null, expectedModes: List<Int> = emptyList()) {
+        enqueue(0xF0, byteArrayOf(index.toByte())) { frame ->
+            val values = frame.parameters().map { it.toInt() and 0xFF }
+            if (values.size !in 2..3 || values[0] != index || values[1] !in 1..6 ||
+                (values[1] == 6 && values.size != 3) || (values[1] != 6 && values.size != 2)) {
+                listener.onStatus("Touch-control response was not recognized")
+                return@enqueue
+            }
+            val control = if (values[1] == 6) {
+                if (values[2] and 0xE0 != 0 || Integer.bitCount(values[2]) !in 2..3) {
+                    listener.onStatus("Touch-control noise-mode mask was invalid")
+                    return@enqueue
+                }
+                TouchControl(index, 6, values[2], null)
+            } else TouchControl(index, values[1])
+            state = state.copy(touchControls = state.touchControls.filterNot { it.index == index } + control)
+            listener.onState(state)
+            if (expectedAction != null && control.action != expectedAction) {
+                listener.onStatus("Touch control was not confirmed by device readback")
+            } else if (expectedAction == 6 && control.noiseMask != null) {
+                val actual = (0..4).filter { control.noiseMask and (1 shl it) != 0 }
+                if (actual != expectedModes.sorted()) listener.onStatus("Noise-mode choices were not confirmed by device readback")
+            }
         }
         pump()
     }

@@ -16,6 +16,7 @@ import android.widget.TextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import android.text.InputType
 import android.text.InputFilter
 import com.spizganed.quickbuds.R
@@ -56,6 +57,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierAutoPowerOffControl: TextView
     private lateinit var edifierNameControl: TextView
     private lateinit var edifierTouchSensitivityControl: TextView
+    private lateinit var edifierTapControls: LinearLayout
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -562,6 +564,11 @@ class DeviceHubActivity : Activity() {
             }
         }
         controls.addView(edifierTouchSensitivityControl)
+        edifierTapControls = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
+        }
+        controls.addView(edifierTapControls)
         edifierAutoPowerOffControl = TextView(this).apply {
             textSize = 13f; gravity = Gravity.CENTER
             setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
@@ -607,6 +614,27 @@ class DeviceHubActivity : Activity() {
             }
         }
         controls.addView(edifierNameControl)
+    }
+
+    private fun chooseEdifierNoiseCycle(mapping: EdifierW820NbPlusSession.TouchControl) {
+        val labels = arrayOf(
+            getString(R.string.device_hub_touch_anc_high),
+            getString(R.string.device_hub_touch_anc_medium),
+            getString(R.string.device_hub_touch_ambient),
+            getString(R.string.device_hub_touch_normal),
+            getString(R.string.device_hub_touch_wind),
+        )
+        val selected = BooleanArray(labels.size) { index -> (mapping.noiseMask ?: 0) and (1 shl index) != 0 }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.device_hub_touch_cycle)
+            .setMultiChoiceItems(labels, selected) { _, which, checked -> selected[which] = checked }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.device_hub_save) { _, _ ->
+                val modes = selected.indices.filter { selected[it] }
+                if (modes.size !in 2..3) Toast.makeText(this, R.string.device_hub_touch_choose_two_three, Toast.LENGTH_SHORT).show()
+                else edifierSession?.setTouchControl(mapping.index, 6, modes)
+            }
+            .show()
     }
 
     private fun addSppModes() {
@@ -732,6 +760,50 @@ class DeviceHubActivity : Activity() {
                 edifierTouchSensitivityControl.setTextColor(palette.text)
                 edifierTouchSensitivityControl.background = ThemeRes.ripple(this, ThemeRes.shape(this, palette.card, palette.outline, 14f))
                 edifierTouchSensitivityControl.isEnabled = ready && supported
+            }
+            if (::edifierTapControls.isInitialized) {
+                val supported = edifierState.touchControlsSupported && edifierState.touchControls.isNotEmpty()
+                edifierTapControls.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierTapControls.removeAllViews()
+                if (supported) {
+                    val labels = listOf(
+                        R.string.device_hub_touch_left_tap, R.string.device_hub_touch_right_tap,
+                        R.string.device_hub_touch_left_hold, R.string.device_hub_touch_right_hold,
+                    )
+                    edifierState.touchControls.sortedBy { it.index }.forEach { mapping ->
+                        val actionNames = if (mapping.index == 1 || mapping.index == 3)
+                            listOf(R.string.device_hub_touch_play_pause, R.string.device_hub_touch_volume_up,
+                                R.string.device_hub_touch_previous, R.string.device_hub_touch_assistant,
+                                R.string.device_hub_touch_game, R.string.device_hub_touch_cycle)
+                        else listOf(R.string.device_hub_touch_play_pause, R.string.device_hub_touch_volume_down,
+                            R.string.device_hub_touch_next, R.string.device_hub_touch_assistant,
+                            R.string.device_hub_touch_sound_mode, R.string.device_hub_touch_cycle)
+                        val selected = when (mapping.action) {
+                            6 -> getString(R.string.device_hub_touch_cycle)
+                            in 1..5 -> getString(actionNames[mapping.action - 1])
+                            else -> getString(R.string.device_hub_unknown)
+                        }
+                        edifierTapControls.addView(TextView(this).apply {
+                            text = getString(labels[mapping.index - 1]) + " · " + selected
+                            textSize = 13f; gravity = Gravity.CENTER_VERTICAL
+                            setPadding(ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+                            setTextColor(ThemeRes.palette(this@DeviceHubActivity).text)
+                            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                            isEnabled = ready
+                            setOnClickListener {
+                                AlertDialog.Builder(this@DeviceHubActivity)
+                                    .setTitle(labels[mapping.index - 1])
+                                    .setItems(actionNames.map { getString(it) }.toTypedArray()) { _, which ->
+                                        val action = which + 1
+                                        if (action == 6) chooseEdifierNoiseCycle(mapping)
+                                        else edifierSession?.setTouchControl(mapping.index, action)
+                                    }
+                                    .setNegativeButton(android.R.string.cancel, null)
+                                    .show()
+                            }
+                        }, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
+                    }
+                }
             }
             if (::edifierNameControl.isInitialized) {
                 val supported = edifierState.bluetoothNameSupported && edifierState.bluetoothNameLimitBytes > 0

@@ -307,6 +307,8 @@ struct AccessorySession {
     touch_sensitivity_supported: bool,
     touch_sensitivity_index: Option<u8>,
     touch_sensitivity_value: Option<u8>,
+    touch_controls_supported: bool,
+    touch_controls: Vec<EdifierTouchControl>,
     power: HashMap<u16, PowerStatus>,
     device_name: String,
 }
@@ -314,6 +316,10 @@ struct AccessorySession {
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct EdifierEqPreset { id: u8, name: &'static str }
+
+#[derive(Clone, Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EdifierTouchControl { index: u8, action: u8, noise_mask: Option<u8> }
 
 fn edifier_eq_presets(profile: u8) -> Vec<EdifierEqPreset> {
     let names: &[&str] = match profile {
@@ -399,6 +405,7 @@ impl AccessorySession {
                     };
                     self.game_mode_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x40 != 0);
                     self.touch_sensitivity_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x08 != 0);
+                    self.touch_controls_supported = capabilities.payload.get(16) == Some(&18);
                     self.auto_power_off_supported = capabilities.payload.get(8) == Some(&1);
                     self.bluetooth_name_supported = capabilities.payload.get(2) == Some(&1);
                     self.bluetooth_name_limit_bytes = capabilities.payload.get(3).copied().map(edifier_name_limit).unwrap_or(0);
@@ -442,6 +449,14 @@ impl AccessorySession {
                                 self.touch_sensitivity_index = Some(index);
                                 self.touch_sensitivity_value = Some(value);
                             }
+                        }
+                    }
+                }
+                if self.touch_controls_supported {
+                    self.touch_controls.clear();
+                    for index in 1..=4 {
+                        if let Ok(control) = self.read_touch_control(index).await {
+                            self.touch_controls.push(control);
                         }
                     }
                 }
@@ -640,6 +655,51 @@ impl AccessorySession {
         self.touch_sensitivity_value = Some(value);
         Ok(())
     }
+    async fn read_touch_control(&mut self, index: u8) -> Result<EdifierTouchControl, String> {
+        if self.model != Model::EdifierW820NbPlus || !self.touch_controls_supported || !(1..=4).contains(&index) {
+            return Err("Touch control is not supported by the reported W820NB Plus profile".into());
+        }
+        let frame = self.request(&encode_edifier(&[0xF0, index]), 0xF0).await?;
+        let p = &frame.payload;
+        if p.len() < 2 || p[0] != index || !(1..=6).contains(&p[1])
+            || (p[1] == 6 && p.len() != 3) || (p[1] != 6 && p.len() != 2) {
+            return Err("Edifier touch-control response was not recognized".into());
+        }
+        let noise_mask = if p[1] == 6 {
+            let mask = p[2];
+            if mask & 0xE0 != 0 || mask.count_ones() < 2 || mask.count_ones() > 3 {
+                return Err("Edifier touch-control mode mask was invalid".into());
+            }
+            Some(mask)
+        } else { None };
+        Ok(EdifierTouchControl { index, action: p[1], noise_mask })
+    }
+    async fn set_touch_control(&mut self, index: u8, action: u8, modes: &[u8]) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || !self.touch_controls_supported || !(1..=4).contains(&index) || !(1..=6).contains(&action) {
+            return Err("Touch control is not supported by the reported W820NB Plus profile".into());
+        }
+        let mut payload = vec![0xF1, index];
+        let expected_mask = if action == 6 {
+            if !(2..=3).contains(&modes.len()) || modes.iter().any(|mode| *mode > 4)
+                || modes.iter().collect::<std::collections::HashSet<_>>().len() != modes.len() {
+                return Err("Choose two or three distinct supported noise modes".into());
+            }
+            let mask = modes.iter().fold(0u8, |bits, mode| bits | (1 << mode));
+            payload.extend_from_slice(&[mask, *modes.last().unwrap()]);
+            Some(mask)
+        } else {
+            if !modes.is_empty() { return Err("Noise-mode choices only apply to the cycle action".into()); }
+            payload.push(action);
+            None
+        };
+        let ack = self.request(&encode_edifier(&payload), 0xF1).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge the touch control".into()); }
+        let actual = self.read_touch_control(index).await?;
+        if actual.action != action || actual.noise_mask != expected_mask { return Err("Edifier touch control did not match device readback".into()); }
+        self.touch_controls.retain(|control| control.index != index);
+        self.touch_controls.push(actual);
+        Ok(())
+    }
     async fn set_auto_power_off(&mut self, enabled: bool) -> Result<(), String> {
         if self.model != Model::EdifierW820NbPlus || !self.auto_power_off_supported || self.auto_power_off.is_none() {
             return Err("Automatic power-off is not available in the reported Edifier profile".into());
@@ -748,7 +808,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
     }
 }
 
@@ -1155,6 +1215,8 @@ pub async fn accessory_connect(
         touch_sensitivity_supported: false,
         touch_sensitivity_index: None,
         touch_sensitivity_value: None,
+        touch_controls_supported: false,
+        touch_controls: Vec::new(),
         power: HashMap::new(),
         device_name: name,
     };
@@ -1302,6 +1364,14 @@ pub async fn accessory_set_touch_sensitivity(app: AppHandle, hub: State<'_, Acce
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_touch_control(app: AppHandle, hub: State<'_, AccessoryHub>, index: u8, action: u8, modes: Vec<u8>) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_touch_control(index, action, &modes).await?;
+    let result = session.snapshot("connected"); emit(&app, result.clone()); Ok(result)
 }
 
 #[tauri::command]
