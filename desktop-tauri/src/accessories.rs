@@ -299,6 +299,8 @@ struct AccessorySession {
     sleep_timer_minutes: Option<u16>,
     game_mode_supported: bool,
     game_mode: Option<bool>,
+    prompt_tone_supported: bool,
+    prompt_tone_enabled: Option<bool>,
     auto_power_off_supported: bool,
     auto_power_off: Option<bool>,
     bluetooth_name_supported: bool,
@@ -404,6 +406,7 @@ impl AccessorySession {
                         _ => Vec::new(),
                     };
                     self.game_mode_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x40 != 0);
+                    self.prompt_tone_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x02 != 0);
                     self.touch_sensitivity_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x08 != 0);
                     self.touch_controls_supported = capabilities.payload.get(16) == Some(&18);
                     self.auto_power_off_supported = capabilities.payload.get(8) == Some(&1);
@@ -428,6 +431,11 @@ impl AccessorySession {
                 if self.game_mode_supported {
                     if let Ok(game) = self.request(&encode_edifier(&[0x08]), 0x08).await {
                         self.game_mode = match game.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+                    }
+                }
+                if self.prompt_tone_supported {
+                    if let Ok(state) = self.request(&encode_edifier(&[0xF9]), 0xF9).await {
+                        self.prompt_tone_enabled = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
                     }
                 }
                 if self.auto_power_off_supported {
@@ -640,6 +648,18 @@ impl AccessorySession {
         Ok(())
     }
 
+    async fn set_prompt_tone(&mut self, enabled: bool) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || !self.prompt_tone_supported || self.prompt_tone_enabled.is_none() {
+            return Err("Prompt tones are not available in the reported Edifier profile".into());
+        }
+        let ack = self.request(&encode_edifier(&[0xFA, u8::from(enabled)]), 0xFA).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge prompt tones".into()); }
+        let state = self.request(&encode_edifier(&[0xF9]), 0xF9).await?;
+        self.prompt_tone_enabled = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+        if self.prompt_tone_enabled != Some(enabled) { return Err("Prompt tone setting did not match device readback".into()); }
+        Ok(())
+    }
+
     async fn set_touch_sensitivity(&mut self, value: u8) -> Result<(), String> {
         let index = self.touch_sensitivity_index.ok_or("Touch sensitivity has not been read")?;
         let max = edifier_sensitivity_max(index).ok_or("Unsupported Edifier sensitivity profile")?;
@@ -808,7 +828,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
     }
 }
 
@@ -1207,6 +1227,8 @@ pub async fn accessory_connect(
         sleep_timer_minutes: None,
         game_mode_supported: false,
         game_mode: None,
+        prompt_tone_supported: false,
+        prompt_tone_enabled: None,
         auto_power_off_supported: false,
         auto_power_off: None,
         bluetooth_name_supported: false,
@@ -1341,6 +1363,16 @@ pub async fn accessory_set_auto_power_off(app: AppHandle, hub: State<'_, Accesso
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_auto_power_off(enabled).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_prompt_tone(app: AppHandle, hub: State<'_, AccessoryHub>, enabled: bool) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_prompt_tone(enabled).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
