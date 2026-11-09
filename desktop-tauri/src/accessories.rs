@@ -335,6 +335,7 @@ struct AccessorySession {
     decoder: Decoder,
     battery: Option<u8>,
     noise: Option<String>,
+    gestures: Vec<(u8, u8, u8)>,
     eq_presets: Vec<EdifierEqPreset>,
     selected_eq: Option<u8>,
     sleep_timer_options: Vec<u16>,
@@ -567,6 +568,7 @@ impl AccessorySession {
                     }
                     .into(),
                 );
+                let _ = self.read_legacy_gestures().await;
             }
             Model::BaseusBlade2 => {
                 let mut codes: Vec<u16> = (0x0001..=0x000D).collect();
@@ -589,6 +591,41 @@ impl AccessorySession {
                 return Err("Baseus SPP profiles use the paired-device session".into());
             }
         }
+        Ok(())
+    }
+    async fn read_legacy_gesture_layout(&mut self, layout: u8) -> Result<(), String> {
+        if self.model != Model::BaseusBowie30 || ![0, 1, 2].contains(&layout) {
+            return Err("Unsupported Bowie 30 gesture layout".into());
+        }
+        let frame = self.request(&[0xBA, 0x21, layout], 0x21).await?;
+        if frame.payload.len() != 3 || frame.payload[0] != layout {
+            return Err("Unrecognized Bowie 30 gesture response".into());
+        }
+        self.gestures.retain(|(_, current, _)| *current != layout);
+        self.gestures.push((0, layout, frame.payload[1]));
+        self.gestures.push((1, layout, frame.payload[2]));
+        Ok(())
+    }
+    async fn read_legacy_gestures(&mut self) -> Result<(), String> {
+        for layout in [0, 2, 1] {
+            self.read_legacy_gesture_layout(layout).await?;
+        }
+        Ok(())
+    }
+    async fn set_gesture(&mut self, button: u8, layout: u8, action: u8) -> Result<(), String> {
+        if self.model != Model::BaseusBowie30 || button > 1 || ![0, 1, 2].contains(&layout)
+            || ![0, 1, 2, 3, 4, 6].contains(&action)
+            || !self.gestures.iter().any(|(side, current, _)| *side == button && *current == layout) {
+            return Err("Unsupported Bowie 30 gesture".into());
+        }
+        let left = self.gestures.iter().find(|(side, current, _)| *side == 0 && *current == layout).map(|(_, _, value)| *value)
+            .ok_or("Missing Bowie 30 left gesture state")?;
+        let right = self.gestures.iter().find(|(side, current, _)| *side == 1 && *current == layout).map(|(_, _, value)| *value)
+            .ok_or("Missing Bowie 30 right gesture state")?;
+        let ack = self.request(&[0xBA, 0x22, layout, if button == 0 { action } else { left }, if button == 1 { action } else { right }], 0x22).await?;
+        if ack.payload.first() != Some(&1) { return Err("Baseus rejected the gesture".into()); }
+        self.read_legacy_gesture_layout(layout).await?;
+        if !self.gestures.contains(&(button, layout, action)) { return Err("Bowie 30 gesture readback mismatch".into()); }
         Ok(())
     }
     async fn set_noise(&mut self, value: &str) -> Result<(), String> {
@@ -890,7 +927,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action})).collect::<Vec<_>>(), "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
     }
 }
 
@@ -1293,6 +1330,7 @@ pub async fn accessory_connect(
         },
         battery: None,
         noise: None,
+        gestures: Vec::new(),
         eq_presets: Vec::new(),
         selected_eq: None,
         sleep_timer_options: Vec::new(),
@@ -1375,8 +1413,16 @@ pub async fn accessory_set_gesture(
     action: u8,
 ) -> Result<Value, String> {
     let mut spp = hub.spp_session.lock().await;
-    let session = spp.as_mut().ok_or("No Baseus SPP headset is connected")?;
-    session.set_gesture(button, layout, action)?;
+    if let Some(session) = spp.as_mut() {
+        session.set_gesture(button, layout, action)?;
+        let result = session.snapshot("connected");
+        emit(&app, result.clone());
+        return Ok(result);
+    }
+    drop(spp);
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No Baseus BLE headset is connected")?;
+    session.set_gesture(button, layout, action).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
