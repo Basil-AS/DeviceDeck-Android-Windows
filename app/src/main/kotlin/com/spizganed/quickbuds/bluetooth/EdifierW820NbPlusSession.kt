@@ -11,7 +11,7 @@ import com.spizganed.quickbuds.protocol.edifier.EdifierEqualizer
 import java.util.ArrayDeque
 
 internal fun decodeEdifierPromptLevel(parameters: ByteArray): Int? =
-    parameters.firstOrNull()?.toInt()?.and(0xFF)?.takeIf { it in 0..12 }
+    parameters.firstOrNull()?.toInt()?.and(0xFF)?.takeIf { it in 0..15 }
 
 /** W820NB Plus command session over DeviceDeck's shared GATT link. */
 class EdifierW820NbPlusSession(
@@ -255,7 +255,7 @@ class EdifierW820NbPlusSession(
     }
 
     fun setPromptVolume(level: Int) {
-        if (!ready || !state.promptVolumeSupported || state.promptVolumeLevel == null || level !in 0..12) {
+        if (!ready || !state.promptVolumeSupported || state.promptVolumeLevel == null || level !in 0..15) {
             listener.onStatus("Voice prompt volume is not available in the reported device profile")
             return
         }
