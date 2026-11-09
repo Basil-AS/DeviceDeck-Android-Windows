@@ -178,6 +178,8 @@ impl BaseusSppSession {
         if self.model == Model::BaseusEp10Pro {
             self.read_noise()?;
             let _ = self.read_gestures();
+        } else if self.model == Model::BaseusBowieMf1 {
+            let _ = self.read_gestures();
         }
         Ok(())
     }
@@ -218,6 +220,21 @@ impl BaseusSppSession {
     }
 
     fn read_gestures(&mut self) -> Result<(), String> {
+        if self.model == Model::BaseusBowieMf1 {
+            for layout in [0, 2, 1] {
+                let frame = self.request(0x21, &[layout])?;
+                if frame.payload.len() != 3 || frame.payload[0] != layout {
+                    return Err("Unrecognized Bowie MF1 gesture response".into());
+                }
+                self.gestures.retain(|(_, existing_layout, _)| *existing_layout != layout);
+                self.gestures.push((0, layout, frame.payload[1]));
+                self.gestures.push((1, layout, frame.payload[2]));
+            }
+            return Ok(());
+        }
+        if self.model != Model::BaseusEp10Pro {
+            return Err("Gesture protocol is unavailable for this model".into());
+        }
         let mut mappings = self.gestures.clone();
         for button in 0..=1 {
             let frame = self.request(0x8C, &[button, 0xFF])?;
@@ -256,7 +273,32 @@ impl BaseusSppSession {
     }
 
     fn set_gesture(&mut self, button: u8, layout: u8, action: u8) -> Result<(), String> {
-        if self.model != Model::BaseusEp10Pro || button > 1 || ![0, 1, 2, 3].contains(&layout) {
+        if button > 1 {
+            return Err("Unsupported Baseus gesture".into());
+        }
+        if self.model == Model::BaseusBowieMf1 {
+            let allowed: &[u8] = match layout {
+                0 | 2 => &[0, 1, 2, 3, 4, 11, 12],
+                1 => &[4, 5],
+                _ => return Err("Unsupported Bowie MF1 gesture layout".into()),
+            };
+            if !allowed.contains(&action)
+                || !self.gestures.iter().any(|(side, current_layout, _)| *side == button && *current_layout == layout) {
+                return Err("Unsupported Bowie MF1 gesture action".into());
+            }
+            let left = self.gestures.iter().find(|(side, current_layout, _)| *side == 0 && *current_layout == layout).map(|(_, _, value)| *value)
+                .ok_or("Missing Bowie MF1 left gesture state")?;
+            let right = self.gestures.iter().find(|(side, current_layout, _)| *side == 1 && *current_layout == layout).map(|(_, _, value)| *value)
+                .ok_or("Missing Bowie MF1 right gesture state")?;
+            let next_left = if button == 0 { action } else { left };
+            let next_right = if button == 1 { action } else { right };
+            let ack = self.request(0x22, &[layout, next_left, next_right])?;
+            if ack.payload.first() != Some(&1) { return Err("Baseus rejected the gesture".into()); }
+            self.read_gestures()?;
+            if !self.gestures.contains(&(button, layout, action)) { return Err("Bowie MF1 gesture readback mismatch".into()); }
+            return Ok(());
+        }
+        if self.model != Model::BaseusEp10Pro || ![0, 1, 2, 3].contains(&layout) {
             return Err("Unsupported Baseus gesture".into());
         }
         let allowed: &[u8] = if layout == 3 { &[0, 1] } else { &[0, 1, 2, 3, 4, 6, 11, 12] };
@@ -915,6 +957,8 @@ fn decode_baseus_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
         }
         let command = buffer[1];
         let size = match command {
+            0x21 => 5,
+            0x22 => 3,
             0x02 | 0x33 => 6,
             0x34 | 0x35 | 0x8B | 0x8D | 0x8F => 3,
             0x8C => 11,
@@ -1536,6 +1580,15 @@ mod tests {
             [0x02, 0x33]
         );
         assert_eq!(frames[0].payload, [80, 0, 75, 1]);
+    }
+
+    #[test]
+    fn baseus_decoder_extracts_legacy_mf1_gesture_frames() {
+        let mut buffer = Vec::new();
+        let frames = decode_baseus_stream(&mut buffer, &[0xAA, 0x21, 0, 1, 2, 0xAA, 0x22, 1]);
+        assert_eq!(frames.iter().map(|frame| frame.command).collect::<Vec<_>>(), [0x21, 0x22]);
+        assert_eq!(frames[0].payload, [0, 1, 2]);
+        assert_eq!(frames[1].payload, [1]);
     }
 
     #[test]

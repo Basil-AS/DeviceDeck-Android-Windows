@@ -33,6 +33,10 @@ object BaseusBowie30Codec {
                 val size = when (buffer[1].toInt() and 0xFF) {
                     0x02, 0x33 -> 6
                     0x34, 0x35 -> 3
+                    // Baseus Intelligent legacy gesture protocol: AA21 carries
+                    // layout + left/right action; AA22 carries one result byte.
+                    0x21 -> 5
+                    0x22 -> 3
                     0x8B, 0x8D, 0x8F -> 3
                     0x8C -> 11
                     0x8E -> {
