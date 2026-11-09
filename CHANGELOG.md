@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.24 — 2026-11-10
 
-- Enable the realme Buds Air7 Pro dual-device connection switch in the unified Android and Windows/Linux apps, based on the realme Link profile and official supported-model list. DeviceDeck exposes the toggle only; connected-device management is not mapped for this model. Hardware verification remains open.
+- Add the realme Buds Air7 Pro dual-device connection switch to the unified DeviceDeck Android and Windows/Linux apps. DeviceDeck exposes the multipoint toggle; connected-device management is not mapped. Hardware verification remains open.
 
 ## 0.1.0-alpha.23 — 2026-11-09
 
