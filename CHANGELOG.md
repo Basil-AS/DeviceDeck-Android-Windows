@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.12 — 2026-11-09
+
+- Android and Windows/Linux: add Edifier W820NB Plus auto power-off when audio is absent. The D8 capability report gates the control; D7 reads state, D6 writes, and D7 verifies the result. Android asks before enabling.
+- Keep Edifier and Baseus controls inside the same DeviceDeck app on each platform. Device behavior remains unverified on physical hardware.
+
 ## 0.1.0-alpha.11 — 2026-11-09
 
 - Android and Windows/Linux: add Baseus EP10 Pro gesture assignments to DeviceDeck's shared device hub. The “Cycle noise modes” action can choose Normal, ANC, and Transparency (at least two), with BA8E readback after BA8F writes.
