@@ -225,7 +225,8 @@ impl BaseusSppSession {
             }
             mappings.retain(|(side, _, _)| *side != button);
             for index in 0..4 {
-                let layout = [3, 0, 1, 2][index];
+                let layout = frame.payload[1 + index * 2];
+                if layout > 3 { return Err("Unknown Baseus gesture layout".into()); }
                 mappings.push((button, layout, frame.payload[2 + index * 2]));
             }
         }

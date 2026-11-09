@@ -111,7 +111,9 @@ class BaseusSppSession(
             val frame = request(0x8C, button, 0xFF)
             if (frame.payload.size != 9 || frame.u8(0) != button) throw IllegalStateException("Unrecognized gesture response")
             rows = rows.filter { it.button != button } + (0 until 4).map { index ->
-                Gesture(button, frame.u8(1 + index * 2), frame.u8(2 + index * 2))
+                val layout = frame.u8(1 + index * 2)
+                if (layout !in 0..3) throw IllegalStateException("Unknown gesture layout")
+                Gesture(button, layout, frame.u8(2 + index * 2))
             }
         }
         state = state.copy(gestures = rows)
