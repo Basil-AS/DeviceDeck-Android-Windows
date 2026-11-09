@@ -301,6 +301,9 @@ struct AccessorySession {
     game_mode: Option<bool>,
     auto_power_off_supported: bool,
     auto_power_off: Option<bool>,
+    bluetooth_name_supported: bool,
+    bluetooth_name_limit_bytes: usize,
+    bluetooth_name: Option<String>,
     power: HashMap<u16, PowerStatus>,
     device_name: String,
 }
@@ -393,6 +396,8 @@ impl AccessorySession {
                     };
                     self.game_mode_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x40 != 0);
                     self.auto_power_off_supported = capabilities.payload.get(8) == Some(&1);
+                    self.bluetooth_name_supported = capabilities.payload.get(2) == Some(&1);
+                    self.bluetooth_name_limit_bytes = capabilities.payload.get(3).copied().map(edifier_name_limit).unwrap_or(0);
                 }
                 if !self.eq_presets.is_empty() {
                     if let Ok(eq) = self.request(&encode_edifier(&[0xD5]), 0xD5).await {
@@ -417,6 +422,11 @@ impl AccessorySession {
                 if self.auto_power_off_supported {
                     if let Ok(state) = self.request(&encode_edifier(&[0xD7]), 0xD7).await {
                         self.auto_power_off = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+                    }
+                }
+                if self.bluetooth_name_supported {
+                    if let Ok(name) = self.request(&encode_edifier(&[0xC9]), 0xC9).await {
+                        self.bluetooth_name = decode_edifier_name(&name.payload);
                     }
                 }
                 let d0 = [0xD0];
@@ -609,6 +619,21 @@ impl AccessorySession {
         if self.auto_power_off != Some(enabled) { return Err("Automatic power-off did not match device readback".into()); }
         Ok(())
     }
+    async fn set_bluetooth_name(&mut self, name: &str) -> Result<(), String> {
+        let bytes = name.as_bytes();
+        if self.model != Model::EdifierW820NbPlus || !self.bluetooth_name_supported || self.bluetooth_name_limit_bytes == 0
+            || name.trim().is_empty() || bytes.len() > self.bluetooth_name_limit_bytes || name.chars().any(char::is_control) {
+            return Err("Bluetooth name is not supported or exceeds the reported UTF-8 byte limit".into());
+        }
+        let mut payload = vec![0xCA];
+        payload.extend_from_slice(bytes);
+        let ack = self.request(&encode_edifier(&payload), 0xCA).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge the Bluetooth name change".into()); }
+        let state = self.request(&encode_edifier(&[0xC9]), 0xC9).await?;
+        self.bluetooth_name = decode_edifier_name(&state.payload);
+        if self.bluetooth_name.as_deref() != Some(name) { return Err("Bluetooth name did not match device readback".into()); }
+        Ok(())
+    }
     async fn read_power(&mut self, code: u16) -> Result<PowerStatus, String> {
         let frame = self.request(&encode_power_read(code), code).await?;
         if frame.payload.len() != 3 {
@@ -691,12 +716,21 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "power": power })
     }
 }
 
 fn encode_edifier(payload: &[u8]) -> Vec<u8> {
     encode_edifier_header(0xAA, payload)
+}
+
+fn edifier_name_limit(mode: u8) -> usize {
+    match mode { 1 | 6 => 24, 2 | 5 => 30, 3 => 29, 4 => 35, _ => 0 }
+}
+
+fn decode_edifier_name(payload: &[u8]) -> Option<String> {
+    let end = payload.iter().rposition(|byte| *byte != 0).map_or(0, |index| index + 1);
+    String::from_utf8(payload[..end].to_vec()).ok().filter(|name| !name.trim().is_empty())
 }
 
 fn encode_edifier_header(header: u8, payload: &[u8]) -> Vec<u8> {
@@ -1079,6 +1113,9 @@ pub async fn accessory_connect(
         game_mode: None,
         auto_power_off_supported: false,
         auto_power_off: None,
+        bluetooth_name_supported: false,
+        bluetooth_name_limit_bytes: 0,
+        bluetooth_name: None,
         power: HashMap::new(),
         device_name: name,
     };
@@ -1203,6 +1240,16 @@ pub async fn accessory_set_auto_power_off(app: AppHandle, hub: State<'_, Accesso
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_auto_power_off(enabled).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_bluetooth_name(app: AppHandle, hub: State<'_, AccessoryHub>, name: String) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_bluetooth_name(&name).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
