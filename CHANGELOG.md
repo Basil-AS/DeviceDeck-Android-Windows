@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.13 — 2026-11-09
+
+- Android and Windows/Linux: show the W820NB Plus Bluetooth name when D8 reports query support. Rename it only when D8 also reports a write profile; enforce its UTF-8 byte limit and confirm CA writes with a C9 readback.
+- Keep the Edifier controls in the same DeviceDeck device hub as realme and Baseus. Physical-device behavior and reconnect persistence remain unverified.
+
 ## 0.1.0-alpha.12 — 2026-11-09
 
 - Android and Windows/Linux: add Edifier W820NB Plus auto power-off when audio is absent. The D8 capability report gates the control; D7 reads state, D6 writes, and D7 verifies the result. Android asks before enabling.
