@@ -565,7 +565,7 @@ class DeviceHubActivity : Activity() {
             background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
             setOnClickListener {
                 val current = edifierState.promptVolumeLevel ?: return@setOnClickListener
-                val slider = SeekBar(this@DeviceHubActivity).apply { max = 12; progress = current }
+                val slider = SeekBar(this@DeviceHubActivity).apply { max = 15; progress = current }
                 AlertDialog.Builder(this@DeviceHubActivity).setTitle(R.string.device_hub_prompt_volume).setView(slider)
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(R.string.device_hub_save) { _, _ -> edifierSession?.setPromptVolume(slider.progress) }
