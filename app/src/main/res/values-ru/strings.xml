@@ -19,6 +19,8 @@
     <string name="device_hub_mode_indoor" translatable="false">Помещение</string>
     <string name="device_hub_mode_outdoor" translatable="false">Улица</string>
     <string name="device_hub_mode_off" translatable="false">Выкл.</string>
+    <string name="device_hub_sleep_timer" translatable="false">Таймер выключения</string>
+    <string name="device_hub_minutes" translatable="false">%1$d мин</string>
     <string name="device_hub_mode_transparency" translatable="false">Прозрачность</string>
     <string name="device_hub_powerbank_waiting" translatable="false">Ожидание данных Blade 2…</string>
     <string name="device_hub_powerbank_theme" translatable="false">Тема экрана</string>
@@ -644,4 +646,5 @@
     <string name="support_later">Позже</string>
     <string name="support_never">Больше не спрашивать</string>
     <string name="device_hub_equalizer" translatable="false">Эквалайзер</string>
+    <string name="accessory_sleep_timer" translatable="false">Таймер выключения</string>
 </resources>

@@ -25,6 +25,8 @@ class EdifierW820NbPlusSession(
         val noise: Noise? = null,
         val equalizerPresets: List<EdifierEqualizer.Preset> = emptyList(),
         val selectedEqualizer: Int? = null,
+        val sleepTimerOptions: List<Int> = emptyList(),
+        val sleepTimerMinutes: Int? = null,
     )
 
     interface Listener {
@@ -51,6 +53,9 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
+        } else if (timedOut?.command == 0xD3) {
+            listener.onStatus("Sleep timer status was not answered; other controls remain available")
+            pump()
         } else {
             close()
             listener.onClosed("The headphones did not answer. Reconnect and try again.")
@@ -65,7 +70,13 @@ class EdifierW820NbPlusSession(
             enqueue(0xD8) { frame ->
                 val payload = frame.parameters()
                 val presets = if (payload.size >= 14) EdifierEqualizer.presets(payload[13].toInt() and 0xFF) else emptyList()
-                state = state.copy(equalizerPresets = presets)
+                val timerProfile = payload.getOrNull(9)?.toInt()?.and(0xFF) ?: 0
+                val timerOptions = when (timerProfile) {
+                    1 -> listOf(0, 10, 20, 30, 60, 90)
+                    2 -> listOf(0, 5, 15, 30, 60, 180)
+                    else -> emptyList()
+                }
+                state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions)
                 listener.onState(state)
                 listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
                 refresh()
@@ -101,6 +112,7 @@ class EdifierW820NbPlusSession(
             listener.onState(state)
             readNoise()
             if (state.equalizerPresets.isNotEmpty()) readEqualizer()
+            if (state.sleepTimerOptions.isNotEmpty()) readSleepTimer()
         }
         pump()
     }
@@ -131,6 +143,42 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readEqualizer(expected = id)
+        }
+        pump()
+    }
+
+    fun setSleepTimer(minutes: Int) {
+        if (!ready || minutes !in state.sleepTimerOptions) {
+            listener.onStatus("Sleep timer value is not supported by this firmware")
+            return
+        }
+        val command = if (minutes == 0) 0xD2 else 0xD1
+        val params = if (minutes == 0) byteArrayOf() else byteArrayOf((minutes shr 8).toByte(), minutes.toByte())
+        enqueue(command, params) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge the sleep timer")
+                return@enqueue
+            }
+            readSleepTimer(expected = minutes)
+        }
+        pump()
+    }
+
+    private fun readSleepTimer(expected: Int? = null) {
+        enqueue(0xD3) { frame ->
+            val bytes = frame.parameters()
+            if (bytes.size < 2) {
+                listener.onStatus("Sleep timer response was not recognized")
+                return@enqueue
+            }
+            val minutes = ((bytes[0].toInt() and 0xFF) shl 8) or (bytes[1].toInt() and 0xFF)
+            if (minutes !in state.sleepTimerOptions) {
+                listener.onStatus("Sleep timer readback is outside the firmware options")
+                return@enqueue
+            }
+            state = state.copy(sleepTimerMinutes = minutes)
+            listener.onState(state)
+            if (expected != null && expected != minutes) listener.onStatus("Sleep timer was not confirmed by device readback")
         }
         pump()
     }

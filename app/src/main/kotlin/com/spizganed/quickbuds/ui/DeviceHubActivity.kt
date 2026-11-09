@@ -47,6 +47,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var noise: TextView
     private lateinit var controls: LinearLayout
     private lateinit var edifierEqControls: LinearLayout
+    private lateinit var edifierTimerControls: LinearLayout
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -513,6 +514,11 @@ class DeviceHubActivity : Activity() {
             setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
         }
         controls.addView(edifierEqControls)
+        edifierTimerControls = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
+        }
+        controls.addView(edifierTimerControls)
     }
 
     private fun addSppModes() {
@@ -572,6 +578,31 @@ class DeviceHubActivity : Activity() {
                                 if (edifierState.selectedEqualizer == preset.id) null else palette.outline, 14f))
                             isEnabled = ready && edifierState.selectedEqualizer != null
                             setOnClickListener { edifierSession?.setEqualizer(preset.id) }
+                        }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
+                    }
+                }
+            }
+            if (::edifierTimerControls.isInitialized) {
+                edifierTimerControls.removeAllViews()
+                if (edifierState.sleepTimerOptions.isNotEmpty()) {
+                    edifierTimerControls.addView(TextView(this).apply {
+                        text = getString(R.string.device_hub_sleep_timer)
+                        textSize = 12f
+                        setTextColor(ThemeRes.palette(this@DeviceHubActivity).textSecondary)
+                    })
+                    edifierState.sleepTimerOptions.forEachIndexed { index, minutes ->
+                        val selected = edifierState.sleepTimerMinutes == minutes
+                        edifierTimerControls.addView(TextView(this).apply {
+                            text = (if (selected) "✓  " else "") + if (minutes == 0) getString(R.string.device_hub_mode_off) else getString(R.string.device_hub_minutes, minutes)
+                            textSize = 13f; gravity = Gravity.CENTER
+                            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+                            val palette = ThemeRes.palette(this@DeviceHubActivity)
+                            setTextColor(if (selected) ThemeRes.onFill(this@DeviceHubActivity) else palette.text)
+                            isClickable = true; isFocusable = true
+                            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.shape(this@DeviceHubActivity,
+                                if (selected) palette.accent else palette.card, if (selected) null else palette.outline, 14f))
+                            isEnabled = ready
+                            setOnClickListener { edifierSession?.setSleepTimer(minutes) }
                         }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
                     }
                 }

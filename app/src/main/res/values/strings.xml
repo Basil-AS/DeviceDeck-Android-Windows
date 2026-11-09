@@ -19,6 +19,8 @@
     <string name="device_hub_mode_indoor" translatable="false">Indoor</string>
     <string name="device_hub_mode_outdoor" translatable="false">Outdoor</string>
     <string name="device_hub_mode_off" translatable="false">Off</string>
+    <string name="device_hub_sleep_timer" translatable="false">Sleep timer</string>
+    <string name="device_hub_minutes" translatable="false">%1$d min</string>
     <string name="device_hub_mode_transparency" translatable="false">Transparency</string>
     <string name="device_hub_powerbank_waiting" translatable="false">Waiting for Blade 2 telemetry…</string>
     <string name="device_hub_powerbank_theme" translatable="false">Screen theme</string>
@@ -734,4 +736,5 @@
     <string name="support_later">Later</string>
     <string name="support_never">Do not ask again</string>
     <string name="device_hub_equalizer" translatable="false">Equalizer</string>
+    <string name="accessory_sleep_timer" translatable="false">Sleep timer</string>
 </resources>
