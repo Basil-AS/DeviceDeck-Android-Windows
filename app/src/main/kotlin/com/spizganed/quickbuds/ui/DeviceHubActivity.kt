@@ -918,8 +918,19 @@ class DeviceHubActivity : Activity() {
             textSize = 12f; setTextColor(ThemeRes.palette(this@DeviceHubActivity).textSecondary)
         })
         currentState.gestures.sortedWith(compareBy({ it.button }, { it.layout })).forEachIndexed { index, gesture ->
-            val label = when (gesture.layout) { 0 -> "Double"; 1 -> "Triple"; 2 -> "Hold"; else -> "Gesture ${gesture.layout}" }
-            val side = if (gesture.button == 0) "Left" else "Right"
+            val russian = resources.configuration.locales[0].language == "ru"
+            val label = when (gesture.layout) {
+                0 -> if (russian) "Двойное нажатие" else "Double"
+                1 -> if (russian) "Тройное нажатие" else "Triple"
+                2 -> if (russian) "Удержание" else "Hold"
+                else -> if (russian) "Жест ${gesture.layout}" else "Gesture ${gesture.layout}"
+            }
+            val side = when {
+                russian && gesture.button == 0 -> "Слева"
+                russian -> "Справа"
+                gesture.button == 0 -> "Left"
+                else -> "Right"
+            }
             sppGestureControls.addView(TextView(this).apply {
                 text = "$side · $label\n${baseusActionLabel(gesture.action)}"
                 textSize = 13f; gravity = Gravity.CENTER_VERTICAL
@@ -934,9 +945,21 @@ class DeviceHubActivity : Activity() {
 
     private fun chooseBowie30Gesture(gesture: BaseusBowie30Session.Gesture) {
         val actions = listOf(0, 1, 2, 3, 4, 6)
-        val layout = when (gesture.layout) { 0 -> "Double"; 1 -> "Triple"; 2 -> "Hold"; else -> "Gesture" }
+        val russian = resources.configuration.locales[0].language == "ru"
+        val layout = when (gesture.layout) {
+            0 -> if (russian) "Двойное нажатие" else "Double"
+            1 -> if (russian) "Тройное нажатие" else "Triple"
+            2 -> if (russian) "Удержание" else "Hold"
+            else -> if (russian) "Жест" else "Gesture"
+        }
+        val side = when {
+            russian && gesture.button == 0 -> "Слева"
+            russian -> "Справа"
+            gesture.button == 0 -> "Left"
+            else -> "Right"
+        }
         AlertDialog.Builder(this)
-            .setTitle("${if (gesture.button == 0) "Left" else "Right"} · $layout")
+            .setTitle("$side · $layout")
             .setItems(actions.map { baseusActionLabel(it) }.toTypedArray()) { _, which -> baseusSession?.setGesture(gesture, actions[which]) }
             .show()
     }
