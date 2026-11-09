@@ -51,6 +51,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierEqControls: LinearLayout
     private lateinit var edifierTimerControls: LinearLayout
     private lateinit var edifierGameModeControl: TextView
+    private lateinit var edifierAutoPowerOffControl: TextView
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -540,6 +541,24 @@ class DeviceHubActivity : Activity() {
             setOnClickListener { edifierState.gameModeEnabled?.let { edifierSession?.setGameMode(!it) } }
         }
         controls.addView(edifierGameModeControl)
+        edifierAutoPowerOffControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                edifierState.autoPowerOffEnabled?.let { enabled ->
+                    if (enabled) edifierSession?.setAutoPowerOff(false)
+                    else AlertDialog.Builder(this@DeviceHubActivity)
+                        .setTitle(R.string.device_hub_auto_power_off)
+                        .setMessage(R.string.device_hub_auto_power_off_confirm)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(R.string.device_hub_mode_on) { _, _ -> edifierSession?.setAutoPowerOff(true) }
+                        .show()
+                }
+            }
+        }
+        controls.addView(edifierAutoPowerOffControl)
     }
 
     private fun addSppModes() {
@@ -643,6 +662,18 @@ class DeviceHubActivity : Activity() {
                 edifierGameModeControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
                     if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
                 edifierGameModeControl.isEnabled = ready && supported
+            }
+            if (::edifierAutoPowerOffControl.isInitialized) {
+                val supported = edifierState.autoPowerOffSupported && edifierState.autoPowerOffEnabled != null
+                edifierAutoPowerOffControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierAutoPowerOffControl.text = getString(R.string.device_hub_auto_power_off) + " · " +
+                    getString(if (edifierState.autoPowerOffEnabled == true) R.string.device_hub_mode_on else R.string.device_hub_mode_off)
+                val palette = ThemeRes.palette(this)
+                val enabled = edifierState.autoPowerOffEnabled == true
+                edifierAutoPowerOffControl.setTextColor(if (enabled) ThemeRes.onFill(this) else palette.text)
+                edifierAutoPowerOffControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
+                    if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
+                edifierAutoPowerOffControl.isEnabled = ready && supported
             }
             return
         }
