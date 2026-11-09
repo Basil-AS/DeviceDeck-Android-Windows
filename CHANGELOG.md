@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.10 — 2026-11-09
+
+- Android and Windows/Linux: add Baseus Blade 2 USB-C C1/C2 mode controls for Off, Output/Discharge, and Input/Charge. Read the fresh `0x0010` port state, use the APK-confirmed `0x0018`–`0x001B` command pairs, then confirm the requested mode with another `0x0010` read. Hardware behavior remains unverified.
+
 ## 0.1.0-alpha.9 — 2026-11-09
 
 - Android and Windows/Linux: expose W820NB Plus game mode only when D8 byte 17 bit 6 advertises it; query with 0x08 and confirm 0x09 writes with a fresh 0x08 readback.
@@ -38,7 +42,7 @@
 - Android: add EDIFIER W820NB Plus battery and noise-mode controls, and add Baseus Bowie 30 battery/noise controls to the shared DeviceDeck device hub.
 - Android: add Baseus Blade 2 and Blade 2-140 power telemetry, cell measurements on 140, three display themes, screensaver, custom display text and reminder/shutdown timers.
 - Windows/Linux: add EDIFIER W820NB Plus and Baseus Bowie 30 BLE battery/noise controls to the existing DeviceDeck app.
-- Keep hardware validation status explicit: these new BLE paths have CI coverage but still need round-trip checks on named devices/firmware. Baseus Blade 2 port toggles and reset remain unavailable.
+- Keep hardware validation status explicit: these new BLE paths have CI coverage but still need round-trip checks on named devices/firmware. Baseus Blade 2 reset remains unavailable.
 - macOS release remains on its independent 0.7.0-alpha.4 version line.
 
 ## 0.1.0-alpha.2

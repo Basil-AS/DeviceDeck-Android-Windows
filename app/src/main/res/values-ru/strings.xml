@@ -35,6 +35,13 @@
     <string name="device_hub_powerbank_set_shutdown" translatable="false">Установить автоотключение</string>
     <string name="device_hub_powerbank_reminder" translatable="false">Таймер напоминания</string>
     <string name="device_hub_powerbank_shutdown" translatable="false">Автоотключение</string>
+    <string name="device_hub_powerbank_port1" translatable="false">Порт USB-C 1</string>
+    <string name="device_hub_powerbank_port2" translatable="false">Порт USB-C 2</string>
+    <string name="device_hub_powerbank_port_off" translatable="false">Выкл.</string>
+    <string name="device_hub_powerbank_port_output" translatable="false">Выход · разряд</string>
+    <string name="device_hub_powerbank_port_input" translatable="false">Вход · заряд</string>
+    <string name="device_hub_powerbank_port_unknown" translatable="false">Неизвестно</string>
+    <string name="device_hub_powerbank_ports" translatable="false">Управление портами USB-C</string>
     <string name="accessory_title" translatable="false">Другие устройства</string>
     <string name="accessory_choose_model" translatable="false">Выберите устройство</string>
     <string name="accessory_scan" translatable="false">Найти устройства</string>

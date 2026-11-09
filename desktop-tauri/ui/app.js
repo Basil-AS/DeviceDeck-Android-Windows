@@ -408,6 +408,7 @@ function buildWindow(){
       <div id="accessoryGameModeSection" hidden><div class="lbl">${$t('device_hub_game_mode')}</div><div class="group" id="accessoryGameModeControl"></div></div>
       <div id="accessoryPowerPanel" hidden>
         <div class="lbl">${$t('device_hub_powerbank_waiting')}</div><div class="group" id="accessoryPowerMetrics"></div>
+        <div class="lbl">${$t('device_hub_powerbank_ports')}</div><div id="accessoryPowerPorts"></div>
         <div class="lbl">${$t('device_hub_powerbank_theme')}</div><button class="row press" data-act="accpowertheme"><div class="txt"><div class="t">${$t('device_hub_powerbank_theme')}</div></div><span class="v" id="accessoryPowerTheme">–</span></button>
         <button class="row press" data-act="accpowersaver"><div class="txt"><div class="t">${$t('device_hub_powerbank_saver')}</div></div><span class="v" id="accessoryPowerSaver">–</span></button>
         <div class="lbl">${$t('device_hub_powerbank_text_hint')}</div><input class="field" id="accessoryPowerText" type="text" maxlength="255" aria-label="${$t('device_hub_powerbank_text_hint')}"><button class="btn press" data-act="accpowertext">${$t('device_hub_powerbank_set_text')}</button>
@@ -744,6 +745,7 @@ document.addEventListener('click',ev=>{
   if(a==='acceq'){window.QBLIVE&&QBLIVE.accessoryEqualizer(Number(v));return;}
   if(a==='accsleeptimer'){window.QBLIVE&&QBLIVE.accessorySleepTimer(Number(v));return;}
   if(a==='accgamemode'){window.QBLIVE&&QBLIVE.accessoryGameMode(v==='true');return;}
+  if(a==='accportmode'){const [port,mode]=v.split(':').map(Number);if(Number.isInteger(port)&&Number.isInteger(mode))QBLIVE.accessoryPort(port,mode);return;}
   if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
   if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
   if(a==='accpowertheme'){const old=Number(accessoryState.power?.['0020']?.value??-1);if(old>=0&&old<=2)QBLIVE.accessoryPower(0x20,(old+1)%3);else toast($t('device_hub_powerbank_waiting'));return;}
@@ -906,6 +908,7 @@ if(window.__TAURI__){
     accessorySleepTimer(minutes){T.core.invoke('accessory_set_sleep_timer',{minutes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryGameMode(enabled){T.core.invoke('accessory_set_game_mode',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryPort(port,mode){T.core.invoke('accessory_set_port_mode',{port,mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryRefresh(){T.core.invoke('accessory_refresh').catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryDisconnect(){T.core.invoke('accessory_disconnect').catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -957,6 +960,8 @@ if(window.__TAURI__){
     const power=accessoryState.power||{};
     const metrics=Object.entries(power).map(([hex,value])=>{const code=parseInt(hex,16),label=powerMetricLabel(code);return label?`<div class="row"><div class="txt"><div class="t">${esc(label)}</div></div><span class="v">${esc(powerMetricValue(code,value))}</span></div>`:'';}).filter(Boolean).join('');
     byId('accessoryPowerMetrics').innerHTML=metrics||`<div class="row"><div class="txt"><div class="s">${$t('device_hub_powerbank_waiting')}</div></div></div>`;
+    const portStatus=power['0010']?Number(power['0010'].value):null;
+    byId('accessoryPowerPorts').innerHTML=[1,2].map(port=>{const mode=portStatus==null?-1:(portStatus>>((port-1)*2))&3;const key=port===1?'device_hub_powerbank_port1':'device_hub_powerbank_port2';return `<div class="lbl">${$t(key)}</div><div class="group">${[0,1,2].map(value=>`<button class="row press" role="radio" aria-checked="${mode===value}" data-act="accportmode" data-v="${port}:${value}"><div class="txt"><div class="t">${$t(['device_hub_powerbank_port_off','device_hub_powerbank_port_output','device_hub_powerbank_port_input'][value])}</div></div>${mode===value?ic('check','ch'):ic('chev','ch')}</button>`).join('')}</div>`;}).join('');
     byId('accessoryPowerTheme').textContent=power['0020']?`${Number(power['0020'].value)+1}/3`:'–';
     byId('accessoryPowerSaver').textContent=power['0022']?Number(power['0022'].value)===1?$t('device_hub_ready'):$t('device_hub_mode_off'):'–';
     if(power['001E']&&document.activeElement!==byId('accessoryPowerReminder'))byId('accessoryPowerReminder').value=power['001E'].value;
