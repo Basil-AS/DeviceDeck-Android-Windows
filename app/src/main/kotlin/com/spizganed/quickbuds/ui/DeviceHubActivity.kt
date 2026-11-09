@@ -448,7 +448,7 @@ class DeviceHubActivity : Activity() {
 
     private fun connected() {
         ready = true
-        controls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2 || selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) View.GONE else View.VISIBLE
+        controls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2) View.GONE else View.VISIBLE
         powerControls.visibility = if (selectedDevice == DeviceKind.BASEUS_BLADE_2) View.VISIBLE else View.GONE
         status.setText(R.string.device_hub_ready)
         scanButton.isEnabled = true
@@ -510,6 +510,7 @@ class DeviceHubActivity : Activity() {
         if (kind == DeviceKind.BASEUS_BOWIE_30) addModes(controls, BaseusBowie30Session.Noise.entries)
         else if (kind == DeviceKind.EDIFIER_W820NB_PLUS) addEdifierModes()
         else if (kind == DeviceKind.BASEUS_EP10_PRO) addSppModes()
+        else if (kind == DeviceKind.BASEUS_BOWIE_MF1) addSppGestureControls()
         powerControls.visibility = View.GONE
         battery.visibility = View.GONE; noise.visibility = View.GONE
         status.setText(R.string.device_hub_scan)
@@ -657,6 +658,10 @@ class DeviceHubActivity : Activity() {
                 setOnClickListener { baseusSppSession?.setNoise(mode) }
             }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
         }
+        addSppGestureControls()
+    }
+
+    private fun addSppGestureControls() {
         sppGestureControls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         controls.addView(sppGestureControls, LinearLayout.LayoutParams(-1, -2).apply {
             topMargin = ThemeRes.dp(this@DeviceHubActivity, 12f)
@@ -852,7 +857,10 @@ class DeviceHubActivity : Activity() {
             renderSppGestures()
             return
         }
-        if (selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) return
+        if (selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) {
+            renderSppGestures()
+            return
+        }
         for (row in 0 until controls.childCount) {
             val rowView = controls.getChildAt(row) as? LinearLayout ?: continue
             for (column in 0 until rowView.childCount) {
@@ -881,7 +889,7 @@ class DeviceHubActivity : Activity() {
         sppState.gestures.sortedWith(compareBy({ it.button }, { it.layout })).forEachIndexed { index, gesture ->
             val label = when (gesture.layout) { 3 -> "Single"; 0 -> "Double"; 1 -> "Triple"; 2 -> "Hold"; else -> "Gesture ${gesture.layout}" }
             val side = if (gesture.button == 0) "Left" else "Right"
-            val action = baseusActionLabel(gesture.action)
+            val action = baseusActionLabel(gesture.action, selectedDevice == DeviceKind.BASEUS_BOWIE_MF1)
             sppGestureControls.addView(TextView(this).apply {
                 text = "$side · $label\n$action"
                 textSize = 13f; gravity = Gravity.CENTER_VERTICAL
@@ -937,14 +945,32 @@ class DeviceHubActivity : Activity() {
     }
 
     private fun chooseBaseusGesture(gesture: BaseusSppSession.Gesture) {
-        val actions = if (gesture.layout == 3) listOf(0, 1) else listOf(0, 1, 2, 3, 4, 6, 11, 12)
+        val mf1 = selectedDevice == DeviceKind.BASEUS_BOWIE_MF1
+        val actions = if (mf1) {
+            if (gesture.layout == 1) listOf(4, 5) else listOf(11, 12, 1, 2, 3, 4, 0)
+        } else if (gesture.layout == 3) listOf(0, 1) else listOf(0, 1, 2, 3, 4, 6, 11, 12)
         AlertDialog.Builder(this)
             .setTitle("${if (gesture.button == 0) "Left" else "Right"} · ${when (gesture.layout) { 3 -> "Single"; 0 -> "Double"; 1 -> "Triple"; else -> "Hold" }}")
-            .setItems(actions.map(::baseusActionLabel).toTypedArray()) { _, which -> baseusSppSession?.setGesture(gesture, actions[which]) }
+            .setItems(actions.map { baseusActionLabel(it, mf1) }.toTypedArray()) { _, which -> baseusSppSession?.setGesture(gesture, actions[which]) }
             .show()
     }
 
-    private fun baseusActionLabel(action: Int): String = when (action) {
+    private fun baseusActionLabel(action: Int, mf1: Boolean = false): String {
+        if (mf1) {
+            val russian = resources.configuration.locales[0].language == "ru"
+            return when (action) {
+                0 -> if (russian) "Включение / выключение" else "Power on/off"
+                1 -> if (russian) "Объявление заряда" else "Battery announcement"
+                2 -> if (russian) "Воспроизведение / пауза" else "Play / pause"
+                3 -> if (russian) "Ответить / завершить вызов" else "Answer / end call"
+                4 -> if (russian) "Отклонить вызов" else "Reject call"
+                5 -> if (russian) "Быстрое прослушивание" else "Quick listen"
+                11 -> if (russian) "Быстрый вызов" else "Quick call"
+                12 -> if (russian) "Режим сопряжения" else "Pairing mode"
+                else -> "Action $action"
+            }
+        }
+        return when (action) {
         0 -> getString(R.string.gesture_action_none)
         1 -> getString(R.string.gesture_action_play_pause)
         2 -> getString(R.string.gesture_action_prev)
@@ -954,6 +980,7 @@ class DeviceHubActivity : Activity() {
         11 -> getString(R.string.gesture_action_volume_up)
         12 -> getString(R.string.gesture_action_volume_down)
         else -> "Action $action"
+        }
     }
 
     private fun renderBlade2(state: BaseusBlade2Session.State) {

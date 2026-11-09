@@ -75,6 +75,8 @@ class BaseusSppSession(
                 if (model == Model.EP10_PRO) {
                     readNoise()
                     runCatching { readGestures() }.onFailure { publishStatus("Gesture settings unavailable: ${it.message ?: "no response"}") }
+                } else if (model == Model.BOWIE_MF1) {
+                    runCatching { readGestures() }.onFailure { publishStatus("Gesture settings unavailable: ${it.message ?: "no response"}") }
                 }
             } catch (error: Exception) { fail(error.message ?: "Could not read headset status") }
         }
@@ -93,9 +95,23 @@ class BaseusSppSession(
     }
 
     fun setGesture(gesture: Gesture, action: Int) {
-        if (!ready || model != Model.EP10_PRO || gesture !in state.gestures || action !in allowedActions(gesture.layout)) return
+        if (!ready || gesture !in state.gestures || action !in allowedActions(gesture.layout)) return
         requests.execute {
             try {
+                if (model == Model.BOWIE_MF1) {
+                    val current = state.gestures.filter { it.layout == gesture.layout }
+                    val left = current.firstOrNull { it.button == 0 }?.action ?: error("Missing left gesture state")
+                    val right = current.firstOrNull { it.button == 1 }?.action ?: error("Missing right gesture state")
+                    val nextLeft = if (gesture.button == 0) action else left
+                    val nextRight = if (gesture.button == 1) action else right
+                    val ack = request(0x22, gesture.layout, nextLeft, nextRight)
+                    if (ack.payload.size != 1 || ack.u8(0) != 1) throw IllegalStateException("The headset rejected the gesture")
+                    readLegacyGestureLayout(gesture.layout)
+                    if (state.gestures.none { it.button == gesture.button && it.layout == gesture.layout && it.action == action })
+                        throw IllegalStateException("Gesture did not match device readback")
+                    return@execute
+                }
+                if (model != Model.EP10_PRO) throw IllegalStateException("Gesture protocol is unavailable for this model")
                 val ack = request(0x8D, gesture.button, gesture.layout, action)
                 if (ack.payload.size != 1 || ack.u8(0) != 1) throw IllegalStateException("The headset rejected the gesture")
                 readGestures()
@@ -123,6 +139,10 @@ class BaseusSppSession(
     }
 
     private fun readGestures() {
+        if (model == Model.BOWIE_MF1) {
+            listOf(0, 2, 1).forEach(::readLegacyGestureLayout)
+            return
+        }
         var rows = state.gestures
         for (button in 0..1) {
             val frame = request(0x8C, button, 0xFF)
@@ -158,7 +178,23 @@ class BaseusSppSession(
 
     private fun gestureKey(gesture: Gesture) = "${gesture.button}:${gesture.layout}"
 
-    private fun allowedActions(layout: Int): List<Int> = if (layout == 3) listOf(0, 1) else listOf(0, 1, 2, 3, 4, 6, 11, 12)
+    private fun readLegacyGestureLayout(layout: Int) {
+        if (layout !in listOf(0, 2, 1)) throw IllegalArgumentException("Unsupported Bowie MF1 gesture layout")
+        val frame = request(0x21, layout)
+        if (frame.payload.size != 3 || frame.u8(0) != layout) throw IllegalStateException("Unrecognized Bowie MF1 gesture response")
+        val rows = state.gestures.filterNot { it.layout == layout } +
+            listOf(Gesture(0, layout, frame.u8(1)), Gesture(1, layout, frame.u8(2)))
+        state = state.copy(gestures = rows)
+        publishState()
+    }
+
+    private fun allowedActions(layout: Int): List<Int> = when {
+        model == Model.BOWIE_MF1 && layout == 1 -> listOf(4, 5)
+        model == Model.BOWIE_MF1 && layout in listOf(0, 2) -> listOf(11, 12, 1, 2, 3, 4, 0)
+        model == Model.EP10_PRO && layout == 3 -> listOf(0, 1)
+        model == Model.EP10_PRO && layout in 0..2 -> listOf(0, 1, 2, 3, 4, 6, 11, 12)
+        else -> emptyList()
+    }
 
     private fun readNoise() {
         val frame = request(0x33)

@@ -20,4 +20,13 @@ class BaseusBowie30CodecTest {
         assertEquals(listOf(80, 0, 64, 1), (0..3).map(frames[0]::u8))
         assertEquals(1, frames[1].u8(0))
     }
+
+    @Test fun decodesLegacyMF1GestureQueryAndWriteReplies() {
+        val decoder = BaseusBowie30Codec.Decoder()
+        assertEquals(emptyList<BaseusFrame>(), decoder.feed(byteArrayOf(0xAA.toByte(), 0x21, 0, 1)))
+        val frames = decoder.feed(byteArrayOf(2, 0xAA.toByte(), 0x22, 1))
+        assertEquals(listOf(0x21, 0x22), frames.map { it.command })
+        assertEquals(listOf(0, 1, 2), (0..2).map(frames[0]::u8))
+        assertEquals(1, frames[1].u8(0))
+    }
 }
