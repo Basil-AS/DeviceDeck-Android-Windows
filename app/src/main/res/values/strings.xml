@@ -63,7 +63,7 @@
     <string name="device_hub_powerbank_set_shutdown" translatable="false">Set auto shutdown</string>
     <string name="device_hub_powerbank_reset" translatable="false">Restore factory settings</string>
     <string name="device_hub_powerbank_reset_confirm" translatable="false">Restore</string>
-    <string name="device_hub_powerbank_reset_warning" translatable="false">This sends the vendor app's factory-reset command. DeviceDeck cannot verify the result. Continue only if you want to restore the Blade 2 settings.</string>
+    <string name="device_hub_powerbank_reset_warning" translatable="false">This sends the factory-reset command used by the vendor app. DeviceDeck cannot verify the result. Continue only if you want to restore the Blade 2 settings.</string>
     <string name="device_hub_powerbank_reminder" translatable="false">Reminder timer</string>
     <string name="device_hub_powerbank_shutdown" translatable="false">Auto shutdown</string>
     <string name="device_hub_powerbank_port1" translatable="false">USB-C 1 port</string>
