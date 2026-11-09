@@ -565,6 +565,41 @@ impl AccessorySession {
         }
         Ok(())
     }
+    async fn set_power_port_mode(&mut self, port: u8, mode: u8) -> Result<(), String> {
+        if self.model != Model::BaseusBlade2 || !(1..=2).contains(&port) || mode > 2 {
+            return Err("Unsupported Blade 2 port mode".into());
+        }
+        let current = self.read_power(0x0010).await?.value;
+        let shift = u32::from((port - 1) * 2);
+        let current_mode = ((current >> shift) & 0x03) as u8;
+        if current_mode == 3 {
+            return Err(format!("Blade 2 reported an unknown C{port} port state"));
+        }
+        if current_mode != mode {
+            let command = |selected: u8| -> Option<u16> {
+                match (port, selected) {
+                    (1, 1) => Some(0x0018), // C1 output / discharge
+                    (1, 2) => Some(0x0019), // C1 input / charge
+                    (2, 1) => Some(0x001A), // C2 output / discharge
+                    (2, 2) => Some(0x001B), // C2 input / charge
+                    _ => None,
+                }
+            };
+            if current_mode != 0 {
+                let off = command(current_mode).ok_or("Unsupported Blade 2 port state")?;
+                self.write(&encode_power_write(off, 0)).await?;
+            }
+            if mode != 0 {
+                let on = command(mode).ok_or("Unsupported Blade 2 port mode")?;
+                self.write(&encode_power_write(on, 1)).await?;
+            }
+        }
+        let actual = self.read_power(0x0010).await?.value;
+        if ((actual >> shift) & 0x03) as u8 != mode {
+            return Err(format!("Blade 2 C{port} port mode did not match status readback"));
+        }
+        Ok(())
+    }
     async fn set_power_text(&self, text: &str) -> Result<(), String> {
         let bytes = text.as_bytes();
         if text.trim().is_empty() || bytes.len() > 255 {
@@ -1073,6 +1108,24 @@ pub async fn accessory_set_power(
         return Err("Connected device is not a Blade 2 powerbank".into());
     }
     session.set_power(code, value).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_port_mode(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    port: u8,
+    mode: u8,
+) -> Result<Value, String> {
+    if hub.spp_session.lock().await.is_some() {
+        return Err("Connected device is a headset, not a Blade 2 powerbank".into());
+    }
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_power_port_mode(port, mode).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)

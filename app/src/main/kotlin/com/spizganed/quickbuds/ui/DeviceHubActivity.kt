@@ -1,6 +1,7 @@
 package com.spizganed.quickbuds.ui
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -55,6 +56,8 @@ class DeviceHubActivity : Activity() {
     private lateinit var powerMetrics: TextView
     private lateinit var bladeTheme: TextView
     private lateinit var bladeSaver: TextView
+    private lateinit var bladePort1: TextView
+    private lateinit var bladePort2: TextView
     private lateinit var bladeTextInput: EditText
     private lateinit var bladeReminderInput: EditText
     private lateinit var bladeShutdownInput: EditText
@@ -145,6 +148,14 @@ class DeviceHubActivity : Activity() {
             setPadding(0, dp(8f), 0, dp(8f))
         }
         powerControls.addView(powerMetrics)
+        bladePort1 = accessoryAction(getString(R.string.device_hub_powerbank_port1), palette, dp) {
+            chooseBladePortMode(1)
+        }
+        bladePort2 = accessoryAction(getString(R.string.device_hub_powerbank_port2), palette, dp) {
+            chooseBladePortMode(2)
+        }
+        powerControls.addView(bladePort1)
+        powerControls.addView(bladePort2)
         bladeTheme = TextView(this).apply {
             setText(R.string.device_hub_powerbank_theme)
             styleAccessoryAction(this, palette, dp)
@@ -684,6 +695,9 @@ class DeviceHubActivity : Activity() {
         }
         state.values[0x001E]?.let { if (!bladeReminderInput.hasFocus()) bladeReminderInput.setText(it.value.toString()) }
         state.values[0x001F]?.let { if (!bladeShutdownInput.hasFocus()) bladeShutdownInput.setText(it.value.toString()) }
+        val portStatus = state.values[0x0010]?.value
+        bladePort1.text = portLabel(1, portStatus)
+        bladePort2.text = portLabel(2, portStatus)
     }
 
     private fun powerMetricLabel(code: Int): String? = when (code) {
@@ -748,4 +762,37 @@ class DeviceHubActivity : Activity() {
         closeSessions()
         super.onDestroy()
     }
-}
+
+    private fun chooseBladePortMode(port: Int) {
+        val status = blade2State.values[0x0010]?.value?.toInt() ?: run {
+            blade2Session?.refresh()
+            return
+        }
+        val current = (status shr ((port - 1) * 2)) and 0x03
+        val title = getString(if (port == 1) R.string.device_hub_powerbank_port1 else R.string.device_hub_powerbank_port2)
+        val options = arrayOf(
+            getString(R.string.device_hub_powerbank_port_off),
+            getString(R.string.device_hub_powerbank_port_output),
+            getString(R.string.device_hub_powerbank_port_input),
+        )
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setSingleChoiceItems(options, current.takeIf { it in 0..2 } ?: -1) { dialog, selected ->
+                dialog.dismiss()
+                blade2Session?.setPortMode(port, selected)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun portLabel(port: Int, status: Int?): String {
+        val title = getString(if (port == 1) R.string.device_hub_powerbank_port1 else R.string.device_hub_powerbank_port2)
+        val mode = status?.let { (it shr ((port - 1) * 2)) and 0x03 } ?: -1
+        val value = when (mode) {
+            0 -> R.string.device_hub_powerbank_port_off
+            1 -> R.string.device_hub_powerbank_port_output
+            2 -> R.string.device_hub_powerbank_port_input
+            else -> R.string.device_hub_powerbank_port_unknown
+        }
+        return "$title  ·  ${getString(value)}"
+    }

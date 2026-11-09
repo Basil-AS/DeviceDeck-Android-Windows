@@ -35,6 +35,13 @@
     <string name="device_hub_powerbank_set_shutdown" translatable="false">Set auto shutdown</string>
     <string name="device_hub_powerbank_reminder" translatable="false">Reminder timer</string>
     <string name="device_hub_powerbank_shutdown" translatable="false">Auto shutdown</string>
+    <string name="device_hub_powerbank_port1" translatable="false">USB-C 1 port</string>
+    <string name="device_hub_powerbank_port2" translatable="false">USB-C 2 port</string>
+    <string name="device_hub_powerbank_port_off" translatable="false">Off</string>
+    <string name="device_hub_powerbank_port_output" translatable="false">Output · discharge</string>
+    <string name="device_hub_powerbank_port_input" translatable="false">Input · charge</string>
+    <string name="device_hub_powerbank_port_unknown" translatable="false">Unknown</string>
+    <string name="device_hub_powerbank_ports" translatable="false">USB-C port control</string>
     <string name="accessory_title" translatable="false">More devices</string>
     <string name="accessory_choose_model" translatable="false">Choose a device</string>
     <string name="accessory_scan" translatable="false">Scan for devices</string>
