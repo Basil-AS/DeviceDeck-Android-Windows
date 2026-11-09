@@ -46,6 +46,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var battery: TextView
     private lateinit var noise: TextView
     private lateinit var controls: LinearLayout
+    private lateinit var edifierEqControls: LinearLayout
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -507,6 +508,11 @@ class DeviceHubActivity : Activity() {
                 if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f)
             })
         }
+        edifierEqControls = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
+        }
+        controls.addView(edifierEqControls)
     }
 
     private fun addSppModes() {
@@ -534,7 +540,7 @@ class DeviceHubActivity : Activity() {
         if (!::controls.isInitialized) return
         if (selectedDevice == DeviceKind.BASEUS_BLADE_2) return
         if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
-            for (index in 0 until controls.childCount) {
+            for (index in EdifierW820NbPlusSession.Noise.entries.indices) {
                 val chip = controls.getChildAt(index) as? TextView ?: continue
                 val mode = EdifierW820NbPlusSession.Noise.entries.getOrNull(index) ?: continue
                 val palette = ThemeRes.palette(this)
@@ -543,6 +549,32 @@ class DeviceHubActivity : Activity() {
                 chip.background = ThemeRes.ripple(this, ThemeRes.shape(this, if (selected) palette.accent else palette.card,
                     if (selected) null else palette.outline, 14f))
                 chip.isEnabled = ready && edifierState.noise != null
+            }
+            if (::edifierEqControls.isInitialized) {
+                edifierEqControls.removeAllViews()
+                if (edifierState.equalizerPresets.isNotEmpty()) {
+                    edifierEqControls.addView(TextView(this).apply {
+                        text = getString(R.string.device_hub_equalizer)
+                        textSize = 12f
+                        setTextColor(ThemeRes.palette(this@DeviceHubActivity).textSecondary)
+                    })
+                    edifierState.equalizerPresets.forEachIndexed { index, preset ->
+                        edifierEqControls.addView(TextView(this).apply {
+                            text = if (edifierState.selectedEqualizer == preset.id) "✓  ${preset.name}" else preset.name
+                            textSize = 13f
+                            gravity = Gravity.CENTER
+                            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+                            val palette = ThemeRes.palette(this@DeviceHubActivity)
+                            setTextColor(if (edifierState.selectedEqualizer == preset.id) ThemeRes.onFill(this@DeviceHubActivity) else palette.text)
+                            isClickable = true; isFocusable = true
+                            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.shape(this@DeviceHubActivity,
+                                if (edifierState.selectedEqualizer == preset.id) palette.accent else palette.card,
+                                if (edifierState.selectedEqualizer == preset.id) null else palette.outline, 14f))
+                            isEnabled = ready && edifierState.selectedEqualizer != null
+                            setOnClickListener { edifierSession?.setEqualizer(preset.id) }
+                        }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
+                    }
+                }
             }
             return
         }

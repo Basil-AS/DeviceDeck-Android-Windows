@@ -733,4 +733,5 @@
     <string name="support_github_action">Star on GitHub</string>
     <string name="support_later">Later</string>
     <string name="support_never">Do not ask again</string>
+    <string name="device_hub_equalizer" translatable="false">Equalizer</string>
 </resources>
