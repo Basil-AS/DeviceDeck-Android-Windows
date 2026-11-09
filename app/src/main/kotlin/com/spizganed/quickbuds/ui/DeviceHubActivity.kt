@@ -16,6 +16,7 @@ import android.widget.TextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.text.InputType
+import android.text.InputFilter
 import com.spizganed.quickbuds.R
 import com.spizganed.quickbuds.bluetooth.BaseusBowie30Session
 import com.spizganed.quickbuds.bluetooth.BaseusBlade2Session
@@ -52,6 +53,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierTimerControls: LinearLayout
     private lateinit var edifierGameModeControl: TextView
     private lateinit var edifierAutoPowerOffControl: TextView
+    private lateinit var edifierNameControl: TextView
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -559,6 +561,33 @@ class DeviceHubActivity : Activity() {
             }
         }
         controls.addView(edifierAutoPowerOffControl)
+        edifierNameControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                val limit = edifierState.bluetoothNameLimitBytes
+                if (!ready || !edifierState.bluetoothNameSupported || limit <= 0) return@setOnClickListener
+                val input = EditText(this@DeviceHubActivity).apply {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                    setSingleLine(true)
+                    setText(edifierState.bluetoothName.orEmpty())
+                    filters = arrayOf(InputFilter { source, start, end, dest, dstart, dend ->
+                        val candidate = dest.toString().replaceRange(dstart, dend, source.subSequence(start, end).toString())
+                        if (candidate.toByteArray(Charsets.UTF_8).size > limit) "" else null
+                    })
+                }
+                AlertDialog.Builder(this@DeviceHubActivity)
+                    .setTitle(R.string.device_hub_bluetooth_name)
+                    .setMessage(getString(R.string.device_hub_bluetooth_name_limit, limit))
+                    .setView(input)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.device_hub_save) { _, _ -> edifierSession?.setBluetoothName(input.text.toString()) }
+                    .show()
+            }
+        }
+        controls.addView(edifierNameControl)
     }
 
     private fun addSppModes() {
@@ -674,6 +703,16 @@ class DeviceHubActivity : Activity() {
                 edifierAutoPowerOffControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
                     if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
                 edifierAutoPowerOffControl.isEnabled = ready && supported
+            }
+            if (::edifierNameControl.isInitialized) {
+                val supported = edifierState.bluetoothNameSupported && edifierState.bluetoothNameLimitBytes > 0
+                edifierNameControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierNameControl.text = getString(R.string.device_hub_bluetooth_name) + " · " +
+                    (edifierState.bluetoothName ?: getString(R.string.device_hub_unknown))
+                val palette = ThemeRes.palette(this)
+                edifierNameControl.setTextColor(palette.text)
+                edifierNameControl.background = ThemeRes.ripple(this, ThemeRes.shape(this, palette.card, palette.outline, 14f))
+                edifierNameControl.isEnabled = ready && supported
             }
             return
         }

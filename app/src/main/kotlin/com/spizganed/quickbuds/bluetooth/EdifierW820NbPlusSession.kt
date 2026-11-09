@@ -31,6 +31,9 @@ class EdifierW820NbPlusSession(
         val gameModeEnabled: Boolean? = null,
         val autoPowerOffSupported: Boolean = false,
         val autoPowerOffEnabled: Boolean? = null,
+        val bluetoothNameSupported: Boolean = false,
+        val bluetoothNameLimitBytes: Int = 0,
+        val bluetoothName: String? = null,
     )
 
     interface Listener {
@@ -57,7 +60,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7) {
+        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -77,13 +80,18 @@ class EdifierW820NbPlusSession(
                 val timerProfile = payload.getOrNull(9)?.toInt()?.and(0xFF) ?: 0
                 val gameModeSupported = (payload.getOrNull(17)?.toInt()?.and(0x40) ?: 0) != 0
                 val autoPowerOffSupported = payload.getOrNull(8)?.toInt()?.and(0xFF) == 1
+                val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
+                val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
+                    1, 6 -> 24; 2, 5 -> 30; 3 -> 29; 4 -> 35; else -> 0
+                }
                 val timerOptions = when (timerProfile) {
                     1 -> listOf(0, 10, 20, 30, 60, 90)
                     2 -> listOf(0, 5, 15, 30, 60, 180)
                     else -> emptyList()
                 }
                 state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions,
-                    gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported)
+                    gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported,
+                    bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit)
                 listener.onState(state)
                 listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
                 refresh()
@@ -122,6 +130,7 @@ class EdifierW820NbPlusSession(
             if (state.sleepTimerOptions.isNotEmpty()) readSleepTimer()
             if (state.gameModeSupported) readGameMode()
             if (state.autoPowerOffSupported) readAutoPowerOff()
+            if (state.bluetoothNameSupported) readBluetoothName()
         }
         pump()
     }
@@ -199,6 +208,37 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readAutoPowerOff(expected = enabled)
+        }
+        pump()
+    }
+
+    fun setBluetoothName(name: String) {
+        val bytes = name.toByteArray(Charsets.UTF_8)
+        if (!ready || !state.bluetoothNameSupported || state.bluetoothNameLimitBytes <= 0 ||
+            name.isBlank() || bytes.size > state.bluetoothNameLimitBytes || name.any { Character.isISOControl(it) }) {
+            listener.onStatus("Name is not supported or exceeds the reported UTF-8 byte limit")
+            return
+        }
+        enqueue(0xCA, bytes) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge the name change")
+                return@enqueue
+            }
+            readBluetoothName(expected = name)
+        }
+        pump()
+    }
+
+    private fun readBluetoothName(expected: String? = null) {
+        enqueue(0xC9) { frame ->
+            val name = frame.parameters().toString(Charsets.UTF_8).trimEnd('\u0000').takeIf { it.isNotBlank() }
+            if (name == null) {
+                listener.onStatus("Bluetooth name response was not recognized")
+                return@enqueue
+            }
+            state = state.copy(bluetoothName = name)
+            listener.onState(state)
+            if (expected != null && expected != name) listener.onStatus("Bluetooth name was not confirmed by device readback")
         }
         pump()
     }
