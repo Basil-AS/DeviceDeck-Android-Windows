@@ -7,6 +7,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EdifierFrameCodecTest {
+    @Test fun d8ProfilesExposeOnlyLayoutsWithKnownPresetSemantics() {
+        assertEquals(listOf("Classic", "Dynamic", "Custom"), EdifierEqualizer.presets(7).map { it.name })
+        assertEquals(listOf(0, 1, 2, 3, 4), EdifierEqualizer.presets(10).map { it.id })
+        assertTrue(EdifierEqualizer.presets(5).isEmpty())
+        assertTrue(EdifierEqualizer.presets(11).isEmpty())
+        assertTrue(EdifierEqualizer.presets(0).isEmpty())
+    }
+
     @Test fun batteryQueryMatchesDocumentedFrame() {
         assertArrayEquals(
             byteArrayOf(0xAA.toByte(), 0x01, 0xD0.toByte(), 0x21, 0x94.toByte()),

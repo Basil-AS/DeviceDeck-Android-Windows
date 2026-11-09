@@ -643,4 +643,5 @@
     <string name="support_github_action">Поставить звезду на GitHub</string>
     <string name="support_later">Позже</string>
     <string name="support_never">Больше не спрашивать</string>
+    <string name="device_hub_equalizer" translatable="false">Эквалайзер</string>
 </resources>

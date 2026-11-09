@@ -7,6 +7,7 @@ import android.os.Looper
 import com.spizganed.quickbuds.protocol.edifier.EdifierFrame
 import com.spizganed.quickbuds.protocol.edifier.EdifierFrameCodec
 import com.spizganed.quickbuds.protocol.edifier.EdifierFrameDecoder
+import com.spizganed.quickbuds.protocol.edifier.EdifierEqualizer
 import java.util.ArrayDeque
 
 /** W820NB Plus command session over DeviceDeck's shared GATT link. */
@@ -19,7 +20,12 @@ class EdifierW820NbPlusSession(
         OFF(1, "Off"), ANC(2, "Noise cancelling"), TRANSPARENCY(3, "Ambient sound"),
     }
 
-    data class State(val batteryPercent: Int? = null, val noise: Noise? = null)
+    data class State(
+        val batteryPercent: Int? = null,
+        val noise: Noise? = null,
+        val equalizerPresets: List<EdifierEqualizer.Preset> = emptyList(),
+        val selectedEqualizer: Int? = null,
+    )
 
     interface Listener {
         fun onState(state: State)
@@ -57,7 +63,11 @@ class EdifierW820NbPlusSession(
             // D8 is a capability probe. Its layout is firmware-sensitive; retain it as
             // evidence but do not enable commands from an unvalidated interpretation.
             enqueue(0xD8) { frame ->
-                listener.onStatus("Capabilities received · ${frame.parameters().size} bytes")
+                val payload = frame.parameters()
+                val presets = if (payload.size >= 14) EdifierEqualizer.presets(payload[13].toInt() and 0xFF) else emptyList()
+                state = state.copy(equalizerPresets = presets)
+                listener.onState(state)
+                listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
                 refresh()
             }
             pump()
@@ -90,6 +100,7 @@ class EdifierW820NbPlusSession(
             state = state.copy(batteryPercent = value)
             listener.onState(state)
             readNoise()
+            if (state.equalizerPresets.isNotEmpty()) readEqualizer()
         }
         pump()
     }
@@ -105,6 +116,35 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readNoise(expected = mode)
+        }
+        pump()
+    }
+
+    fun setEqualizer(id: Int) {
+        if (!ready || state.selectedEqualizer == null || state.equalizerPresets.none { it.id == id }) {
+            listener.onStatus("Read a supported EQ profile before changing it")
+            return
+        }
+        enqueue(0xC4, byteArrayOf(id.toByte())) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge the EQ preset")
+                return@enqueue
+            }
+            readEqualizer(expected = id)
+        }
+        pump()
+    }
+
+    private fun readEqualizer(expected: Int? = null) {
+        enqueue(0xD5) { frame ->
+            val selected = frame.parameters().firstOrNull()?.toInt()?.and(0xFF)
+            if (selected == null || state.equalizerPresets.none { it.id == selected }) {
+                listener.onStatus("EQ response did not match the reported profile")
+                return@enqueue
+            }
+            state = state.copy(selectedEqualizer = selected)
+            listener.onState(state)
+            if (expected != null && expected != selected) listener.onStatus("EQ preset was not confirmed by device readback")
         }
         pump()
     }

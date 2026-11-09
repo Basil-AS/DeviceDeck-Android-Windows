@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.7 — 2026-11-09
+
+- Android and Windows/Linux: add W820NB Plus EQ presets from the Edifier D8 profile report; read the selected preset with D5 and confirm C4 changes with a fresh D5 readback. Profiles with unsupported per-side or scene layouts stay hidden.
+- Protocol changes have CI coverage. Physical-device validation is still required.
+
 ## 0.1.0-alpha.6 — 2026-11-09
 
 - Windows/Linux: add Baseus EP10 Pro battery and Off/ANC/Transparency controls over paired RFCOMM/SPP in DeviceDeck's existing cross-brand hub; add battery-only Bowie MF1 SPP profile. Noise writes require acknowledgement and mode readback.

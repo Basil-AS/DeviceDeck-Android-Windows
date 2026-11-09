@@ -239,8 +239,30 @@ struct AccessorySession {
     decoder: Decoder,
     battery: Option<u8>,
     noise: Option<String>,
+    eq_presets: Vec<EdifierEqPreset>,
+    selected_eq: Option<u8>,
     power: HashMap<u16, PowerStatus>,
     device_name: String,
+}
+
+#[derive(Clone, Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EdifierEqPreset { id: u8, name: &'static str }
+
+fn edifier_eq_presets(profile: u8) -> Vec<EdifierEqPreset> {
+    let names: &[&str] = match profile {
+        1 => &["Classic", "Popular", "Classical", "Rock"],
+        2 => &["Classic", "Popular", "Classical", "Rock", "Dance", "Blues"],
+        3 => &["Classic", "Popular", "Rock"],
+        4 => &["Classic", "Popular", "Classical", "Rock", "Custom"],
+        6 => &["Standard", "Surround", "Game"],
+        7 => &["Classic", "Dynamic", "Custom"],
+        8 => &["Classic", "Dynamic", "Spatial", "Custom"],
+        9 => &["Classic", "HiFi Camel", "STAX"],
+        10 => &["Classic", "Monitor", "Variable", "Vocal", "Custom"],
+        _ => &[],
+    };
+    names.iter().enumerate().map(|(id, name)| EdifierEqPreset { id: id as u8, name }).collect()
 }
 
 enum Decoder {
@@ -302,7 +324,18 @@ impl AccessorySession {
                 // D8 is a capability probe; the current desktop profile does not expose
                 // optional commands until its W820-specific flags have been validated.
                 let d8 = [0xD8];
-                let _ = self.request(&encode_edifier(&d8), 0xD8).await;
+                if let Ok(capabilities) = self.request(&encode_edifier(&d8), 0xD8).await {
+                    if let Some(profile) = capabilities.payload.get(13).copied() {
+                        self.eq_presets = edifier_eq_presets(profile);
+                    }
+                }
+                if !self.eq_presets.is_empty() {
+                    if let Ok(eq) = self.request(&encode_edifier(&[0xD5]), 0xD5).await {
+                        if let Some(selected) = eq.payload.first().copied().filter(|id| self.eq_presets.iter().any(|p| p.id == *id)) {
+                            self.selected_eq = Some(selected);
+                        }
+                    }
+                }
                 let d0 = [0xD0];
                 let battery = self.request(&encode_edifier(&d0), 0xD0).await?;
                 let level = battery
@@ -445,6 +478,18 @@ impl AccessorySession {
         }
         Ok(())
     }
+    async fn set_equalizer(&mut self, id: u8) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || self.eq_presets.iter().all(|preset| preset.id != id) || self.selected_eq.is_none() {
+            return Err("No supported Edifier EQ profile has been read".into());
+        }
+        let ack = self.request(&encode_edifier(&[0xC4, id]), 0xC4).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge the EQ preset".into()); }
+        let state = self.request(&encode_edifier(&[0xD5]), 0xD5).await?;
+        let actual = state.payload.first().copied().filter(|value| self.eq_presets.iter().any(|preset| preset.id == *value));
+        self.selected_eq = actual;
+        if actual != Some(id) { return Err("Edifier EQ preset did not match device readback".into()); }
+        Ok(())
+    }
     async fn read_power(&mut self, code: u16) -> Result<PowerStatus, String> {
         let frame = self.request(&encode_power_read(code), code).await?;
         if frame.payload.len() != 3 {
@@ -492,7 +537,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "power": power })
     }
 }
 
@@ -865,6 +910,8 @@ pub async fn accessory_connect(
         },
         battery: None,
         noise: None,
+        eq_presets: Vec::new(),
+        selected_eq: None,
         power: HashMap::new(),
         device_name: name,
     };
@@ -913,6 +960,20 @@ pub async fn accessory_set_noise(
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_noise(&mode).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_equalizer(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    id: u8,
+) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_equalizer(id).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
@@ -980,6 +1041,14 @@ pub async fn accessory_disconnect(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn edifier_d8_profiles_only_enable_known_preset_layouts() {
+        assert_eq!(edifier_eq_presets(7).iter().map(|p| p.name).collect::<Vec<_>>(), ["Classic", "Dynamic", "Custom"]);
+        assert_eq!(edifier_eq_presets(10).last().map(|p| p.id), Some(4));
+        assert!(edifier_eq_presets(5).is_empty());
+        assert!(edifier_eq_presets(11).is_empty());
+    }
+
     #[test]
     fn baseus_spp_profiles_match_paired_model_names() {
         assert!(Model::parse("baseus-ep10-pro")
