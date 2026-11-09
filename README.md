@@ -40,7 +40,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-Android and Windows/Linux 0.1.0-alpha.19 add automatic name matching for `realme Buds 7` and `realme Buds 7 Pro`, using the existing Air7 and Air7 Pro control profiles. This matches the aliases already present in the macOS catalog. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub also includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. Hardware behavior still needs validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
+Android and Windows/Linux 0.1.0-alpha.20 add readable per-port protocol labels for Baseus Blade 2 and Blade 2-140. Alpha.19 added automatic name matching for `realme Buds 7` and `realme Buds 7 Pro` through the existing Air7 and Air7 Pro control profiles. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub also includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. Hardware behavior still needs validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |

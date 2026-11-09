@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.20 — 2026-11-09
+
+- Decode Baseus Blade 2 USB-C negotiated-protocol telemetry as per-port labels, including the separate Blade 2-140 protocol table, across Android and Windows/Linux.
+- Keep the Blade 2 power accessory inside the shared DeviceDeck device hub; no separate Baseus app or release channel.
+
 ## 0.1.0-alpha.19 — 2026-11-09
 
 - Recognize `realme Buds 7` and `realme Buds 7 Pro` as aliases of the existing Air7 / Air7 Pro profiles on Android and Windows/Linux, matching the macOS catalog. Name-only discovery and paired-device selection now resolve these variants to the same profile.
