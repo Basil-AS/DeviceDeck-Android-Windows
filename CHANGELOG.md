@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.14 — 2026-11-09
 
 - Android and Windows/Linux: add Edifier W820NB Plus touch-sensitivity read/write controls when D8 byte 17 bit 3 advertises support. Read FD before showing the control; accept only indexed profiles 1 (0–31) and 2 (0–15), then confirm FE writes with FD readback. This remains unverified on physical hardware.
 - Keep the control in the existing shared DeviceDeck hub alongside Edifier, realme and Baseus profiles.
