@@ -135,6 +135,8 @@ struct BaseusSppSession {
     buffer: Vec<u8>,
     battery: Option<(u8, u8)>,
     noise: Option<String>,
+    gestures: Vec<(u8, u8, u8)>,
+    gesture_children: HashMap<String, Vec<u8>>,
     device_name: String,
 }
 
@@ -175,6 +177,7 @@ impl BaseusSppSession {
         self.battery = Some((battery.payload[0], battery.payload[2]));
         if self.model == Model::BaseusEp10Pro {
             self.read_noise()?;
+            let _ = self.read_gestures();
         }
         Ok(())
     }
@@ -214,10 +217,61 @@ impl BaseusSppSession {
         Ok(())
     }
 
+    fn read_gestures(&mut self) -> Result<(), String> {
+        let mut mappings = self.gestures.clone();
+        for button in 0..=1 {
+            let frame = self.request(0x8C, &[button, 0xFF])?;
+            if frame.payload.len() != 9 || frame.payload[0] != button {
+                return Err("Unrecognized Baseus gesture response".into());
+            }
+            mappings.retain(|(side, _, _)| *side != button);
+            for index in 0..4 {
+                let layout = frame.payload[1 + index * 2];
+                if layout > 3 { return Err("Unknown Baseus gesture layout".into()); }
+                mappings.push((button, layout, frame.payload[2 + index * 2]));
+            }
+        }
+        self.gestures = mappings;
+        for (button, layout, action) in self.gestures.clone().into_iter().filter(|(_, _, action)| *action == 6) {
+            let frame = self.request(0x8E, &[button, layout, 6])?;
+            if frame.payload.len() < 4 || frame.payload[0] != button || frame.payload[1] != layout || frame.payload[2] != 6
+                || frame.payload[3] < 2 || frame.payload.len() != 4 + frame.payload[3] as usize { return Err("Unrecognized Baseus gesture child response".into()); }
+            let children = frame.payload[4..].to_vec();
+            if children.iter().any(|id| ![0,1,2].contains(id)) || children.iter().collect::<std::collections::HashSet<_>>().len() != children.len() { return Err("Invalid Baseus gesture child values".into()); }
+            self.gesture_children.insert(format!("{button}:{layout}"), children);
+        }
+        Ok(())
+    }
+
+    fn set_gesture_children(&mut self, button: u8, layout: u8, selected: &[u8]) -> Result<(), String> {
+        if self.model != Model::BaseusEp10Pro || button > 1 || ![0,1,2,3].contains(&layout) || !(2..=3).contains(&selected.len())
+            || selected.iter().any(|id| ![0,1,2].contains(id)) || selected.iter().collect::<std::collections::HashSet<_>>().len() != selected.len()
+            || !self.gestures.contains(&(button, layout, 6)) { return Err("Unsupported Baseus gesture child selection".into()); }
+        let mut payload = vec![button, layout, 6, selected.len() as u8]; payload.extend_from_slice(selected);
+        let ack = self.request(0x8F, &payload)?;
+        if ack.payload.first() != Some(&1) { return Err("Baseus rejected gesture child selection".into()); }
+        let frame = self.request(0x8E, &[button, layout, 6])?;
+        if frame.payload.len() < 4 || frame.payload[0] != button || frame.payload[1] != layout || frame.payload[2] != 6 || frame.payload.len() != 4 + frame.payload[3] as usize || &frame.payload[4..] != selected { return Err("Baseus gesture child readback mismatch".into()); }
+        self.gesture_children.insert(format!("{button}:{layout}"), selected.to_vec()); Ok(())
+    }
+
+    fn set_gesture(&mut self, button: u8, layout: u8, action: u8) -> Result<(), String> {
+        if self.model != Model::BaseusEp10Pro || button > 1 || ![0, 1, 2, 3].contains(&layout) {
+            return Err("Unsupported Baseus gesture".into());
+        }
+        let allowed: &[u8] = if layout == 3 { &[0, 1] } else { &[0, 1, 2, 3, 4, 6, 11, 12] };
+        if !allowed.contains(&action) { return Err("Unsupported Baseus gesture action".into()); }
+        let ack = self.request(0x8D, &[button, layout, action])?;
+        if ack.payload.first() != Some(&1) { return Err("Baseus rejected the gesture".into()); }
+        self.read_gestures()?;
+        if !self.gestures.contains(&(button, layout, action)) { return Err("Baseus gesture readback mismatch".into()); }
+        Ok(())
+    }
+
     fn snapshot(&self, status: &str) -> Value {
         json!({ "status": status, "model": self.model.id(), "name": self.device_name,
             "battery": self.battery.map(|(left, right)| json!({"left": left, "right": right})),
-            "noise": self.noise, "power": {} })
+            "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action,"children":self.gesture_children.get(&format!("{button}:{layout}"))})).collect::<Vec<_>>(), "power": {} })
     }
 }
 
@@ -693,7 +747,12 @@ fn decode_baseus_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
         let command = buffer[1];
         let size = match command {
             0x02 | 0x33 => 6,
-            0x34 | 0x35 => 3,
+            0x34 | 0x35 | 0x8B | 0x8D | 0x8F => 3,
+            0x8C => 11,
+            0x8E => {
+                if buffer.len() < 6 { break; }
+                6 + buffer[5] as usize
+            }
             _ => {
                 buffer.remove(0);
                 continue;
@@ -918,6 +977,8 @@ pub async fn accessory_connect(
             buffer: Vec::new(),
             battery: None,
             noise: None,
+            gestures: Vec::new(),
+            gesture_children: HashMap::new(),
             device_name: name,
         };
         session.refresh()?;
@@ -1048,6 +1109,30 @@ pub async fn accessory_set_noise(
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_gesture(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    button: u8,
+    layout: u8,
+    action: u8,
+) -> Result<Value, String> {
+    let mut spp = hub.spp_session.lock().await;
+    let session = spp.as_mut().ok_or("No Baseus SPP headset is connected")?;
+    session.set_gesture(button, layout, action)?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_gesture_children(app: AppHandle, hub: State<'_, AccessoryHub>, button: u8, layout: u8, selected: Vec<u8>) -> Result<Value, String> {
+    let mut spp = hub.spp_session.lock().await;
+    let session = spp.as_mut().ok_or("No Baseus SPP headset is connected")?;
+    session.set_gesture_children(button, layout, &selected)?;
+    let result = session.snapshot("connected"); emit(&app, result.clone()); Ok(result)
 }
 
 #[tauri::command]

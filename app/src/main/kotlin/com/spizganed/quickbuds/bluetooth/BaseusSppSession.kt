@@ -23,7 +23,8 @@ class BaseusSppSession(
 ) {
     enum class Model { EP10_PRO, BOWIE_MF1 }
     enum class Noise(val wireMode: Int, val wireType: Int) { OFF(0, 0xFF), ANC(1, 101), TRANSPARENCY(2, 0xFF) }
-    data class State(val leftBattery: Int? = null, val rightBattery: Int? = null, val noise: Noise? = null)
+    data class Gesture(val button: Int, val layout: Int, val action: Int)
+    data class State(val leftBattery: Int? = null, val rightBattery: Int? = null, val noise: Noise? = null, val gestures: List<Gesture> = emptyList(), val gestureChildren: Map<String, List<Int>> = emptyMap())
     interface Listener {
         fun onState(state: State)
         fun onStatus(text: String)
@@ -71,7 +72,10 @@ class BaseusSppSession(
                     throw IllegalStateException("Unrecognized battery response")
                 state = state.copy(leftBattery = battery.u8(0), rightBattery = battery.u8(2))
                 publishState()
-                if (model == Model.EP10_PRO) readNoise()
+                if (model == Model.EP10_PRO) {
+                    readNoise()
+                    runCatching { readGestures() }.onFailure { publishStatus("Gesture settings unavailable: ${it.message ?: "no response"}") }
+                }
             } catch (error: Exception) { fail(error.message ?: "Could not read headset status") }
         }
     }
@@ -87,6 +91,74 @@ class BaseusSppSession(
             } catch (error: Exception) { publishStatus(error.message ?: "Could not change noise mode") }
         }
     }
+
+    fun setGesture(gesture: Gesture, action: Int) {
+        if (!ready || model != Model.EP10_PRO || gesture !in state.gestures || action !in allowedActions(gesture.layout)) return
+        requests.execute {
+            try {
+                val ack = request(0x8D, gesture.button, gesture.layout, action)
+                if (ack.payload.size != 1 || ack.u8(0) != 1) throw IllegalStateException("The headset rejected the gesture")
+                readGestures()
+                if (state.gestures.none { it.button == gesture.button && it.layout == gesture.layout && it.action == action })
+                    throw IllegalStateException("Gesture did not match device readback")
+            } catch (error: Exception) { publishStatus(error.message ?: "Could not change gesture") }
+        }
+    }
+
+    fun setGestureChildren(gesture: Gesture, selected: List<Int>) {
+        val available = listOf(1, 2, 0)
+        if (!ready || model != Model.EP10_PRO || gesture.action != 6 || selected.size !in 2..3 ||
+            selected.distinct().size != selected.size || selected.any { it !in available }) return
+        requests.execute {
+            try {
+                val ack = request(0x8F, gesture.button, gesture.layout, 6, selected.size, *selected.toIntArray())
+                if (ack.payload.size != 1 || ack.u8(0) != 1) throw IllegalStateException("The headset rejected the noise-cycle choices")
+                val actual = readGestureChildren(gesture)
+                if (actual != selected) throw IllegalStateException("Noise-cycle choices did not match device readback")
+                val key = gestureKey(gesture)
+                state = state.copy(gestureChildren = state.gestureChildren + (key to actual))
+                publishState()
+            } catch (error: Exception) { publishStatus(error.message ?: "Could not save noise-cycle choices") }
+        }
+    }
+
+    private fun readGestures() {
+        var rows = state.gestures
+        for (button in 0..1) {
+            val frame = request(0x8C, button, 0xFF)
+            if (frame.payload.size != 9 || frame.u8(0) != button) throw IllegalStateException("Unrecognized gesture response")
+            rows = rows.filter { it.button != button } + (0 until 4).map { index ->
+                val layout = frame.u8(1 + index * 2)
+                if (layout !in 0..3) throw IllegalStateException("Unknown gesture layout")
+                Gesture(button, layout, frame.u8(2 + index * 2))
+            }
+        }
+        state = state.copy(gestures = rows)
+        publishState()
+        rows.filter { it.action == 6 }.forEach { gesture ->
+            runCatching {
+                val values = readGestureChildren(gesture)
+                state = state.copy(gestureChildren = state.gestureChildren + (gestureKey(gesture) to values))
+                publishState()
+            }.onFailure { publishStatus("Noise-cycle choices unavailable: ${it.message ?: "no response"}") }
+        }
+    }
+
+    private fun readGestureChildren(gesture: Gesture): List<Int> {
+        val frame = request(0x8E, gesture.button, gesture.layout, 6)
+        if (frame.payload.size < 4 || frame.u8(0) != gesture.button || frame.u8(1) != gesture.layout || frame.u8(2) != 6)
+            throw IllegalStateException("Unrecognized noise-cycle response")
+        val count = frame.u8(3)
+        if (count != frame.payload.size - 4) throw IllegalStateException("Incomplete noise-cycle response")
+        val values = (0 until count).map { frame.u8(4 + it) }
+        if (values.size !in 2..3 || values.distinct().size != values.size || values.any { it !in listOf(0, 1, 2) })
+            throw IllegalStateException("Invalid noise-cycle choices")
+        return values
+    }
+
+    private fun gestureKey(gesture: Gesture) = "${gesture.button}:${gesture.layout}"
+
+    private fun allowedActions(layout: Int): List<Int> = if (layout == 3) listOf(0, 1) else listOf(0, 1, 2, 3, 4, 6, 11, 12)
 
     private fun readNoise() {
         val frame = request(0x33)

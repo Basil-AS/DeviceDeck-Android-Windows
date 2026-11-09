@@ -33,6 +33,12 @@ object BaseusBowie30Codec {
                 val size = when (buffer[1].toInt() and 0xFF) {
                     0x02, 0x33 -> 6
                     0x34, 0x35 -> 3
+                    0x8B, 0x8D, 0x8F -> 3
+                    0x8C -> 11
+                    0x8E -> {
+                        if (buffer.size < 6) break
+                        6 + (buffer[5].toInt() and 0xFF)
+                    }
                     else -> { buffer = buffer.copyOfRange(1, buffer.size); continue }
                 }
                 if (buffer.size < size) break

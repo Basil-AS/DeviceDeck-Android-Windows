@@ -40,7 +40,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-Android and Windows/Linux are at 0.1.0-alpha.10. DeviceDeck keeps Edifier, realme and Baseus products in one app per platform. The shared cross-brand hub includes profile-gated W820NB Plus EQ presets, sleep timer, and game mode on Android and Windows/Linux, Baseus EP10 Pro SPP battery/noise controls and Bowie MF1 battery readings, plus Blade 2 telemetry/display/timer and USB-C port mode controls. Hardware behavior still requires validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
+Android and Windows/Linux are at 0.1.0-alpha.11. DeviceDeck keeps Edifier, realme and Baseus products in one app per platform. The shared cross-brand hub includes profile-gated W820NB Plus EQ presets, sleep timer, and game mode; Baseus EP10 Pro SPP battery/noise and gesture controls (including cycle-mode choices); Bowie MF1 battery readings; and Blade 2 telemetry/display/timer and USB-C port mode controls. Hardware behavior still requires validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |

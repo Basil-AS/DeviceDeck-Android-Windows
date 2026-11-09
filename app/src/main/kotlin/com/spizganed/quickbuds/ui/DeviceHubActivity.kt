@@ -47,6 +47,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var battery: TextView
     private lateinit var noise: TextView
     private lateinit var controls: LinearLayout
+    private lateinit var sppGestureControls: LinearLayout
     private lateinit var edifierEqControls: LinearLayout
     private lateinit var edifierTimerControls: LinearLayout
     private lateinit var edifierGameModeControl: TextView
@@ -552,6 +553,10 @@ class DeviceHubActivity : Activity() {
                 setOnClickListener { baseusSppSession?.setNoise(mode) }
             }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
         }
+        sppGestureControls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        controls.addView(sppGestureControls, LinearLayout.LayoutParams(-1, -2).apply {
+            topMargin = ThemeRes.dp(this@DeviceHubActivity, 12f)
+        })
     }
 
     private fun noiseLabel(mode: BaseusBowie30Session.Noise): String = when (mode) {
@@ -642,7 +647,7 @@ class DeviceHubActivity : Activity() {
             return
         }
         if (selectedDevice == DeviceKind.BASEUS_EP10_PRO) {
-            for (index in 0 until controls.childCount) {
+            for (index in BaseusSppSession.Noise.entries.indices) {
                 val chip = controls.getChildAt(index) as? TextView ?: continue
                 val mode = BaseusSppSession.Noise.entries.getOrNull(index) ?: continue
                 val palette = ThemeRes.palette(this)
@@ -652,6 +657,7 @@ class DeviceHubActivity : Activity() {
                     if (selected) null else palette.outline, 14f))
                 chip.isEnabled = ready && sppState.noise != null
             }
+            renderSppGestures()
             return
         }
         if (selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) return
@@ -669,6 +675,93 @@ class DeviceHubActivity : Activity() {
                 chip.isEnabled = ready && currentState.noise != null
             }
         }
+    }
+
+    private fun renderSppGestures() {
+        if (!::sppGestureControls.isInitialized) return
+        sppGestureControls.removeAllViews()
+        if (sppState.gestures.isEmpty()) return
+        val secondary = ThemeRes.palette(this).textSecondary
+        sppGestureControls.addView(TextView(this).apply {
+            text = if (resources.configuration.locales[0].language == "ru") "Жесты" else "Gestures"
+            textSize = 12f; setTextColor(secondary)
+        })
+        sppState.gestures.sortedWith(compareBy({ it.button }, { it.layout })).forEachIndexed { index, gesture ->
+            val label = when (gesture.layout) { 3 -> "Single"; 0 -> "Double"; 1 -> "Triple"; 2 -> "Hold"; else -> "Gesture ${gesture.layout}" }
+            val side = if (gesture.button == 0) "Left" else "Right"
+            val action = baseusActionLabel(gesture.action)
+            sppGestureControls.addView(TextView(this).apply {
+                text = "$side · $label\n$action"
+                textSize = 13f; gravity = Gravity.CENTER_VERTICAL
+                setPadding(ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 10f), ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 10f))
+                setTextColor(ThemeRes.palette(this@DeviceHubActivity).text)
+                isClickable = true; isFocusable = true
+                background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+                isEnabled = ready
+                setOnClickListener { chooseBaseusGesture(gesture) }
+            }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = ThemeRes.dp(this@DeviceHubActivity, if (index == 0) 6f else 4f) })
+            if (gesture.action == 6) {
+                val key = "${gesture.button}:${gesture.layout}"
+                val selected = sppState.gestureChildren[key].orEmpty()
+                val modes = listOf(1, 2, 0)
+                val labels = modes.map { when (it) {
+                    1 -> if (resources.configuration.locales[0].language == "ru") "Шумоподавление" else "Noise cancelling"
+                    2 -> getString(R.string.device_hub_mode_transparency)
+                    else -> if (resources.configuration.locales[0].language == "ru") "Обычный режим" else "Normal"
+                } }
+                sppGestureControls.addView(TextView(this).apply {
+                    text = if (selected.isEmpty()) {
+                        if (resources.configuration.locales[0].language == "ru") "Режимы цикла не прочитаны" else "Cycle choices unavailable"
+                    } else labels.filterIndexed { i, _ -> modes[i] in selected }.joinToString(" · ")
+                    textSize = 12f; gravity = Gravity.CENTER_VERTICAL
+                    setPadding(ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 6f), ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 8f))
+                    setTextColor(ThemeRes.palette(this@DeviceHubActivity).textSecondary)
+                    isClickable = selected.isNotEmpty() && ready; isFocusable = isClickable
+                    setOnClickListener { chooseBaseusGestureChildren(gesture, modes, labels, selected) }
+                })
+            }
+        }
+    }
+
+    private fun chooseBaseusGestureChildren(
+        gesture: BaseusSppSession.Gesture,
+        modes: List<Int>,
+        labels: List<String>,
+        selected: List<Int>,
+    ) {
+        val checked = BooleanArray(modes.size) { modes[it] in selected }
+        val title = if (resources.configuration.locales[0].language == "ru") "Режимы цикла шумоподавления" else "Noise-cycle modes"
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMultiChoiceItems(labels.toTypedArray(), checked) { _, which, isChecked -> checked[which] = isChecked }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(if (resources.configuration.locales[0].language == "ru") "Сохранить" else "Save") { _, _ ->
+                val values = modes.filterIndexed { index, _ -> checked[index] }
+                if (values.size < 2) {
+                    status.setText(if (resources.configuration.locales[0].language == "ru") "Выберите минимум два режима" else "Select at least two modes")
+                } else baseusSppSession?.setGestureChildren(gesture, values)
+            }
+            .show()
+    }
+
+    private fun chooseBaseusGesture(gesture: BaseusSppSession.Gesture) {
+        val actions = if (gesture.layout == 3) listOf(0, 1) else listOf(0, 1, 2, 3, 4, 6, 11, 12)
+        AlertDialog.Builder(this)
+            .setTitle("${if (gesture.button == 0) "Left" else "Right"} · ${when (gesture.layout) { 3 -> "Single"; 0 -> "Double"; 1 -> "Triple"; else -> "Hold" }}")
+            .setItems(actions.map(::baseusActionLabel).toTypedArray()) { _, which -> baseusSppSession?.setGesture(gesture, actions[which]) }
+            .show()
+    }
+
+    private fun baseusActionLabel(action: Int): String = when (action) {
+        0 -> getString(R.string.gesture_action_none)
+        1 -> getString(R.string.gesture_action_play_pause)
+        2 -> getString(R.string.gesture_action_prev)
+        3 -> getString(R.string.gesture_action_next)
+        4 -> getString(R.string.gesture_action_assistant)
+        6 -> if (resources.configuration.locales[0].language == "ru") "Переключение режимов шумоподавления" else "Cycle noise modes"
+        11 -> getString(R.string.gesture_action_volume_up)
+        12 -> getString(R.string.gesture_action_volume_down)
+        else -> "Action $action"
     }
 
     private fun renderBlade2(state: BaseusBlade2Session.State) {
