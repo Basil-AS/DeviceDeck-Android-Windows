@@ -711,7 +711,7 @@ impl AccessorySession {
     }
 
     async fn set_prompt_volume(&mut self, level: u8) -> Result<(), String> {
-        if self.model != Model::EdifierW820NbPlus || !self.prompt_volume_supported || self.prompt_volume_level.is_none() || level > 12 {
+        if self.model != Model::EdifierW820NbPlus || !self.prompt_volume_supported || self.prompt_volume_level.is_none() || level > 15 {
             return Err("Voice prompt volume is not available in the reported Edifier profile".into());
         }
         let ack = self.request(&encode_edifier(&[0x06, level]), 0x06).await?;
@@ -907,7 +907,7 @@ fn edifier_prompt_volume_supported(capabilities: &[u8]) -> bool {
 }
 
 fn decode_edifier_prompt_level(payload: &[u8]) -> Option<u8> {
-    payload.first().copied().filter(|level| *level <= 12)
+    payload.first().copied().filter(|level| *level <= 15)
 }
 
 fn edifier_sensitivity_max(index: u8) -> Option<u8> {
@@ -1585,8 +1585,9 @@ mod tests {
         capabilities[17] = 0x10;
         assert!(edifier_prompt_volume_supported(&capabilities));
         assert_eq!(decode_edifier_prompt_level(&[0]), Some(0));
-        assert_eq!(decode_edifier_prompt_level(&[12]), Some(12));
-        assert_eq!(decode_edifier_prompt_level(&[13]), None);
+        assert_eq!(decode_edifier_prompt_level(&[13]), Some(13));
+        assert_eq!(decode_edifier_prompt_level(&[15]), Some(15));
+        assert_eq!(decode_edifier_prompt_level(&[16]), None);
         assert_eq!(decode_edifier_prompt_level(&[]), None);
     }
 
