@@ -405,6 +405,7 @@ function buildWindow(){
       <div id="accessoryNoiseSection"><div class="lbl">${$t('accessory_noise')}</div><div class="group" id="accessoryModes"></div></div>
       <div id="accessoryEqSection" hidden><div class="lbl">${$t('device_hub_equalizer')}</div><div class="group" id="accessoryEqPresets"></div></div>
       <div id="accessorySleepTimerSection" hidden><div class="lbl">${$t('accessory_sleep_timer')}</div><div class="group" id="accessorySleepTimerOptions"></div></div>
+      <div id="accessoryGameModeSection" hidden><div class="lbl">${$t('device_hub_game_mode')}</div><div class="group" id="accessoryGameModeControl"></div></div>
       <div id="accessoryPowerPanel" hidden>
         <div class="lbl">${$t('device_hub_powerbank_waiting')}</div><div class="group" id="accessoryPowerMetrics"></div>
         <div class="lbl">${$t('device_hub_powerbank_theme')}</div><button class="row press" data-act="accpowertheme"><div class="txt"><div class="t">${$t('device_hub_powerbank_theme')}</div></div><span class="v" id="accessoryPowerTheme">–</span></button>
@@ -742,6 +743,7 @@ document.addEventListener('click',ev=>{
   if(a==='accmode'){window.QBLIVE&&QBLIVE.accessoryMode(v);return;}
   if(a==='acceq'){window.QBLIVE&&QBLIVE.accessoryEqualizer(Number(v));return;}
   if(a==='accsleeptimer'){window.QBLIVE&&QBLIVE.accessorySleepTimer(Number(v));return;}
+  if(a==='accgamemode'){window.QBLIVE&&QBLIVE.accessoryGameMode(v==='true');return;}
   if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
   if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
   if(a==='accpowertheme'){const old=Number(accessoryState.power?.['0020']?.value??-1);if(old>=0&&old<=2)QBLIVE.accessoryPower(0x20,(old+1)%3);else toast($t('device_hub_powerbank_waiting'));return;}
@@ -902,6 +904,7 @@ if(window.__TAURI__){
     accessoryMode(mode){T.core.invoke('accessory_set_noise',{mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryEqualizer(id){T.core.invoke('accessory_set_equalizer',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessorySleepTimer(minutes){T.core.invoke('accessory_set_sleep_timer',{minutes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryGameMode(enabled){T.core.invoke('accessory_set_game_mode',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryRefresh(){T.core.invoke('accessory_refresh').catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -947,6 +950,10 @@ if(window.__TAURI__){
     const timerOptions=accessoryState.sleepTimerOptions||[];
     byId('accessorySleepTimerSection').hidden=accessoryState.model!=='edifier-w820nb-plus'||timerOptions.length===0;
     byId('accessorySleepTimerOptions').innerHTML=timerOptions.map(minutes=>`<button class="row press" role="radio" aria-checked="${minutes===accessoryState.sleepTimerMinutes}" data-act="accsleeptimer" data-v="${minutes}"><div class="txt"><div class="t">${minutes===0?$t('device_hub_mode_off'):$t('device_hub_minutes',`${minutes} min`)}</div></div>${minutes===accessoryState.sleepTimerMinutes?ic('check','ch'):ic('chev','ch')}</button>`).join('');
+    const gameMode=accessoryState.gameMode;
+    const gameVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.gameModeSupported===true&&typeof gameMode==='boolean';
+    byId('accessoryGameModeSection').hidden=!gameVisible;
+    byId('accessoryGameModeControl').innerHTML=gameVisible?`<button class="row press" role="switch" aria-checked="${gameMode}" data-act="accgamemode" data-v="${!gameMode}"><div class="txt"><div class="t">${$t('device_hub_game_mode')}</div></div><span class="v">${$t(gameMode?'device_hub_mode_on':'device_hub_mode_off')}</span>${ic(gameMode?'check':'chev','ch')}</button>`:'';
     const power=accessoryState.power||{};
     const metrics=Object.entries(power).map(([hex,value])=>{const code=parseInt(hex,16),label=powerMetricLabel(code);return label?`<div class="row"><div class="txt"><div class="t">${esc(label)}</div></div><span class="v">${esc(powerMetricValue(code,value))}</span></div>`:'';}).filter(Boolean).join('');
     byId('accessoryPowerMetrics').innerHTML=metrics||`<div class="row"><div class="txt"><div class="s">${$t('device_hub_powerbank_waiting')}</div></div></div>`;

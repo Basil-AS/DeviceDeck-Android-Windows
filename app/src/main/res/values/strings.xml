@@ -19,6 +19,8 @@
     <string name="device_hub_mode_indoor" translatable="false">Indoor</string>
     <string name="device_hub_mode_outdoor" translatable="false">Outdoor</string>
     <string name="device_hub_mode_off" translatable="false">Off</string>
+    <string name="device_hub_mode_on" translatable="false">On</string>
+    <string name="device_hub_game_mode" translatable="false">Game mode</string>
     <string name="device_hub_sleep_timer" translatable="false">Sleep timer</string>
     <string name="device_hub_minutes" translatable="false">%1$d min</string>
     <string name="device_hub_mode_transparency" translatable="false">Transparency</string>
