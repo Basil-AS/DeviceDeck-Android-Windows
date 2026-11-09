@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.25 — 2026-11-10
+
+- Add original model-specific vector illustrations to the Android Device Hub for EDIFIER W820NB Plus, Baseus Bowie 30, EP10 Pro, and Bowie MF1. Keep the Blade 2 power-bank art and give each illustration an accessible device-name description.
+
 ## 0.1.0-alpha.24 — 2026-11-10
 
 - Add the realme Buds Air7 Pro dual-device connection switch to the unified DeviceDeck Android and Windows/Linux apps. DeviceDeck exposes the multipoint toggle; connected-device management is not mapped. Hardware verification remains open.
