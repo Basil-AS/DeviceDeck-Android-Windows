@@ -796,3 +796,4 @@ class DeviceHubActivity : Activity() {
         }
         return "$title  ·  ${getString(value)}"
     }
+}
