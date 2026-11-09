@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.19 — 2026-11-09
+
+- Recognize `realme Buds 7` and `realme Buds 7 Pro` as aliases of the existing Air7 / Air7 Pro profiles on Android and Windows/Linux, matching the macOS catalog. Name-only discovery and paired-device selection now resolve these variants to the same profile.
+
 ## 0.1.0-alpha.18 — 2026-11-09
 
-- Add capability-gated EDIFIER W820NB Plus voice prompt volume to the existing DeviceDeck hub on Android and Windows/Linux. D8 B17 bit 4 gates the control; 0x05 reads the level, 0x06 sets it within 0–12, and readback confirms the result. Physical-device verification remains open.
+- Add capability-gated EDIFIER W820NB Plus voice prompt volume to the existing DeviceDeck hub on Android and Windows/Linux. D8 B17 bit 4 gates the control; 0x05 reads the level, 0x06 sets it within 0–15, and readback confirms the result. Physical-device verification remains open.
 
 ## 0.1.0-alpha.17 — 2026-11-09
 

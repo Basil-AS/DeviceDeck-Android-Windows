@@ -40,7 +40,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-Android and Windows/Linux 0.1.0-alpha.13 adds capability-gated Bluetooth name reading and renaming for W820NB Plus in the same DeviceDeck hub as realme and Baseus. D8 gates C9 reads and CA writes; writes obey the reported UTF-8 byte limit and are confirmed with C9 readback. The hub also includes W820NB Plus EQ presets, sleep timer and game mode; Baseus EP10 Pro SPP battery/noise and gesture controls (including cycle-mode choices); Bowie MF1 battery readings; and Blade 2 telemetry/display/timer and USB-C port mode controls. Hardware behavior still requires validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). macOS follows its own version line. Pair SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
+Android and Windows/Linux 0.1.0-alpha.19 add automatic name matching for `realme Buds 7` and `realme Buds 7 Pro`, using the existing Air7 and Air7 Pro control profiles. This matches the aliases already present in the macOS catalog. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub also includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. Hardware behavior still needs validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |
