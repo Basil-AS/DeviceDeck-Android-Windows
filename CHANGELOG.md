@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Android and Windows/Linux: expose the Edifier W820NB Plus sleep timer only when D8 advertises a known timer profile; read the current value with D3 and confirm D1/D2 writes with D3 readback.
+- The shared accessory hub keeps timer controls inside DeviceDeck. Hardware validation on W820NB Plus remains pending.
+
 ## 0.1.0-alpha.7 — 2026-11-09
 
 - Android and Windows/Linux: add W820NB Plus EQ presets from the Edifier D8 profile report; read the selected preset with D5 and confirm C4 changes with a fresh D5 readback. Profiles with unsupported per-side or scene layouts stay hidden.
