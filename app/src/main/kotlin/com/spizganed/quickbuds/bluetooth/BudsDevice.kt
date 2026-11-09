@@ -21,7 +21,7 @@ object BudsDevice {
 
     fun isBuds(context: Context, device: BluetoothDevice): Boolean = runCatching {
         device.uuids?.any { it.uuid.toString().uppercase() in SPP_UUIDS } == true ||
-            ModelCatalog.all(context).any { it.name == device.name }
+            ModelCatalog.isKnownName(context, device.name)
     }.getOrDefault(false)
 
     fun remember(context: Context, device: BluetoothDevice) {
@@ -37,7 +37,9 @@ object BudsDevice {
         val saved = prefs(context).getString(KEY_ADDRESS, null)
         // A model picked by hand names the buds the person means, whichever buds connected for audio last.
         val picked = ModelCatalog.manual(context)?.let { id -> ModelCatalog.all(context).firstOrNull { it.id == id }?.name }
-        picked?.let { name -> bonded.firstOrNull { it.name == name } }?.let { return it.also { d -> remember(context, d) } }
+        picked?.let { id -> ModelCatalog.all(context).firstOrNull { it.id == id } }
+            ?.let { model -> bonded.firstOrNull { ModelCatalog.matchesName(model, it.name) } }
+            ?.let { return it.also { d -> remember(context, d) } }
         return bonded.firstOrNull { it.address == saved }
             ?: bonded.firstOrNull { isBuds(context, it) }?.also { remember(context, it) }
     }

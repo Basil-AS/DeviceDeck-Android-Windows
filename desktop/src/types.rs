@@ -266,13 +266,20 @@ pub fn models() -> &'static [Value] {
 /// `ModelCatalog.find`: the product id (unique in the list), else the device name (a renamed device has none).
 pub fn find_model(id: Option<&str>, name: Option<&str>) -> Option<&'static Value> {
     let m = models();
-    let by_name = |x: &&Value| name.is_some() && x["name"].as_str() == name;
+    let by_name = |x: &&Value| name.is_some_and(|name| model_name_matches(x, name));
     let by_id = |x: &&Value| id.is_some_and(|id| x["id"].as_str().is_some_and(|i| i.eq_ignore_ascii_case(id)));
     // HeyMelody's order (PROTOCOL.md section 6): name and id, then name, then id.
     m.iter().find(|x| by_name(x) && by_id(x)).or_else(|| m.iter().find(by_name)).or_else(|| m.iter().find(by_id))
 }
 
-pub fn is_known_name(name: &str) -> bool { models().iter().any(|m| m["name"].as_str() == Some(name)) }
+fn model_name_matches(model: &Value, name: &str) -> bool {
+    model["name"].as_str().is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+        || model["aliases"].as_array().is_some_and(|aliases| aliases.iter().any(|alias| {
+            alias.as_str().is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+        }))
+}
+
+pub fn is_known_name(name: &str) -> bool { models().iter().any(|m| model_name_matches(m, name)) }
 
 #[derive(Default, Clone)]
 pub struct AncModes {

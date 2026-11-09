@@ -67,6 +67,16 @@ mod wire {
     }
 }
 
+#[test]
+fn requested_realme_buds_7_names_resolve_to_air7_profiles() {
+    let air7 = crate::types::find_model(None, Some("realme Buds 7")).expect("Buds 7 alias");
+    let air7_pro = crate::types::find_model(None, Some("realme Buds 7 Pro")).expect("Buds 7 Pro alias");
+    assert_eq!(air7["id"].as_str(), Some("064812"));
+    assert_eq!(air7_pro["id"].as_str(), Some("064C12"));
+    assert!(crate::types::is_known_name("REALME BUDS 7"));
+    assert!(crate::types::is_known_name("realme buds 7 pro"));
+}
+
 mod msg {
     use buds_core::msg::*;
     use buds_core::wire::Message;
