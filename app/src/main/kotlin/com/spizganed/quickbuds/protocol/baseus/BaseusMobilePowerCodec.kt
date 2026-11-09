@@ -3,6 +3,16 @@ package com.spizganed.quickbuds.protocol.baseus
 /** App-layer frames used by Baseus Intelligent's Blade 2 power-device screen. */
 object BaseusMobilePowerCodec {
     private val prefix = byteArrayOf(0x9A.toByte(), 0xAA.toByte())
+    private val standardPortProtocols = listOf("", "PPS", "PD3.0", "QC2.0", "QC3.0", "AFC", "FCP", "SCP")
+    private val blade2_140PortProtocols = listOf("", "DCP", "", "QC", "", "AFC", "FCP", "SCP", "PD")
+
+    /** Baseus Intelligent packs USB-C 1's protocol in the low byte and USB-C 2's in the high byte. */
+    fun negotiatedProtocols(value: Int, blade2_140: Boolean): String? {
+        val table = if (blade2_140) blade2_140PortProtocols else standardPortProtocols
+        val ports = listOf("C1" to (value and 0xFF), "C2" to ((value ushr 8) and 0xFF))
+        val labels = ports.mapNotNull { (port, index) -> table.getOrNull(index)?.takeIf { it.isNotBlank() }?.let { "$port $it" } }
+        return labels.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+    }
 
     data class Status(val code: Int, val multiplier: Int, val value: Int) {
         fun scaled(): Double? = multiplier.takeIf { it != 0 }?.let { value.toDouble() / it }
