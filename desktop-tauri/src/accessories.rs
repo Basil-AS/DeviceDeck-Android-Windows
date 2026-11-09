@@ -343,6 +343,8 @@ struct AccessorySession {
     game_mode: Option<bool>,
     prompt_tone_supported: bool,
     prompt_tone_enabled: Option<bool>,
+    prompt_volume_supported: bool,
+    prompt_volume_level: Option<u8>,
     auto_power_off_supported: bool,
     auto_power_off: Option<bool>,
     bluetooth_name_supported: bool,
@@ -449,6 +451,7 @@ impl AccessorySession {
                     };
                     self.game_mode_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x40 != 0);
                     self.prompt_tone_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x02 != 0);
+                    self.prompt_volume_supported = edifier_prompt_volume_supported(&capabilities.payload);
                     self.touch_sensitivity_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x08 != 0);
                     self.touch_controls_supported = capabilities.payload.get(16) == Some(&18);
                     self.auto_power_off_supported = capabilities.payload.get(8) == Some(&1);
@@ -478,6 +481,11 @@ impl AccessorySession {
                 if self.prompt_tone_supported {
                     if let Ok(state) = self.request(&encode_edifier(&[0xF9]), 0xF9).await {
                         self.prompt_tone_enabled = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+                    }
+                }
+                if self.prompt_volume_supported {
+                    if let Ok(level) = self.request(&encode_edifier(&[0x05]), 0x05).await {
+                        self.prompt_volume_level = decode_edifier_prompt_level(&level.payload);
                     }
                 }
                 if self.auto_power_off_supported {
@@ -702,6 +710,18 @@ impl AccessorySession {
         Ok(())
     }
 
+    async fn set_prompt_volume(&mut self, level: u8) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || !self.prompt_volume_supported || self.prompt_volume_level.is_none() || level > 15 {
+            return Err("Voice prompt volume is not available in the reported Edifier profile".into());
+        }
+        let ack = self.request(&encode_edifier(&[0x06, level]), 0x06).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge voice prompt volume".into()); }
+        let state = self.request(&encode_edifier(&[0x05]), 0x05).await?;
+        self.prompt_volume_level = decode_edifier_prompt_level(&state.payload);
+        if self.prompt_volume_level != Some(level) { return Err("Voice prompt volume did not match device readback".into()); }
+        Ok(())
+    }
+
     async fn set_touch_sensitivity(&mut self, value: u8) -> Result<(), String> {
         let index = self.touch_sensitivity_index.ok_or("Touch sensitivity has not been read")?;
         let max = edifier_sensitivity_max(index).ok_or("Unsupported Edifier sensitivity profile")?;
@@ -870,7 +890,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
     }
 }
 
@@ -880,6 +900,14 @@ fn encode_edifier(payload: &[u8]) -> Vec<u8> {
 
 fn edifier_name_limit(mode: u8) -> usize {
     match mode { 1 | 6 => 24, 2 | 5 => 30, 3 => 29, 4 => 35, _ => 0 }
+}
+
+fn edifier_prompt_volume_supported(capabilities: &[u8]) -> bool {
+    capabilities.get(17).is_some_and(|value| value & 0x10 != 0)
+}
+
+fn decode_edifier_prompt_level(payload: &[u8]) -> Option<u8> {
+    payload.first().copied().filter(|level| *level <= 15)
 }
 
 fn edifier_sensitivity_max(index: u8) -> Option<u8> {
@@ -1273,6 +1301,8 @@ pub async fn accessory_connect(
         game_mode: None,
         prompt_tone_supported: false,
         prompt_tone_enabled: None,
+        prompt_volume_supported: false,
+        prompt_volume_level: None,
         auto_power_off_supported: false,
         auto_power_off: None,
         bluetooth_name_supported: false,
@@ -1423,6 +1453,16 @@ pub async fn accessory_set_prompt_tone(app: AppHandle, hub: State<'_, AccessoryH
 }
 
 #[tauri::command]
+pub async fn accessory_set_prompt_volume(app: AppHandle, hub: State<'_, AccessoryHub>, level: u8) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_prompt_volume(level).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
 pub async fn accessory_set_bluetooth_name(app: AppHandle, hub: State<'_, AccessoryHub>, name: String) -> Result<Value, String> {
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
@@ -1536,6 +1576,19 @@ mod tests {
         assert_eq!(edifier_eq_presets(10).last().map(|p| p.id), Some(4));
         assert!(edifier_eq_presets(5).is_empty());
         assert!(edifier_eq_presets(11).is_empty());
+    }
+
+    #[test]
+    fn edifier_voice_prompt_level_uses_the_reported_b17_bit_and_range_zero_to_twelve() {
+        let mut capabilities = vec![0; 18];
+        assert!(!edifier_prompt_volume_supported(&capabilities));
+        capabilities[17] = 0x10;
+        assert!(edifier_prompt_volume_supported(&capabilities));
+        assert_eq!(decode_edifier_prompt_level(&[0]), Some(0));
+        assert_eq!(decode_edifier_prompt_level(&[13]), Some(13));
+        assert_eq!(decode_edifier_prompt_level(&[15]), Some(15));
+        assert_eq!(decode_edifier_prompt_level(&[16]), None);
+        assert_eq!(decode_edifier_prompt_level(&[]), None);
     }
 
     #[test]
