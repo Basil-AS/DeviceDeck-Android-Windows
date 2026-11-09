@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.26 — 2026-11-10
+
+- Add original, model-specific vector illustrations to the Android realme Buds Air7 and Air7 Pro model-picker rows.
+
 ## 0.1.0-alpha.25 — 2026-11-10
 
 - Add original model-specific vector illustrations to the Android Device Hub for EDIFIER W820NB Plus, Baseus Bowie 30, EP10 Pro, and Bowie MF1. Keep the Blade 2 power-bank art and give each illustration an accessible device-name description.
