@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.16 — 2026-11-09
 
 - Add the D8 B17 bit 1 gated EDIFIER W820NB Plus prompt tone switch to the shared Android and Windows/Linux DeviceDeck hub. F9 reads state and FA writes a one-byte switch, with F9 readback after each write. Static APK evidence supports this mapping; physical-device verification remains open.
 

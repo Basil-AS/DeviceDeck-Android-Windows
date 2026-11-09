@@ -24,8 +24,8 @@ android {
     // Keep the upstream source namespace while giving this fork an isolated install identity.
     defaultConfig {
         applicationId = "app.devicedeck.android"
-        versionCode = 14
-        versionName = "0.1.0-alpha.15"
+        versionCode = 15
+        versionName = "0.1.0-alpha.16"
         minSdk = 26
         targetSdk = 37
 
