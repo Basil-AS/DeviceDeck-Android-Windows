@@ -48,6 +48,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var controls: LinearLayout
     private lateinit var edifierEqControls: LinearLayout
     private lateinit var edifierTimerControls: LinearLayout
+    private lateinit var edifierGameModeControl: TextView
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -519,6 +520,14 @@ class DeviceHubActivity : Activity() {
             setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
         }
         controls.addView(edifierTimerControls)
+        edifierGameModeControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener { edifierState.gameModeEnabled?.let { edifierSession?.setGameMode(!it) } }
+        }
+        controls.addView(edifierGameModeControl)
     }
 
     private fun addSppModes() {
@@ -606,6 +615,18 @@ class DeviceHubActivity : Activity() {
                         }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
                     }
                 }
+            }
+            if (::edifierGameModeControl.isInitialized) {
+                val supported = edifierState.gameModeSupported && edifierState.gameModeEnabled != null
+                edifierGameModeControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierGameModeControl.text = getString(R.string.device_hub_game_mode) + " · " +
+                    getString(if (edifierState.gameModeEnabled == true) R.string.device_hub_mode_on else R.string.device_hub_mode_off)
+                val palette = ThemeRes.palette(this)
+                val enabled = edifierState.gameModeEnabled == true
+                edifierGameModeControl.setTextColor(if (enabled) ThemeRes.onFill(this) else palette.text)
+                edifierGameModeControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
+                    if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
+                edifierGameModeControl.isEnabled = ready && supported
             }
             return
         }
