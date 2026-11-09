@@ -10,6 +10,9 @@ import com.spizganed.quickbuds.protocol.edifier.EdifierFrameDecoder
 import com.spizganed.quickbuds.protocol.edifier.EdifierEqualizer
 import java.util.ArrayDeque
 
+internal fun decodeEdifierPromptLevel(parameters: ByteArray): Int? =
+    parameters.firstOrNull()?.toInt()?.and(0xFF)?.takeIf { it in 0..12 }
+
 /** W820NB Plus command session over DeviceDeck's shared GATT link. */
 class EdifierW820NbPlusSession(
     context: Context,
@@ -33,6 +36,8 @@ class EdifierW820NbPlusSession(
         val autoPowerOffEnabled: Boolean? = null,
         val promptToneSwitchSupported: Boolean = false,
         val promptToneEnabled: Boolean? = null,
+        val promptVolumeSupported: Boolean = false,
+        val promptVolumeLevel: Int? = null,
         val bluetoothNameSupported: Boolean = false,
         val bluetoothNameLimitBytes: Int = 0,
         val bluetoothName: String? = null,
@@ -70,7 +75,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1 || timedOut?.command == 0xF9 || timedOut?.command == 0xFA) {
+        } else if (timedOut?.command == 0x05 || timedOut?.command == 0x06 || timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1 || timedOut?.command == 0xF9 || timedOut?.command == 0xFA) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -93,6 +98,7 @@ class EdifierW820NbPlusSession(
                 val touchControlsSupported = payload.getOrNull(16)?.toInt()?.and(0xFF) == 18
                 val autoPowerOffSupported = payload.getOrNull(8)?.toInt()?.and(0xFF) == 1
                 val promptToneSwitchSupported = (payload.getOrNull(17)?.toInt()?.and(0x02) ?: 0) != 0
+                val promptVolumeSupported = (payload.getOrNull(17)?.toInt()?.and(0x10) ?: 0) != 0
                 val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
                     1, 6 -> 24; 2, 5 -> 30; 3 -> 29; 4 -> 35; else -> 0
@@ -105,6 +111,7 @@ class EdifierW820NbPlusSession(
                 state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions,
                     gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported,
                     promptToneSwitchSupported = promptToneSwitchSupported,
+                    promptVolumeSupported = promptVolumeSupported,
                     bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit,
                     touchSensitivitySupported = touchSensitivitySupported,
                     touchControlsSupported = touchControlsSupported)
@@ -147,6 +154,7 @@ class EdifierW820NbPlusSession(
             if (state.gameModeSupported) readGameMode()
             if (state.autoPowerOffSupported) readAutoPowerOff()
             if (state.promptToneSwitchSupported) readPromptToneSwitch()
+            if (state.promptVolumeSupported) readPromptVolume()
             if (state.bluetoothNameSupported) readBluetoothName()
             if (state.touchSensitivitySupported) readTouchSensitivity()
             if (state.touchControlsSupported) readTouchControls()
@@ -242,6 +250,21 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readPromptToneSwitch(expected = enabled)
+        }
+        pump()
+    }
+
+    fun setPromptVolume(level: Int) {
+        if (!ready || !state.promptVolumeSupported || state.promptVolumeLevel == null || level !in 0..12) {
+            listener.onStatus("Voice prompt volume is not available in the reported device profile")
+            return
+        }
+        enqueue(0x06, byteArrayOf(level.toByte())) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge voice prompt volume")
+                return@enqueue
+            }
+            readPromptVolume(expected = level)
         }
         pump()
     }
@@ -388,6 +411,20 @@ class EdifierW820NbPlusSession(
             state = state.copy(promptToneEnabled = value)
             listener.onState(state)
             if (expected != null && value != expected) listener.onStatus("Prompt tone setting did not match device readback")
+        }
+        pump()
+    }
+
+    private fun readPromptVolume(expected: Int? = null) {
+        enqueue(0x05) { frame ->
+            val level = decodeEdifierPromptLevel(frame.parameters())
+            if (level == null) {
+                listener.onStatus("Voice prompt volume response was not recognized")
+                return@enqueue
+            }
+            state = state.copy(promptVolumeLevel = level)
+            listener.onState(state)
+            if (expected != null && expected != level) listener.onStatus("Voice prompt volume did not match device readback")
         }
         pump()
     }
