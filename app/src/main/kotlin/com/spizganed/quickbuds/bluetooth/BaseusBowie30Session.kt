@@ -14,7 +14,8 @@ class BaseusBowie30Session(
     device: BluetoothDevice,
     private val listener: Listener,
 ) {
-    data class State(val leftBattery: Int? = null, val rightBattery: Int? = null, val noise: Noise? = null)
+    data class Gesture(val button: Int, val layout: Int, val action: Int)
+    data class State(val leftBattery: Int? = null, val rightBattery: Int? = null, val noise: Noise? = null, val gestures: List<Gesture> = emptyList())
     enum class Noise(val wireMode: Int, val wireType: Int, val title: String) {
         OFF(0, 0xFF, "Off"),
         COMMUTE(1, 8, "Commute"),
@@ -73,7 +74,7 @@ class BaseusBowie30Session(
             }
             state = state.copy(leftBattery = battery.u8(0), rightBattery = battery.u8(2))
             listener.onState(state)
-            readNoise()
+            readNoise { readLegacyGestures() }
         }
     }
 
@@ -91,7 +92,7 @@ class BaseusBowie30Session(
         }
     }
 
-    private fun readNoise(expected: Noise? = null) {
+    private fun readNoise(expected: Noise? = null, done: () -> Unit = {}) {
         enqueue(0x33, response = 0x33) { frame ->
             if (frame.payload.size != 4) {
                 listener.onStatus("Noise response was not recognized")
@@ -115,6 +116,50 @@ class BaseusBowie30Session(
             state = state.copy(noise = value)
             listener.onState(state)
             if (expected != null && value != expected) listener.onStatus("Mode was not confirmed by device readback")
+            done()
+        }
+    }
+
+    private fun readLegacyGestures() {
+        listOf(0, 2, 1).forEach { layout ->
+            enqueue(0x21, layout, response = 0x21) { frame ->
+                if (frame.payload.size != 3 || frame.u8(0) != layout) {
+                    listener.onStatus("Gesture response was not recognized")
+                    return@enqueue
+                }
+                val rows = state.gestures.filterNot { it.layout == layout } + listOf(
+                    Gesture(0, layout, frame.u8(1)), Gesture(1, layout, frame.u8(2)),
+                )
+                state = state.copy(gestures = rows)
+                listener.onState(state)
+            }
+        }
+    }
+
+    fun setGesture(gesture: Gesture, action: Int) {
+        if (!ready || gesture !in state.gestures || action !in listOf(0, 1, 2, 3, 4, 6)) return
+        val current = state.gestures.filter { it.layout == gesture.layout }
+        val left = current.firstOrNull { it.button == 0 }?.action ?: return
+        val right = current.firstOrNull { it.button == 1 }?.action ?: return
+        val layout = gesture.layout
+        enqueue(0x22, layout, if (gesture.button == 0) action else left,
+            if (gesture.button == 1) action else right, response = 0x22) { ack ->
+            if (ack.payload.size != 1 || ack.u8(0) != 1) {
+                listener.onStatus("The headset rejected the gesture")
+                return@enqueue
+            }
+            enqueue(0x21, layout, response = 0x21) { frame ->
+                if (frame.payload.size != 3 || frame.u8(0) != layout ||
+                    frame.u8(gesture.button + 1) != action) {
+                    listener.onStatus("Gesture change was not confirmed by device readback")
+                    return@enqueue
+                }
+                val rows = state.gestures.filterNot { it.layout == layout } + listOf(
+                    Gesture(0, layout, frame.u8(1)), Gesture(1, layout, frame.u8(2)),
+                )
+                state = state.copy(gestures = rows)
+                listener.onState(state)
+            }
         }
     }
 
