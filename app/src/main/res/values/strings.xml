@@ -26,6 +26,25 @@
     <string name="device_hub_bluetooth_name" translatable="false">Bluetooth name</string>
     <string name="device_hub_bluetooth_name_limit" translatable="false">Maximum %1$d UTF-8 bytes</string>
     <string name="device_hub_touch_sensitivity" translatable="false">Touch sensitivity</string>
+    <string name="device_hub_touch_left_tap" translatable="false">Left · single tap</string>
+    <string name="device_hub_touch_right_tap" translatable="false">Right · single tap</string>
+    <string name="device_hub_touch_left_hold" translatable="false">Left · long press</string>
+    <string name="device_hub_touch_right_hold" translatable="false">Right · long press</string>
+    <string name="device_hub_touch_play_pause" translatable="false">Play / pause</string>
+    <string name="device_hub_touch_volume_up" translatable="false">Volume up</string>
+    <string name="device_hub_touch_volume_down" translatable="false">Volume down</string>
+    <string name="device_hub_touch_previous" translatable="false">Previous track</string>
+    <string name="device_hub_touch_next" translatable="false">Next track</string>
+    <string name="device_hub_touch_assistant" translatable="false">Voice assistant</string>
+    <string name="device_hub_touch_game" translatable="false">Game mode</string>
+    <string name="device_hub_touch_sound_mode" translatable="false">Sound mode</string>
+    <string name="device_hub_touch_cycle" translatable="false">Cycle noise modes</string>
+    <string name="device_hub_touch_anc_high" translatable="false">High noise cancelling</string>
+    <string name="device_hub_touch_anc_medium" translatable="false">Medium noise cancelling</string>
+    <string name="device_hub_touch_ambient" translatable="false">Ambient sound</string>
+    <string name="device_hub_touch_normal" translatable="false">Normal mode</string>
+    <string name="device_hub_touch_wind" translatable="false">Wind reduction</string>
+    <string name="device_hub_touch_choose_two_three" translatable="false">Choose two or three modes</string>
     <string name="device_hub_save" translatable="false">Save</string>
     <string name="device_hub_unknown" translatable="false">Unknown</string>
     <string name="device_hub_sleep_timer" translatable="false">Sleep timer</string>
