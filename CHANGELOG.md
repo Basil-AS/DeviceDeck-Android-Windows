@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.22 — 2026-11-09
+
+- Show Baseus Bowie 30 as over-ear headphones and Baseus Bowie MF1 as earbuds in the unified DeviceDeck accessory panels.
+
 ## 0.1.0-alpha.21 — 2026-11-09
 
 - Add Baseus Bowie 30 BLE gesture assignments in the existing unified DeviceDeck device hub on Android, Windows, and Linux. Read with BA21 and apply BA22, then verify the paired settings by reading them again. Options follow the model-specific Baseus app profile. Physical-device verification remains open.
