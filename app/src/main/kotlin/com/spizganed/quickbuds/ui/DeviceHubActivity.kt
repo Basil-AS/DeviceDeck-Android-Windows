@@ -98,8 +98,8 @@ class DeviceHubActivity : Activity() {
             setPadding(dp(16f), dp(14f), dp(16f), dp(14f))
         }
         deviceIllustration = ImageView(this).apply {
-            setImageResource(R.drawable.ic_device_earbuds)
-            contentDescription = getString(R.string.device_hub_earbuds_illustration)
+            setImageResource(R.drawable.ic_device_headphones)
+            contentDescription = getString(R.string.device_hub_headphones_illustration)
             scaleType = ImageView.ScaleType.FIT_CENTER
         }
         card.addView(deviceIllustration, LinearLayout.LayoutParams(dp(72f), dp(60f)).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = dp(6f) })
@@ -497,14 +497,14 @@ class DeviceHubActivity : Activity() {
             DeviceKind.BASEUS_BOWIE_MF1 -> "Baseus Bowie MF1"
         }
         val illustration = when (kind) {
-            DeviceKind.BASEUS_BOWIE_30, DeviceKind.BASEUS_EP10_PRO -> R.drawable.ic_device_earbuds
-            DeviceKind.BASEUS_BOWIE_MF1, DeviceKind.EDIFIER_W820NB_PLUS -> R.drawable.ic_device_headphones
+            DeviceKind.BASEUS_BOWIE_30, DeviceKind.EDIFIER_W820NB_PLUS -> R.drawable.ic_device_headphones
+            DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> R.drawable.ic_device_earbuds
             DeviceKind.BASEUS_BLADE_2 -> R.drawable.ic_baseus_blade2
         }
         deviceIllustration.setImageResource(illustration)
         deviceIllustration.contentDescription = when (kind) {
-            DeviceKind.BASEUS_BOWIE_30, DeviceKind.BASEUS_EP10_PRO -> getString(R.string.device_hub_earbuds_illustration)
-            DeviceKind.BASEUS_BOWIE_MF1, DeviceKind.EDIFIER_W820NB_PLUS -> getString(R.string.device_hub_headphones_illustration)
+            DeviceKind.BASEUS_BOWIE_30, DeviceKind.EDIFIER_W820NB_PLUS -> getString(R.string.device_hub_headphones_illustration)
+            DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> getString(R.string.device_hub_earbuds_illustration)
             DeviceKind.BASEUS_BLADE_2 -> getString(R.string.device_hub_powerbank_illustration)
         }
         deviceRow.visibility = View.GONE; controls.removeAllViews(); controls.visibility = View.GONE

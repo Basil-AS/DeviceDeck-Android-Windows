@@ -955,7 +955,7 @@ if(window.__TAURI__){
     const status=byId('accessoryStatus'),list=byId('accessoryDevices'),controls=byId('accessoryControls');if(!status||!list||!controls)return;
     const label={scanning:$t('accessory_scanning'),found:$t('accessory_connect'),connected:$t('conn_on'),disconnected:$t('conn_off'),'not-found':$t('accessory_no_devices'),error:accessoryState.error||$t('accessory_no_devices')}[accessoryState.status]||accessoryState.status||'';
     status.textContent=label;
-    const icon=accessoryState.model==='baseus-blade-2'?'powerbank':accessoryState.model==='edifier-w820nb-plus'?'headphones':'earbud';
+    const icon=accessoryState.model==='baseus-blade-2'?'powerbank':['baseus-bowie-30','edifier-w820nb-plus'].includes(accessoryState.model)?'headphones':'earbud';
     if(Array.isArray(accessoryState.devices))list.innerHTML=accessoryState.devices.map(d=>`<button class="row press" data-act="accconnect" data-v="${esc(d.id)}">${ic(icon)}<div class="txt"><div class="t">${esc(d.name)}</div><div class="s">${esc($t('accessory_connect'))}</div></div>${ic('chev','ch')}</button>`).join('');
     const connected=accessoryState.status==='connected';controls.hidden=!connected;
     if(!connected)return;
