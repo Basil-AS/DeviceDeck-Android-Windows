@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.15 — 2026-11-09
 
 - Android and Windows/Linux: add capability-gated EDIFIER W820NB Plus left/right tap and long-press assignment controls from D8 profile 18. Map play/pause, side-specific volume/track, voice assistant, game/sound mode, and 2–3 selected noise-cycle modes with F0 readback after F1 writes. Static APK mappings are implemented; physical headset verification remains open.
 
