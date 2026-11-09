@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.24 — 2026-11-10
+
+- Add the realme Buds Air7 Pro dual-device connection switch to the unified DeviceDeck Android and Windows/Linux apps. DeviceDeck exposes the multipoint toggle; connected-device management is not mapped. Hardware verification remains open.
+
 ## 0.1.0-alpha.23 — 2026-11-09
 
 - Add the Baseus Intelligent Blade 2 factory-reset command to the existing DeviceDeck accessory panel on Android, Windows, and Linux. Require explicit confirmation; the vendor app provides no reset acknowledgement or readback, so DeviceDeck reports only that the command was sent. Hardware verification remains open.
