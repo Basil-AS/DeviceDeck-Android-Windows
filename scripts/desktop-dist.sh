@@ -46,24 +46,18 @@ build_linux() {
   fi
 }
 
-# Tauri's AppImage bundler downloads AppRun from GitHub Assets into its cache.
-# GitHub's redirect target can return HTTP 504 on hosted runners. Prefetch this
-# pinned runtime with curl retries so the bundler can use its normal cache path.
+# Tauri's AppImage bundler expects AppRun in its cache. Keep the pinned runtime
+# in source so builds do not depend on GitHub release asset availability.
 if [ -n "${QB_NATIVE:-}" ]; then
   tauri_cache=${XDG_CACHE_HOME:-"$HOME/.cache"}/tauri
   apprun="$tauri_cache/AppRun-x86_64"
   apprun_sha256=f30140a43a0a59e46db21bdefdf749b9e9f2c6946e92afabbacf98b8ae73fb4f
   if ! [ -f "$apprun" ] || ! printf '%s  %s\n' "$apprun_sha256" "$apprun" | sha256sum --check --status; then
+    bundled_apprun="$root/scripts/vendor/AppRun-x86_64"
+    printf '%s  %s\n' "$apprun_sha256" "$bundled_apprun" | sha256sum --check --status
     mkdir -p "$tauri_cache"
-    download=$(mktemp "$tauri_cache/AppRun-download.XXXXXX")
-    trap 'rm -f "$download"' EXIT
-    curl --fail --location --retry 6 --retry-all-errors --retry-delay 2 \
-      https://github.com/tauri-apps/binary-releases/releases/download/apprun-old/AppRun-x86_64 \
-      --output "$download"
-    printf '%s  %s\n' "$apprun_sha256" "$download" | sha256sum --check
-    chmod 0755 "$download"
-    mv -f "$download" "$apprun"
-    trap - EXIT
+    install -m 0755 "$bundled_apprun" "$apprun.tmp"
+    mv -f "$apprun.tmp" "$apprun"
   fi
 fi
 
