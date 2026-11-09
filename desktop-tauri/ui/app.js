@@ -408,6 +408,7 @@ function buildWindow(){
       <div id="accessorySleepTimerSection" hidden><div class="lbl">${$t('accessory_sleep_timer')}</div><div class="group" id="accessorySleepTimerOptions"></div></div>
       <div id="accessoryGameModeSection" hidden><div class="lbl">${$t('device_hub_game_mode')}</div><div class="group" id="accessoryGameModeControl"></div></div>
       <div id="accessoryPromptToneSection" hidden><div class="lbl">${$t('device_hub_prompt_tone')}</div><div class="group" id="accessoryPromptToneControl"></div></div>
+      <div id="accessoryPromptVolumeSection" hidden><div class="lbl">Voice prompt volume</div><div class="group"><input id="accessoryPromptVolume" type="range" min="0" max="12"><span class="v" id="accessoryPromptVolumeValue"></span><button class="btn press" data-act="accpromptvolume">Save</button></div></div>
       <div id="accessoryAutoPowerOffSection" hidden><div class="lbl">${$t('device_hub_auto_power_off')}</div><div class="group" id="accessoryAutoPowerOffControl"></div></div>
       <div id="accessoryBluetoothNameSection" hidden><div class="lbl">${$t('device_hub_bluetooth_name')}</div><div class="group"><input class="field" id="accessoryBluetoothName" type="text" aria-label="${$t('device_hub_bluetooth_name')}"><button class="btn press" data-act="accsetbtname">${$t('device_hub_save')}</button></div><div class="s" id="accessoryBluetoothNameLimit"></div></div>
       <div id="accessoryTouchSensitivitySection" hidden><div class="lbl">Touch sensitivity</div><div class="group"><input id="accessoryTouchSensitivity" type="range" min="0" max="31"><span class="v" id="accessoryTouchSensitivityValue"></span><button class="btn press" data-act="accsetsensitivity">Save</button></div></div>
@@ -752,6 +753,7 @@ document.addEventListener('click',ev=>{
   if(a==='accsleeptimer'){window.QBLIVE&&QBLIVE.accessorySleepTimer(Number(v));return;}
   if(a==='accgamemode'){window.QBLIVE&&QBLIVE.accessoryGameMode(v==='true');return;}
   if(a==='accprompttone'){window.QBLIVE&&QBLIVE.accessoryPromptTone(v==='true');return;}
+  if(a==='accpromptvolume'){const value=Number(byId('accessoryPromptVolume').value);if(Number.isInteger(value)&&value>=0&&value<=12)QBLIVE.accessoryPromptVolume(value);return;}
   if(a==='accautopoweroff'){window.QBLIVE&&QBLIVE.accessoryAutoPowerOff(v==='true');return;}
   if(a==='accsetbtname'){const name=byId('accessoryBluetoothName').value;if(name.trim())QBLIVE.accessoryBluetoothName(name);return;}
   if(a==='accsetsensitivity'){const value=Number(byId('accessoryTouchSensitivity').value);if(Number.isInteger(value))QBLIVE.accessoryTouchSensitivity(value);return;}
@@ -923,6 +925,7 @@ if(window.__TAURI__){
     accessorySleepTimer(minutes){T.core.invoke('accessory_set_sleep_timer',{minutes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryGameMode(enabled){T.core.invoke('accessory_set_game_mode',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPromptTone(enabled){T.core.invoke('accessory_set_prompt_tone',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryPromptVolume(level){T.core.invoke('accessory_set_prompt_volume',{level}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryAutoPowerOff(enabled){T.core.invoke('accessory_set_auto_power_off',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryBluetoothName(name){T.core.invoke('accessory_set_bluetooth_name',{name}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryTouchSensitivity(value){T.core.invoke('accessory_set_touch_sensitivity',{value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -985,6 +988,10 @@ if(window.__TAURI__){
     const promptToneVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.promptToneSupported===true&&typeof promptTone==='boolean';
     byId('accessoryPromptToneSection').hidden=!promptToneVisible;
     byId('accessoryPromptToneControl').innerHTML=promptToneVisible?`<button class="row press" role="switch" aria-checked="${promptTone}" data-act="accprompttone" data-v="${!promptTone}"><div class="txt"><div class="t">${$t('device_hub_prompt_tone')}</div></div><span class="v">${$t(promptTone?'device_hub_mode_on':'device_hub_mode_off')}</span>${ic(promptTone?'check':'chev','ch')}</button>`:'';
+    const promptVolume=accessoryState.promptVolumeLevel;
+    const promptVolumeVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.promptVolumeSupported===true&&Number.isInteger(promptVolume)&&promptVolume>=0&&promptVolume<=12;
+    byId('accessoryPromptVolumeSection').hidden=!promptVolumeVisible;
+    if(promptVolumeVisible){const slider=byId('accessoryPromptVolume');if(document.activeElement!==slider)slider.value=promptVolume;byId('accessoryPromptVolumeValue').textContent=String(promptVolume);}
     const autoOff=accessoryState.autoPowerOff;
     const autoOffVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.autoPowerOffSupported===true&&typeof autoOff==='boolean';
     byId('accessoryAutoPowerOffSection').hidden=!autoOffVisible;

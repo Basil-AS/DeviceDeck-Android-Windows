@@ -56,6 +56,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierGameModeControl: TextView
     private lateinit var edifierAutoPowerOffControl: TextView
     private lateinit var edifierPromptToneControl: TextView
+    private lateinit var edifierPromptVolumeControl: TextView
     private lateinit var edifierNameControl: TextView
     private lateinit var edifierTouchSensitivityControl: TextView
     private lateinit var edifierTapControls: LinearLayout
@@ -557,6 +558,21 @@ class DeviceHubActivity : Activity() {
             setOnClickListener { edifierState.promptToneEnabled?.let { edifierSession?.setPromptToneSwitch(!it) } }
         }
         controls.addView(edifierPromptToneControl)
+        edifierPromptVolumeControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                val current = edifierState.promptVolumeLevel ?: return@setOnClickListener
+                val slider = SeekBar(this@DeviceHubActivity).apply { max = 12; progress = current }
+                AlertDialog.Builder(this@DeviceHubActivity).setTitle(R.string.device_hub_prompt_volume).setView(slider)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.device_hub_save) { _, _ -> edifierSession?.setPromptVolume(slider.progress) }
+                    .show()
+            }
+        }
+        controls.addView(edifierPromptVolumeControl)
         edifierTouchSensitivityControl = TextView(this).apply {
             textSize = 13f; gravity = Gravity.CENTER
             setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
@@ -764,6 +780,16 @@ class DeviceHubActivity : Activity() {
                 edifierPromptToneControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
                     if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
                 edifierPromptToneControl.isEnabled = ready && supported
+            }
+            if (::edifierPromptVolumeControl.isInitialized) {
+                val level = edifierState.promptVolumeLevel
+                val supported = edifierState.promptVolumeSupported && level != null
+                edifierPromptVolumeControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierPromptVolumeControl.text = getString(R.string.device_hub_prompt_volume) + " · " + (level ?: "—")
+                val palette = ThemeRes.palette(this)
+                edifierPromptVolumeControl.setTextColor(palette.text)
+                edifierPromptVolumeControl.background = ThemeRes.ripple(this, ThemeRes.shape(this, palette.card, palette.outline, 14f))
+                edifierPromptVolumeControl.isEnabled = ready && supported
             }
             if (::edifierAutoPowerOffControl.isInitialized) {
                 val supported = edifierState.autoPowerOffSupported && edifierState.autoPowerOffEnabled != null
