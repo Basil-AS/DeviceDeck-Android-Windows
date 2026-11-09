@@ -15,6 +15,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.text.InputType
 import android.text.InputFilter
 import com.spizganed.quickbuds.R
@@ -54,6 +55,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierGameModeControl: TextView
     private lateinit var edifierAutoPowerOffControl: TextView
     private lateinit var edifierNameControl: TextView
+    private lateinit var edifierTouchSensitivityControl: TextView
     private lateinit var scanButton: TextView
     private lateinit var deviceRow: TextView
     private lateinit var powerControls: LinearLayout
@@ -543,6 +545,23 @@ class DeviceHubActivity : Activity() {
             setOnClickListener { edifierState.gameModeEnabled?.let { edifierSession?.setGameMode(!it) } }
         }
         controls.addView(edifierGameModeControl)
+        edifierTouchSensitivityControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                val index = edifierState.touchSensitivityIndex ?: return@setOnClickListener
+                val current = edifierState.touchSensitivityValue ?: return@setOnClickListener
+                val max = if (index == 1) 31 else if (index == 2) 15 else return@setOnClickListener
+                val slider = SeekBar(this@DeviceHubActivity).apply { this.max = max; progress = current }
+                AlertDialog.Builder(this@DeviceHubActivity).setTitle(R.string.device_hub_touch_sensitivity).setView(slider)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.device_hub_save) { _, _ -> edifierSession?.setTouchSensitivity(slider.progress) }
+                    .show()
+            }
+        }
+        controls.addView(edifierTouchSensitivityControl)
         edifierAutoPowerOffControl = TextView(this).apply {
             textSize = 13f; gravity = Gravity.CENTER
             setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
@@ -703,6 +722,16 @@ class DeviceHubActivity : Activity() {
                 edifierAutoPowerOffControl.background = ThemeRes.ripple(this, ThemeRes.shape(this,
                     if (enabled) palette.accent else palette.card, if (enabled) null else palette.outline, 14f))
                 edifierAutoPowerOffControl.isEnabled = ready && supported
+            }
+            if (::edifierTouchSensitivityControl.isInitialized) {
+                val value = edifierState.touchSensitivityValue
+                val supported = edifierState.touchSensitivitySupported && value != null
+                edifierTouchSensitivityControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierTouchSensitivityControl.text = getString(R.string.device_hub_touch_sensitivity) + " · " + (value?.toString() ?: "–")
+                val palette = ThemeRes.palette(this)
+                edifierTouchSensitivityControl.setTextColor(palette.text)
+                edifierTouchSensitivityControl.background = ThemeRes.ripple(this, ThemeRes.shape(this, palette.card, palette.outline, 14f))
+                edifierTouchSensitivityControl.isEnabled = ready && supported
             }
             if (::edifierNameControl.isInitialized) {
                 val supported = edifierState.bluetoothNameSupported && edifierState.bluetoothNameLimitBytes > 0

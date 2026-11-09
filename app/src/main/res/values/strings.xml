@@ -25,6 +25,7 @@
     <string name="device_hub_auto_power_off_confirm" translatable="false">When enabled, the headphones may turn off automatically during silence. Turn it on?</string>
     <string name="device_hub_bluetooth_name" translatable="false">Bluetooth name</string>
     <string name="device_hub_bluetooth_name_limit" translatable="false">Maximum %1$d UTF-8 bytes</string>
+    <string name="device_hub_touch_sensitivity" translatable="false">Touch sensitivity</string>
     <string name="device_hub_save" translatable="false">Save</string>
     <string name="device_hub_unknown" translatable="false">Unknown</string>
     <string name="device_hub_sleep_timer" translatable="false">Sleep timer</string>

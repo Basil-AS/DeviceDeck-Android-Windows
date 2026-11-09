@@ -409,6 +409,7 @@ function buildWindow(){
       <div id="accessoryGameModeSection" hidden><div class="lbl">${$t('device_hub_game_mode')}</div><div class="group" id="accessoryGameModeControl"></div></div>
       <div id="accessoryAutoPowerOffSection" hidden><div class="lbl">${$t('device_hub_auto_power_off')}</div><div class="group" id="accessoryAutoPowerOffControl"></div></div>
       <div id="accessoryBluetoothNameSection" hidden><div class="lbl">${$t('device_hub_bluetooth_name')}</div><div class="group"><input class="field" id="accessoryBluetoothName" type="text" aria-label="${$t('device_hub_bluetooth_name')}"><button class="btn press" data-act="accsetbtname">${$t('device_hub_save')}</button></div><div class="s" id="accessoryBluetoothNameLimit"></div></div>
+      <div id="accessoryTouchSensitivitySection" hidden><div class="lbl">Touch sensitivity</div><div class="group"><input id="accessoryTouchSensitivity" type="range" min="0" max="31"><span class="v" id="accessoryTouchSensitivityValue"></span><button class="btn press" data-act="accsetsensitivity">Save</button></div></div>
       <div id="accessoryPowerPanel" hidden>
         <div class="lbl">${$t('device_hub_powerbank_waiting')}</div><div class="group" id="accessoryPowerMetrics"></div>
         <div class="lbl">${$t('device_hub_powerbank_ports')}</div><div id="accessoryPowerPorts"></div>
@@ -750,6 +751,7 @@ document.addEventListener('click',ev=>{
   if(a==='accgamemode'){window.QBLIVE&&QBLIVE.accessoryGameMode(v==='true');return;}
   if(a==='accautopoweroff'){window.QBLIVE&&QBLIVE.accessoryAutoPowerOff(v==='true');return;}
   if(a==='accsetbtname'){const name=byId('accessoryBluetoothName').value;if(name.trim())QBLIVE.accessoryBluetoothName(name);return;}
+  if(a==='accsetsensitivity'){const value=Number(byId('accessoryTouchSensitivity').value);if(Number.isInteger(value))QBLIVE.accessoryTouchSensitivity(value);return;}
   if(a==='accportmode'){const [port,mode]=v.split(':').map(Number);if(Number.isInteger(port)&&Number.isInteger(mode))QBLIVE.accessoryPort(port,mode);return;}
   if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
   if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
@@ -918,6 +920,7 @@ if(window.__TAURI__){
     accessoryGameMode(enabled){T.core.invoke('accessory_set_game_mode',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryAutoPowerOff(enabled){T.core.invoke('accessory_set_auto_power_off',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryBluetoothName(name){T.core.invoke('accessory_set_bluetooth_name',{name}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryTouchSensitivity(value){T.core.invoke('accessory_set_touch_sensitivity',{value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPort(port,mode){T.core.invoke('accessory_set_port_mode',{port,mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -979,6 +982,10 @@ if(window.__TAURI__){
     const nameVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.bluetoothNameSupported===true&&Number(accessoryState.bluetoothNameLimitBytes)>0;
     byId('accessoryBluetoothNameSection').hidden=!nameVisible;
     if(nameVisible){const field=byId('accessoryBluetoothName');if(document.activeElement!==field)field.value=accessoryState.bluetoothName||'';byId('accessoryBluetoothNameLimit').textContent=$t('device_hub_bluetooth_name_limit',`${accessoryState.bluetoothNameLimitBytes} UTF-8 bytes`);}
+    const sensitivity=accessoryState.touchSensitivity;
+    const sensitivityVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.touchSensitivitySupported===true&&Number.isInteger(sensitivity)&&Number.isInteger(accessoryState.touchSensitivityIndex);
+    byId('accessoryTouchSensitivitySection').hidden=!sensitivityVisible;
+    if(sensitivityVisible){const max=accessoryState.touchSensitivityIndex===1?31:15;byId('accessoryTouchSensitivity').max=String(max);byId('accessoryTouchSensitivity').value=String(Math.min(max,sensitivity));byId('accessoryTouchSensitivityValue').textContent=String(sensitivity);}
     const power=accessoryState.power||{};
     const metrics=Object.entries(power).map(([hex,value])=>{const code=parseInt(hex,16),label=powerMetricLabel(code);return label?`<div class="row"><div class="txt"><div class="t">${esc(label)}</div></div><span class="v">${esc(powerMetricValue(code,value))}</span></div>`:'';}).filter(Boolean).join('');
     byId('accessoryPowerMetrics').innerHTML=metrics||`<div class="row"><div class="txt"><div class="s">${$t('device_hub_powerbank_waiting')}</div></div></div>`;

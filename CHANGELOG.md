@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.14 — 2026-11-09
+
+- Android and Windows/Linux: add Edifier W820NB Plus touch-sensitivity read/write controls when D8 byte 17 bit 3 advertises support. Read FD before showing the control; accept only indexed profiles 1 (0–31) and 2 (0–15), then confirm FE writes with FD readback. This remains unverified on physical hardware.
+- Keep the control in the existing shared DeviceDeck hub alongside Edifier, realme and Baseus profiles.
+
 ## 0.1.0-alpha.13 — 2026-11-09
 
 - Android and Windows/Linux: show the W820NB Plus Bluetooth name when D8 reports query support. Rename it only when D8 also reports a write profile; enforce its UTF-8 byte limit and confirm CA writes with a C9 readback.

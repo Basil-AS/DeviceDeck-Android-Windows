@@ -34,6 +34,9 @@ class EdifierW820NbPlusSession(
         val bluetoothNameSupported: Boolean = false,
         val bluetoothNameLimitBytes: Int = 0,
         val bluetoothName: String? = null,
+        val touchSensitivitySupported: Boolean = false,
+        val touchSensitivityIndex: Int? = null,
+        val touchSensitivityValue: Int? = null,
     )
 
     interface Listener {
@@ -60,7 +63,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9) {
+        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -79,6 +82,7 @@ class EdifierW820NbPlusSession(
                 val presets = if (payload.size >= 14) EdifierEqualizer.presets(payload[13].toInt() and 0xFF) else emptyList()
                 val timerProfile = payload.getOrNull(9)?.toInt()?.and(0xFF) ?: 0
                 val gameModeSupported = (payload.getOrNull(17)?.toInt()?.and(0x40) ?: 0) != 0
+                val touchSensitivitySupported = (payload.getOrNull(17)?.toInt()?.and(0x08) ?: 0) != 0
                 val autoPowerOffSupported = payload.getOrNull(8)?.toInt()?.and(0xFF) == 1
                 val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
@@ -91,7 +95,8 @@ class EdifierW820NbPlusSession(
                 }
                 state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions,
                     gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported,
-                    bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit)
+                    bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit,
+                    touchSensitivitySupported = touchSensitivitySupported)
                 listener.onState(state)
                 listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
                 refresh()
@@ -131,6 +136,7 @@ class EdifierW820NbPlusSession(
             if (state.gameModeSupported) readGameMode()
             if (state.autoPowerOffSupported) readAutoPowerOff()
             if (state.bluetoothNameSupported) readBluetoothName()
+            if (state.touchSensitivitySupported) readTouchSensitivity()
         }
         pump()
     }
@@ -225,6 +231,41 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readBluetoothName(expected = name)
+        }
+        pump()
+    }
+
+    fun setTouchSensitivity(value: Int) {
+        val index = state.touchSensitivityIndex
+        val maximum = when (index) { 1 -> 31; 2 -> 15; else -> -1 }
+        if (!ready || !state.touchSensitivitySupported || index == null || value !in 0..maximum || state.touchSensitivityValue == null) {
+            listener.onStatus("Touch sensitivity is unavailable in the reported device profile")
+            return
+        }
+        enqueue(0xFE, byteArrayOf(index.toByte(), value.toByte())) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge touch sensitivity")
+                return@enqueue
+            }
+            readTouchSensitivity(expected = value)
+        }
+        pump()
+    }
+
+    private fun readTouchSensitivity(expected: Int? = null) {
+        enqueue(0xFD) { frame ->
+            val p = frame.parameters()
+            if (p.size < 2) { listener.onStatus("Touch sensitivity response was not recognized"); return@enqueue }
+            val index = p[0].toInt() and 0xFF
+            val value = p[1].toInt() and 0xFF
+            val maximum = when (index) { 1 -> 31; 2 -> 15; else -> -1 }
+            if (maximum < 0 || value !in 0..maximum) {
+                listener.onStatus("Touch sensitivity response is outside the reported profile")
+                return@enqueue
+            }
+            state = state.copy(touchSensitivityIndex = index, touchSensitivityValue = value)
+            listener.onState(state)
+            if (expected != null && expected != value) listener.onStatus("Touch sensitivity was not confirmed by device readback")
         }
         pump()
     }
