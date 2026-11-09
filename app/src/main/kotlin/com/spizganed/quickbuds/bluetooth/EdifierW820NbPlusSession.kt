@@ -29,6 +29,8 @@ class EdifierW820NbPlusSession(
         val sleepTimerMinutes: Int? = null,
         val gameModeSupported: Boolean = false,
         val gameModeEnabled: Boolean? = null,
+        val autoPowerOffSupported: Boolean = false,
+        val autoPowerOffEnabled: Boolean? = null,
     )
 
     interface Listener {
@@ -55,7 +57,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08) {
+        } else if (timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -74,13 +76,14 @@ class EdifierW820NbPlusSession(
                 val presets = if (payload.size >= 14) EdifierEqualizer.presets(payload[13].toInt() and 0xFF) else emptyList()
                 val timerProfile = payload.getOrNull(9)?.toInt()?.and(0xFF) ?: 0
                 val gameModeSupported = (payload.getOrNull(17)?.toInt()?.and(0x40) ?: 0) != 0
+                val autoPowerOffSupported = payload.getOrNull(8)?.toInt()?.and(0xFF) == 1
                 val timerOptions = when (timerProfile) {
                     1 -> listOf(0, 10, 20, 30, 60, 90)
                     2 -> listOf(0, 5, 15, 30, 60, 180)
                     else -> emptyList()
                 }
                 state = state.copy(equalizerPresets = presets, sleepTimerOptions = timerOptions,
-                    gameModeSupported = gameModeSupported)
+                    gameModeSupported = gameModeSupported, autoPowerOffSupported = autoPowerOffSupported)
                 listener.onState(state)
                 listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
                 refresh()
@@ -118,6 +121,7 @@ class EdifierW820NbPlusSession(
             if (state.equalizerPresets.isNotEmpty()) readEqualizer()
             if (state.sleepTimerOptions.isNotEmpty()) readSleepTimer()
             if (state.gameModeSupported) readGameMode()
+            if (state.autoPowerOffSupported) readAutoPowerOff()
         }
         pump()
     }
@@ -180,6 +184,39 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readGameMode(expected = enabled)
+        }
+        pump()
+    }
+
+    fun setAutoPowerOff(enabled: Boolean) {
+        if (!ready || !state.autoPowerOffSupported || state.autoPowerOffEnabled == null) {
+            listener.onStatus("Automatic power-off is not available in the reported device profile")
+            return
+        }
+        enqueue(0xD6, byteArrayOf(if (enabled) 1 else 0)) { ack ->
+            if (ack.header != EdifierFrame.Header.ACK) {
+                listener.onStatus("The headphones did not acknowledge automatic power-off")
+                return@enqueue
+            }
+            readAutoPowerOff(expected = enabled)
+        }
+        pump()
+    }
+
+    private fun readAutoPowerOff(expected: Boolean? = null) {
+        enqueue(0xD7) { frame ->
+            val enabled = when (frame.parameters().firstOrNull()?.toInt()?.and(0xFF)) {
+                0 -> false
+                1 -> true
+                else -> null
+            }
+            if (enabled == null) {
+                listener.onStatus("Automatic power-off response was not recognized")
+                return@enqueue
+            }
+            state = state.copy(autoPowerOffEnabled = enabled)
+            listener.onState(state)
+            if (expected != null && expected != enabled) listener.onStatus("Automatic power-off was not confirmed by device readback")
         }
         pump()
     }

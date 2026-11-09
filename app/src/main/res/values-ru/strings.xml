@@ -21,6 +21,8 @@
     <string name="device_hub_mode_off" translatable="false">Выкл.</string>
     <string name="device_hub_mode_on" translatable="false">Вкл.</string>
     <string name="device_hub_game_mode" translatable="false">Игровой режим</string>
+    <string name="device_hub_auto_power_off" translatable="false">Автоотключение без звука</string>
+    <string name="device_hub_auto_power_off_confirm" translatable="false">При включении наушники могут выключаться автоматически во время тишины. Включить?</string>
     <string name="device_hub_sleep_timer" translatable="false">Таймер выключения</string>
     <string name="device_hub_minutes" translatable="false">%1$d мин</string>
     <string name="device_hub_mode_transparency" translatable="false">Прозрачность</string>
