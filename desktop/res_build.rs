@@ -118,7 +118,7 @@ const STRINGS: &[&str] = &[
     // Desktop-only rows and the Tauri pages.
     "desktop_autostart_title", "desktop_autostart_sub", "desktop_devtools_sub", "desktop_copy_log", "desktop_dual_empty", "about_privacy_reset", "problem_capture_hint", "row_dual_title",
     "accessory_title", "accessory_choose_model", "accessory_scan", "accessory_scanning", "accessory_no_devices", "accessory_connect", "accessory_refresh", "accessory_disconnect", "accessory_battery", "accessory_noise",
-    "device_hub_powerbank_waiting", "device_hub_powerbank_theme", "device_hub_powerbank_saver", "device_hub_powerbank_text_hint", "device_hub_powerbank_set_text", "device_hub_powerbank_reminder_hint", "device_hub_powerbank_set_reminder", "device_hub_powerbank_shutdown_hint", "device_hub_powerbank_set_shutdown", "device_hub_powerbank_reminder", "device_hub_powerbank_shutdown", "device_hub_equalizer",
+    "device_hub_powerbank_waiting", "device_hub_powerbank_theme", "device_hub_powerbank_saver", "device_hub_powerbank_text_hint", "device_hub_powerbank_set_text", "device_hub_powerbank_reminder_hint", "device_hub_powerbank_set_reminder", "device_hub_powerbank_shutdown_hint", "device_hub_powerbank_set_shutdown", "device_hub_powerbank_reminder", "device_hub_powerbank_shutdown", "device_hub_powerbank_ports", "device_hub_powerbank_port1", "device_hub_powerbank_port2", "device_hub_powerbank_port_off", "device_hub_powerbank_port_output", "device_hub_powerbank_port_input", "device_hub_equalizer",
 ];
 
 fn attr<'a>(tag: &'a str, name: &str) -> Option<&'a str> {

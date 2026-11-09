@@ -111,6 +111,51 @@ class BaseusBlade2Session(context: Context, private val device: BluetoothDevice,
         writeAndRead(code, minutes)
     }
 
+    /** Mode 1 is output/discharge and mode 2 is input/charge, matching Baseus's 0010 state. */
+    fun setPortMode(port: Int, mode: Int) {
+        if (!ready) return
+        if (port !in 1..2 || mode !in 0..2) {
+            listener.onStatus("Unsupported Blade 2 port mode")
+            return
+        }
+        read(0x0010) { status ->
+            if (status == null) listener.onStatus("Blade 2 did not return the current port state")
+            else applyPortMode(port, mode, status.value)
+        }
+    }
+
+    private fun applyPortMode(port: Int, mode: Int, status: Int) {
+        val shift = (port - 1) * 2
+        val currentMode = (status shr shift) and 0x03
+        if (currentMode == 3) {
+            listener.onStatus("Blade 2 reported an unknown C$port port state")
+            return
+        }
+        val command = { selected: Int ->
+            when {
+                port == 1 && selected == 1 -> 0x0018
+                port == 1 && selected == 2 -> 0x0019
+                port == 2 && selected == 1 -> 0x001A
+                port == 2 && selected == 2 -> 0x001B
+                else -> null
+            }
+        }
+        val writes = buildList {
+            if (currentMode != 0 && currentMode != mode) command(currentMode)?.let { add(it to 0) }
+            if (mode != 0 && currentMode != mode) command(mode)?.let { add(it to 1) }
+        }
+        writes.forEach { (code, value) ->
+            enqueue(Operation(BaseusMobilePowerCodec.writeU16(code, value), null) { })
+        }
+        enqueue(Operation(BaseusMobilePowerCodec.read(0x0010), 0x0010) { actual ->
+            val confirmed = actual?.value?.toInt()?.let { (it shr shift) and 0x03 }
+            listener.onStatus(
+                if (confirmed == mode) "C$port port mode confirmed by device readback"
+                else "C$port port mode was not confirmed by device readback",
+            )
+        })
+    }
+
     fun setScreenText(text: String) {
         if (!ready) return
         val packet = runCatching { BaseusMobilePowerCodec.writeText(text) }.getOrElse {
