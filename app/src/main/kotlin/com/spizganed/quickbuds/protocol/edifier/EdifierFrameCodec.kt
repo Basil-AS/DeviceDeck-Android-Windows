@@ -104,3 +104,21 @@ class EdifierFrameDecoder(private val maximumBufferedBytes: Int = 8192) {
         return frames
     }
 }
+
+/** Preset layouts reported by Edifier Connect's W820NB Plus D8 capability record. */
+object EdifierEqualizer {
+    private val profiles = mapOf(
+        1 to listOf("Classic", "Popular", "Classical", "Rock"),
+        2 to listOf("Classic", "Popular", "Classical", "Rock", "Dance", "Blues"),
+        3 to listOf("Classic", "Popular", "Rock"),
+        4 to listOf("Classic", "Popular", "Classical", "Rock", "Custom"),
+        6 to listOf("Standard", "Surround", "Game"),
+        7 to listOf("Classic", "Dynamic", "Custom"),
+        8 to listOf("Classic", "Dynamic", "Spatial", "Custom"),
+        9 to listOf("Classic", "HiFi Camel", "STAX"),
+        10 to listOf("Classic", "Monitor", "Variable", "Vocal", "Custom"),
+    )
+
+    fun presets(profile: Int): List<Preset> = profiles[profile].orEmpty().mapIndexed { id, name -> Preset(id, name) }
+    data class Preset(val id: Int, val name: String)
+}

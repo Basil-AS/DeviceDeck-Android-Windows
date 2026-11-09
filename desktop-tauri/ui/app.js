@@ -403,6 +403,7 @@ function buildWindow(){
       <div class="row" id="accessoryBatteryRow">${ic('battery')}<div class="txt"><div class="t">${$t('accessory_battery')}</div></div><span class="v" id="accessoryBattery">–</span></div>
       <div class="row" id="accessoryNoiseRow">${ic('anc')}<div class="txt"><div class="t">${$t('accessory_noise')}</div></div><span class="v" id="accessoryNoise">–</span></div>
       <div id="accessoryNoiseSection"><div class="lbl">${$t('accessory_noise')}</div><div class="group" id="accessoryModes"></div></div>
+      <div id="accessoryEqSection" hidden><div class="lbl">${$t('device_hub_equalizer')}</div><div class="group" id="accessoryEqPresets"></div></div>
       <div id="accessoryPowerPanel" hidden>
         <div class="lbl">${$t('device_hub_powerbank_waiting')}</div><div class="group" id="accessoryPowerMetrics"></div>
         <div class="lbl">${$t('device_hub_powerbank_theme')}</div><button class="row press" data-act="accpowertheme"><div class="txt"><div class="t">${$t('device_hub_powerbank_theme')}</div></div><span class="v" id="accessoryPowerTheme">–</span></button>
@@ -738,6 +739,7 @@ document.addEventListener('click',ev=>{
   if(a==='accscan'){window.QBLIVE&&QBLIVE.accessoryScan();return;}
   if(a==='accconnect'){window.QBLIVE&&QBLIVE.accessoryConnect(v);return;}
   if(a==='accmode'){window.QBLIVE&&QBLIVE.accessoryMode(v);return;}
+  if(a==='acceq'){window.QBLIVE&&QBLIVE.accessoryEqualizer(Number(v));return;}
   if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
   if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
   if(a==='accpowertheme'){const old=Number(accessoryState.power?.['0020']?.value??-1);if(old>=0&&old<=2)QBLIVE.accessoryPower(0x20,(old+1)%3);else toast($t('device_hub_powerbank_waiting'));return;}
@@ -896,6 +898,7 @@ if(window.__TAURI__){
     accessoryScan(){const model=byId('accessoryModel').value;byId('accessoryDevices').innerHTML='';return T.core.invoke('accessory_scan',{model}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryConnect(id){T.core.invoke('accessory_connect',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryMode(mode){T.core.invoke('accessory_set_noise',{mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryEqualizer(id){T.core.invoke('accessory_set_equalizer',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryRefresh(){T.core.invoke('accessory_refresh').catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -935,6 +938,9 @@ if(window.__TAURI__){
     byId('accessoryNoise').textContent=noise?noise[1]:'–';
     const modes=byId('accessoryModes');
     modes.innerHTML=(accessoryModes[accessoryState.model]||[]).map(([id,title])=>`<button class="row press" role="radio" aria-checked="${id===accessoryState.noise}" data-act="accmode" data-v="${id}"><div class="txt"><div class="t">${esc(title)}</div></div>${id===accessoryState.noise?ic('check','ch'):ic('chev','ch')}</button>`).join('');
+    const presets=accessoryState.eqPresets||[];
+    byId('accessoryEqSection').hidden=accessoryState.model!=='edifier-w820nb-plus'||presets.length===0;
+    byId('accessoryEqPresets').innerHTML=presets.map(p=>`<button class="row press" role="radio" aria-checked="${p.id===accessoryState.selectedEq}" data-act="acceq" data-v="${p.id}"><div class="txt"><div class="t">${esc(p.name)}</div></div>${p.id===accessoryState.selectedEq?ic('check','ch'):ic('chev','ch')}</button>`).join('');
     const power=accessoryState.power||{};
     const metrics=Object.entries(power).map(([hex,value])=>{const code=parseInt(hex,16),label=powerMetricLabel(code);return label?`<div class="row"><div class="txt"><div class="t">${esc(label)}</div></div><span class="v">${esc(powerMetricValue(code,value))}</span></div>`:'';}).filter(Boolean).join('');
     byId('accessoryPowerMetrics').innerHTML=metrics||`<div class="row"><div class="txt"><div class="s">${$t('device_hub_powerbank_waiting')}</div></div></div>`;
