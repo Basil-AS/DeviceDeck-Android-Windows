@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.10 — 2026-11-09
 
 - Android and Windows/Linux: add Baseus Blade 2 USB-C C1/C2 mode controls for Off, Output/Discharge, and Input/Charge. Read the fresh `0x0010` port state, use the APK-confirmed `0x0018`–`0x001B` command pairs, then confirm the requested mode with another `0x0010` read. Hardware behavior remains unverified.
 
