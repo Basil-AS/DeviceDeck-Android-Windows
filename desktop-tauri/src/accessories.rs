@@ -299,6 +299,8 @@ struct AccessorySession {
     sleep_timer_minutes: Option<u16>,
     game_mode_supported: bool,
     game_mode: Option<bool>,
+    auto_power_off_supported: bool,
+    auto_power_off: Option<bool>,
     power: HashMap<u16, PowerStatus>,
     device_name: String,
 }
@@ -390,6 +392,7 @@ impl AccessorySession {
                         _ => Vec::new(),
                     };
                     self.game_mode_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x40 != 0);
+                    self.auto_power_off_supported = capabilities.payload.get(8) == Some(&1);
                 }
                 if !self.eq_presets.is_empty() {
                     if let Ok(eq) = self.request(&encode_edifier(&[0xD5]), 0xD5).await {
@@ -409,6 +412,11 @@ impl AccessorySession {
                 if self.game_mode_supported {
                     if let Ok(game) = self.request(&encode_edifier(&[0x08]), 0x08).await {
                         self.game_mode = match game.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+                    }
+                }
+                if self.auto_power_off_supported {
+                    if let Ok(state) = self.request(&encode_edifier(&[0xD7]), 0xD7).await {
+                        self.auto_power_off = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
                     }
                 }
                 let d0 = [0xD0];
@@ -590,6 +598,17 @@ impl AccessorySession {
         if self.game_mode != Some(enabled) { return Err("Edifier game mode did not match device readback".into()); }
         Ok(())
     }
+    async fn set_auto_power_off(&mut self, enabled: bool) -> Result<(), String> {
+        if self.model != Model::EdifierW820NbPlus || !self.auto_power_off_supported || self.auto_power_off.is_none() {
+            return Err("Automatic power-off is not available in the reported Edifier profile".into());
+        }
+        let ack = self.request(&encode_edifier(&[0xD6, u8::from(enabled)]), 0xD6).await?;
+        if ack.header != 0xCC { return Err("Edifier did not acknowledge automatic power-off".into()); }
+        let state = self.request(&encode_edifier(&[0xD7]), 0xD7).await?;
+        self.auto_power_off = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
+        if self.auto_power_off != Some(enabled) { return Err("Automatic power-off did not match device readback".into()); }
+        Ok(())
+    }
     async fn read_power(&mut self, code: u16) -> Result<PowerStatus, String> {
         let frame = self.request(&encode_power_read(code), code).await?;
         if frame.payload.len() != 3 {
@@ -672,7 +691,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "power": power })
     }
 }
 
@@ -1058,6 +1077,8 @@ pub async fn accessory_connect(
         sleep_timer_minutes: None,
         game_mode_supported: false,
         game_mode: None,
+        auto_power_off_supported: false,
+        auto_power_off: None,
         power: HashMap::new(),
         device_name: name,
     };
@@ -1172,6 +1193,16 @@ pub async fn accessory_set_game_mode(
     let mut active = hub.session.lock().await;
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_game_mode(enabled).await?;
+    let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_set_auto_power_off(app: AppHandle, hub: State<'_, AccessoryHub>, enabled: bool) -> Result<Value, String> {
+    let mut active = hub.session.lock().await;
+    let session = active.as_mut().ok_or("No BLE device is connected")?;
+    session.set_auto_power_off(enabled).await?;
     let result = session.snapshot("connected");
     emit(&app, result.clone());
     Ok(result)

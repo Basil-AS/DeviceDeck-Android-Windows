@@ -407,6 +407,7 @@ function buildWindow(){
       <div id="accessoryEqSection" hidden><div class="lbl">${$t('device_hub_equalizer')}</div><div class="group" id="accessoryEqPresets"></div></div>
       <div id="accessorySleepTimerSection" hidden><div class="lbl">${$t('accessory_sleep_timer')}</div><div class="group" id="accessorySleepTimerOptions"></div></div>
       <div id="accessoryGameModeSection" hidden><div class="lbl">${$t('device_hub_game_mode')}</div><div class="group" id="accessoryGameModeControl"></div></div>
+      <div id="accessoryAutoPowerOffSection" hidden><div class="lbl">${$t('device_hub_auto_power_off')}</div><div class="group" id="accessoryAutoPowerOffControl"></div></div>
       <div id="accessoryPowerPanel" hidden>
         <div class="lbl">${$t('device_hub_powerbank_waiting')}</div><div class="group" id="accessoryPowerMetrics"></div>
         <div class="lbl">${$t('device_hub_powerbank_ports')}</div><div id="accessoryPowerPorts"></div>
@@ -746,6 +747,7 @@ document.addEventListener('click',ev=>{
   if(a==='acceq'){window.QBLIVE&&QBLIVE.accessoryEqualizer(Number(v));return;}
   if(a==='accsleeptimer'){window.QBLIVE&&QBLIVE.accessorySleepTimer(Number(v));return;}
   if(a==='accgamemode'){window.QBLIVE&&QBLIVE.accessoryGameMode(v==='true');return;}
+  if(a==='accautopoweroff'){window.QBLIVE&&QBLIVE.accessoryAutoPowerOff(v==='true');return;}
   if(a==='accportmode'){const [port,mode]=v.split(':').map(Number);if(Number.isInteger(port)&&Number.isInteger(mode))QBLIVE.accessoryPort(port,mode);return;}
   if(a==='accrefresh'){window.QBLIVE&&QBLIVE.accessoryRefresh();return;}
   if(a==='accdisconnect'){window.QBLIVE&&QBLIVE.accessoryDisconnect();return;}
@@ -912,6 +914,7 @@ if(window.__TAURI__){
     accessoryEqualizer(id){T.core.invoke('accessory_set_equalizer',{id}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessorySleepTimer(minutes){T.core.invoke('accessory_set_sleep_timer',{minutes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryGameMode(enabled){T.core.invoke('accessory_set_game_mode',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryAutoPowerOff(enabled){T.core.invoke('accessory_set_auto_power_off',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPower(code,value){T.core.invoke('accessory_set_power',{code,value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPort(port,mode){T.core.invoke('accessory_set_port_mode',{port,mode}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPowerText(text){T.core.invoke('accessory_set_power_text',{text}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -966,6 +969,10 @@ if(window.__TAURI__){
     const gameVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.gameModeSupported===true&&typeof gameMode==='boolean';
     byId('accessoryGameModeSection').hidden=!gameVisible;
     byId('accessoryGameModeControl').innerHTML=gameVisible?`<button class="row press" role="switch" aria-checked="${gameMode}" data-act="accgamemode" data-v="${!gameMode}"><div class="txt"><div class="t">${$t('device_hub_game_mode')}</div></div><span class="v">${$t(gameMode?'device_hub_mode_on':'device_hub_mode_off')}</span>${ic(gameMode?'check':'chev','ch')}</button>`:'';
+    const autoOff=accessoryState.autoPowerOff;
+    const autoOffVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.autoPowerOffSupported===true&&typeof autoOff==='boolean';
+    byId('accessoryAutoPowerOffSection').hidden=!autoOffVisible;
+    byId('accessoryAutoPowerOffControl').innerHTML=autoOffVisible?`<button class="row press" role="switch" aria-checked="${autoOff}" data-act="accautopoweroff" data-v="${!autoOff}"><div class="txt"><div class="t">${$t('device_hub_auto_power_off')}</div></div><span class="v">${$t(autoOff?'device_hub_mode_on':'device_hub_mode_off')}</span>${ic(autoOff?'check':'chev','ch')}</button>`:'';
     const power=accessoryState.power||{};
     const metrics=Object.entries(power).map(([hex,value])=>{const code=parseInt(hex,16),label=powerMetricLabel(code);return label?`<div class="row"><div class="txt"><div class="t">${esc(label)}</div></div><span class="v">${esc(powerMetricValue(code,value))}</span></div>`:'';}).filter(Boolean).join('');
     byId('accessoryPowerMetrics').innerHTML=metrics||`<div class="row"><div class="txt"><div class="s">${$t('device_hub_powerbank_waiting')}</div></div></div>`;
