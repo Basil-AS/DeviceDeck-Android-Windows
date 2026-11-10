@@ -377,6 +377,15 @@ class DeviceHubActivity : Activity() {
             return
         }
         pairedFallback = paired
+        if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && paired != null) {
+            // Keep scanning for the manufacturer's protocol advertisement, but do not make
+            // users wait for it: Android's bonded-device record is already a valid target.
+            foundDevice = paired
+            seenAny = true
+            deviceRow.text = "${pairedDeviceName(paired) ?: profile.displayName}  ·  ${getString(R.string.conn_action_connect)}"
+            deviceRow.visibility = View.VISIBLE
+            status.setText(R.string.device_hub_paired_found)
+        }
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
             override fun onDevice(
                 device: BluetoothDevice,
@@ -384,6 +393,13 @@ class DeviceHubActivity : Activity() {
                 manufacturerId: Int?,
                 manufacturerData: ByteArray?,
             ) {
+                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && pairedFallback?.address == device.address) {
+                    // A bonded device can be shown before its advertisement is observed.
+                    // Still consume the manufacturer record so the session uses the
+                    // headset's BLE version and Encryption10 setting when available.
+                    edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
+                    return
+                }
                 if (foundDevice != null) return
                 seenAny = true
                 foundDevice = device
