@@ -318,8 +318,9 @@ class BleGattScanner private constructor(
             } == true
             if (!profile.matchesName(advertisedName) && !advertisesProfileService) return
             val manufacturerData = result.scanRecord?.manufacturerSpecificData
-            val manufacturerId = manufacturerData?.takeIf { it.size() > 0 }?.keyAt(0)
-            val manufacturerBytes = manufacturerData?.takeIf { it.size() > 0 }?.valueAt(0)?.copyOf()
+            val manufacturerId = profile.manufacturerId?.takeIf { manufacturerData?.get(it) != null }
+                ?: manufacturerData?.takeIf { it.size() > 0 }?.keyAt(0)
+            val manufacturerBytes = manufacturerId?.let { manufacturerData?.get(it)?.copyOf() }
             handler.post {
                 if (running && seen.add(device.address)) listener.onDevice(device, profile, manufacturerId, manufacturerBytes)
             }
