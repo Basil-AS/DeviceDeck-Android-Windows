@@ -10,8 +10,9 @@ use tauri::{AppHandle, Emitter, Manager as TauriManager, State};
 use uuid::Uuid;
 
 const EDIFIER_DISCOVERY: &str = "0000a500-0000-1000-8000-00805f9b34fb";
-const EDIFIER_WRITE: &str = "48093803-1a48-11e9-ab14-d663bd873d93";
-const EDIFIER_NOTIFY: &str = "48093802-1a48-11e9-ab14-d663bd873d93";
+const EDIFIER_SERVICE: &str = "4809a501-1a48-11e9-ab14-d663bd873d93";
+const EDIFIER_WRITE: &str = "48090002-1a48-11e9-ab14-d663bd873d93";
+const EDIFIER_NOTIFY: &str = "48090001-1a48-11e9-ab14-d663bd873d93";
 const BASEUS_WRITE: &str = "ee684b1a-1e9b-ed3e-ee55-f894667e92ac";
 const BASEUS_NOTIFY: &str = "654b749c-e37f-ae1f-ebab-40ca133e3690";
 const MAX_RX_BUFFER: usize = 4096;
@@ -69,6 +70,16 @@ impl Model {
             Self::BaseusEp10Pro | Self::BaseusBowieMf1 => BASEUS_NOTIFY,
         })
         .unwrap()
+    }
+
+    fn service_uuid(self) -> Option<Uuid> {
+        match self {
+            Self::EdifierW820NbPlus => Some(Uuid::parse_str(EDIFIER_SERVICE).unwrap()),
+            Self::BaseusBowie30
+            | Self::BaseusBlade2
+            | Self::BaseusEp10Pro
+            | Self::BaseusBowieMf1 => None,
+        }
     }
     fn matches(self, name: &str, services: &[Uuid]) -> bool {
         match self {
@@ -1298,14 +1309,21 @@ pub async fn accessory_connect(
         .await
         .map_err(|e| format!("GATT service discovery failed: {e}"))?;
     let chars = peripheral.characteristics();
+    let service_uuid = model.service_uuid();
     let write = chars
         .iter()
-        .find(|c| c.uuid == model.write_uuid())
+        .find(|c| {
+            c.uuid == model.write_uuid()
+                && service_uuid.map_or(true, |service| c.service_uuid == service)
+        })
         .cloned()
         .ok_or("Device control write characteristic was not found")?;
     let notify = chars
         .iter()
-        .find(|c| c.uuid == model.notify_uuid())
+        .find(|c| {
+            c.uuid == model.notify_uuid()
+                && service_uuid.map_or(true, |service| c.service_uuid == service)
+        })
         .cloned()
         .ok_or("Device notification characteristic was not found")?;
     peripheral

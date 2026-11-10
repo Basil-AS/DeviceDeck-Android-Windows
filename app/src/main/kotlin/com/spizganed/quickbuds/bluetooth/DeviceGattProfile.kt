@@ -21,9 +21,11 @@ object DeviceGattProfiles {
     val edifierW820NbPlus = DeviceGattProfile(
         id = "edifier:w820nb-plus",
         displayName = "EDIFIER W820NB Plus",
-        service = UUID.fromString("48093801-1A48-11E9-AB14-D663BD873D93"),
-        write = UUID.fromString("48093803-1A48-11E9-AB14-D663BD873D93"),
-        notify = UUID.fromString("48093802-1A48-11E9-AB14-D663BD873D93"),
+        // Connect 8.4.28 products_release.json record 224: the Plus uses a
+        // model-specific service and product-wide read/write characteristic UUIDs.
+        service = UUID.fromString("4809A501-1A48-11E9-AB14-D663BD873D93"),
+        write = UUID.fromString("48090002-1A48-11E9-AB14-D663BD873D93"),
+        notify = UUID.fromString("48090001-1A48-11E9-AB14-D663BD873D93"),
         acceptedNames = setOf("EDIFIER W820NB Plus", "W820NB Plus", "W820NB PLUS"),
         // Edifier Connect uses this model-search UUID in advertisements; it is
         // distinct from the GATT service and endpoints above.
