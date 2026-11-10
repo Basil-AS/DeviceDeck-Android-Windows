@@ -345,9 +345,19 @@ class BleGattScanner private constructor(
         return try {
             scanner = bleScanner
             seen.clear()
-            val filters = profile.discoveryService?.let { uuid ->
-                listOf(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(uuid)).build())
-            }
+            // Android treats entries in the ScanFilter list as alternatives (OR).
+            // Filtering only by the product search UUID silently hides devices that
+            // advertise the supported local name but omit that UUID. The callback
+            // already accepts either signal, so make the controller-side filters
+            // match the same rule.
+            val filters = buildList {
+                profile.discoveryService?.let { uuid ->
+                    add(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(uuid)).build())
+                }
+                profile.acceptedNames.forEach { name ->
+                    add(ScanFilter.Builder().setDeviceName(name).build())
+                }
+            }.takeIf { it.isNotEmpty() }
             bleScanner.startScan(
                 filters,
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),
