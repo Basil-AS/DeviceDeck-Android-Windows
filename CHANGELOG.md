@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.39 — 2026-11-10
+
+- Android: select EDIFIER manufacturer data by company ID `0x07E0` when advertisements contain multiple manufacturer records, ensuring BLE v1/v2 negotiation uses the headset record.
+- Android version code 38; Android and Windows/Linux version synchronized to 0.1.0-alpha.39. Physical W820NB Plus validation remains outstanding.
+
+
 ## 0.1.0-alpha.38 — 2026-11-10
 
 - Android: retry alternate W820NB Plus BLE framing only when no valid manufacturer advertisement selected the mode; restore the initial mode if optional capability probes all time out.
