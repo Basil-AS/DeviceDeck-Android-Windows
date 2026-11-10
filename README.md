@@ -40,7 +40,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-Android and Windows/Linux 0.1.0-alpha.26 add original model illustrations for realme Buds Air7 and Air7 Pro to the Android model picker. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. Hardware behavior still needs validation on named models and firmware; see the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
+Android and Windows/Linux 0.1.0-alpha.27 use the EDIFIER W820NB Plus control service and characteristics extracted from EDIFIER Connect 8.4.28; connection and command round-trip still need headset validation. Alpha.26 adds original realme Buds Air7/Air7 Pro illustrations to the Android model picker. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. See the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |
