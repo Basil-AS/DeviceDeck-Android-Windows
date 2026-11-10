@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.32 — 2026-11-10
+
+- Add the EDIFIER W820NB Plus power-off action (`0xCE`) when D8 byte 10 reports support. Require confirmation and report the request as sent when the headphones disconnect before acknowledging it; the power state has no readback. Static EDIFIER app evidence; physical-headset behavior remains unverified.
+- Synchronize the Android and Windows/Linux version to 0.1.0-alpha.32.
+
 ## 0.1.0-alpha.31 — 2026-11-10
 
 - Add capability-gated EDIFIER W820NB Plus audio disconnect (`0xCD`) and Bluetooth repair/pairing (`0xCF`) actions when the device advertises them. Both actions require confirmation. The command mapping comes from static analysis of EDIFIER Connect; physical-headset verification remains open.
