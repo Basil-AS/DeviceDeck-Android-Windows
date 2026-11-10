@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.31 — 2026-11-10
+
+- Add capability-gated EDIFIER W820NB Plus audio disconnect (`0xCD`) and Bluetooth repair/pairing (`0xCF`) actions when the device advertises them. Both actions require confirmation. The command mapping comes from static analysis of EDIFIER Connect; physical-headset verification remains open.
+- Synchronize the Android and Windows/Linux version to 0.1.0-alpha.31.
+
 ## 0.1.0-alpha.30 — 2026-11-10
 
 - Query the W820NB Plus firmware version (`C6`) and Bluetooth address (`C8`) when the D8 profile reports those read-only features, and show the returned values in the DeviceDeck device panel.
