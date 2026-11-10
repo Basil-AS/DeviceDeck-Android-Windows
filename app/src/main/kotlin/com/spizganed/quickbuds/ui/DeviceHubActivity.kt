@@ -59,6 +59,8 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierPromptToneControl: TextView
     private lateinit var edifierPromptVolumeControl: TextView
     private lateinit var edifierNameControl: TextView
+    private lateinit var edifierAudioDisconnectControl: TextView
+    private lateinit var edifierPairingRepairControl: TextView
     private lateinit var edifierTouchSensitivityControl: TextView
     private lateinit var edifierTapControls: LinearLayout
     private lateinit var scanButton: TextView
@@ -653,6 +655,36 @@ class DeviceHubActivity : Activity() {
             }
         }
         controls.addView(edifierNameControl)
+        edifierAudioDisconnectControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                AlertDialog.Builder(this@DeviceHubActivity)
+                    .setTitle(R.string.device_hub_edifier_disconnect_audio)
+                    .setMessage(R.string.device_hub_edifier_disconnect_audio_confirm)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.device_hub_edifier_disconnect_audio) { _, _ -> edifierSession?.disconnectAudio() }
+                    .show()
+            }
+        }
+        controls.addView(edifierAudioDisconnectControl)
+        edifierPairingRepairControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                AlertDialog.Builder(this@DeviceHubActivity)
+                    .setTitle(R.string.device_hub_edifier_pairing_repair)
+                    .setMessage(R.string.device_hub_edifier_pairing_repair_confirm)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.device_hub_edifier_pairing_repair) { _, _ -> edifierSession?.enterPairingMode() }
+                    .show()
+            }
+        }
+        controls.addView(edifierPairingRepairControl)
     }
 
     private fun chooseEdifierNoiseCycle(mapping: EdifierW820NbPlusSession.TouchControl) {
@@ -887,6 +919,20 @@ class DeviceHubActivity : Activity() {
                 edifierNameControl.setTextColor(palette.text)
                 edifierNameControl.background = ThemeRes.ripple(this, ThemeRes.shape(this, palette.card, palette.outline, 14f))
                 edifierNameControl.isEnabled = ready && supported
+            }
+            if (::edifierAudioDisconnectControl.isInitialized) {
+                val supported = edifierState.audioDisconnectSupported
+                edifierAudioDisconnectControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierAudioDisconnectControl.text = getString(R.string.device_hub_edifier_disconnect_audio)
+                edifierAudioDisconnectControl.setTextColor(ThemeRes.palette(this).text)
+                edifierAudioDisconnectControl.isEnabled = ready && supported
+            }
+            if (::edifierPairingRepairControl.isInitialized) {
+                val supported = edifierState.pairingRepairSupported
+                edifierPairingRepairControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierPairingRepairControl.text = getString(R.string.device_hub_edifier_pairing_repair)
+                edifierPairingRepairControl.setTextColor(ThemeRes.palette(this).text)
+                edifierPairingRepairControl.isEnabled = ready && supported
             }
             return
         }
