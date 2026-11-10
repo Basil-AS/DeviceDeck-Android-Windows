@@ -345,19 +345,24 @@ class BleGattScanner private constructor(
         return try {
             scanner = bleScanner
             seen.clear()
-            // Android treats entries in the ScanFilter list as alternatives (OR).
-            // Filtering only by the product search UUID silently hides devices that
-            // advertise the supported local name but omit that UUID. The callback
-            // already accepts either signal, so make the controller-side filters
-            // match the same rule.
-            val filters = buildList {
-                profile.discoveryService?.let { uuid ->
-                    add(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(uuid)).build())
-                }
-                profile.acceptedNames.forEach { name ->
-                    add(ScanFilter.Builder().setDeviceName(name).build())
-                }
-            }.takeIf { it.isNotEmpty() }
+            // CoreBluetooth/Android controller filters can reject advertisements
+            // before the callback can apply DeviceGattProfile.matchesName(), which
+            // intentionally tolerates casing and punctuation differences. The
+            // W820NB Plus is a short, model-specific scan, so receive advertisements
+            // broadly and enforce its accepted-name/search-UUID gate here.
+            // Keep controller filters for the other profiles to limit scan traffic.
+            val filters = if (profile.id == DeviceGattProfiles.edifierW820NbPlus.id) {
+                null
+            } else {
+                buildList {
+                    profile.discoveryService?.let { uuid ->
+                        add(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(uuid)).build())
+                    }
+                    profile.acceptedNames.forEach { name ->
+                        add(ScanFilter.Builder().setDeviceName(name).build())
+                    }
+                }.takeIf { it.isNotEmpty() }
+            }
             bleScanner.startScan(
                 filters,
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),
