@@ -84,7 +84,7 @@ class DeviceHubActivity : Activity() {
         if (!seenAny && selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && pairedFallback != null) {
             foundDevice = pairedFallback
             seenAny = true
-            deviceRow.text = "${runCatching { pairedFallback?.name }.getOrNull() ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
+            deviceRow.text = "${pairedDeviceName(pairedFallback) ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
             deviceRow.visibility = View.VISIBLE
             status.setText(R.string.device_hub_paired_found)
         } else if (!seenAny && baseusSession == null && edifierSession == null) status.setText(R.string.device_hub_none)
@@ -403,7 +403,7 @@ class DeviceHubActivity : Activity() {
                 if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && pairedFallback != null && !seenAny) {
                     foundDevice = pairedFallback
                     seenAny = true
-                    deviceRow.text = "${runCatching { pairedFallback?.name }.getOrNull() ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
+                    deviceRow.text = "${pairedDeviceName(pairedFallback) ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
                     deviceRow.visibility = View.VISIBLE
                     status.setText(R.string.device_hub_paired_found)
                 } else status.text = message
@@ -464,6 +464,10 @@ class DeviceHubActivity : Activity() {
             override fun onClosed(reason: String) = disconnected(reason)
         })
     }
+
+    @SuppressLint("MissingPermission")
+    private fun pairedDeviceName(device: BluetoothDevice?): String? =
+        runCatching { device?.name }.getOrNull()
 
     private fun connectBlade2(device: BluetoothDevice) {
         blade2Session = BaseusBlade2Session(this, device, object : BaseusBlade2Session.Listener {
