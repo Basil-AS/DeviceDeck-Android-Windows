@@ -29,6 +29,10 @@
     <string name="device_hub_bluetooth_address" translatable="false">Bluetooth address</string>
     <string name="device_hub_bluetooth_name" translatable="false">Bluetooth name</string>
     <string name="device_hub_bluetooth_name_limit" translatable="false">Maximum %1$d UTF-8 bytes</string>
+    <string name="device_hub_edifier_disconnect_audio" translatable="false">Disconnect audio</string>
+    <string name="device_hub_edifier_disconnect_audio_confirm" translatable="false">This asks the headphones to disconnect their audio link. The DeviceDeck control connection may remain active.</string>
+    <string name="device_hub_edifier_pairing_repair" translatable="false">Enter pairing mode</string>
+    <string name="device_hub_edifier_pairing_repair_confirm" translatable="false">The headphones may leave the current audio connection and become discoverable for pairing. Continue?</string>
     <string name="device_hub_touch_sensitivity" translatable="false">Touch sensitivity</string>
     <string name="device_hub_touch_left_tap" translatable="false">Left · single tap</string>
     <string name="device_hub_touch_right_tap" translatable="false">Right · single tap</string>

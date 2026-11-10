@@ -28,6 +28,10 @@
     <string name="device_hub_bluetooth_address" translatable="false">Адрес Bluetooth</string>
     <string name="device_hub_bluetooth_name" translatable="false">Имя Bluetooth</string>
     <string name="device_hub_bluetooth_name_limit" translatable="false">Максимум %1$d байт UTF-8</string>
+    <string name="device_hub_edifier_disconnect_audio" translatable="false">Отключить звук</string>
+    <string name="device_hub_edifier_disconnect_audio_confirm" translatable="false">Наушники отключат аудиосоединение. Управляющее соединение DeviceDeck может остаться активным.</string>
+    <string name="device_hub_edifier_pairing_repair" translatable="false">Включить режим сопряжения</string>
+    <string name="device_hub_edifier_pairing_repair_confirm" translatable="false">Наушники могут отключиться от текущего аудиосоединения и стать доступными для сопряжения. Продолжить?</string>
     <string name="device_hub_touch_sensitivity" translatable="false">Чувствительность сенсора</string>
     <string name="device_hub_touch_left_tap" translatable="false">Слева · одно касание</string>
     <string name="device_hub_touch_right_tap" translatable="false">Справа · одно касание</string>
