@@ -27,6 +27,7 @@ import com.spizganed.quickbuds.bluetooth.BleGattScanner
 import com.spizganed.quickbuds.bluetooth.EdifierW820NbPlusSession
 import com.spizganed.quickbuds.bluetooth.DeviceGattProfiles
 import com.spizganed.quickbuds.protocol.baseus.BaseusMobilePowerCodec
+import com.spizganed.quickbuds.protocol.edifier.EdifierBleProtocol
 
 /** One in-app home for cross-brand accessory sessions. More device profiles are added here. */
 class DeviceHubActivity : Activity() {
@@ -40,6 +41,8 @@ class DeviceHubActivity : Activity() {
     private var sppState = BaseusSppSession.State()
     private var selectedDevice = DeviceKind.BASEUS_BOWIE_30
     private var foundDevice: BluetoothDevice? = null
+    private var pairedFallback: BluetoothDevice? = null
+    private var edifierProtocol = EdifierBleProtocol()
     private var ready = false
     private var currentState = BaseusBowie30Session.State()
     private var edifierState = EdifierW820NbPlusSession.State()
@@ -78,7 +81,13 @@ class DeviceHubActivity : Activity() {
     private var seenAny = false
 
     private val scanTimeout = Runnable {
-        if (!seenAny && baseusSession == null && edifierSession == null) status.setText(R.string.device_hub_none)
+        if (!seenAny && selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && pairedFallback != null) {
+            foundDevice = pairedFallback
+            seenAny = true
+            deviceRow.text = "${runCatching { pairedFallback?.name }.getOrNull() ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
+            deviceRow.visibility = View.VISIBLE
+            status.setText(R.string.device_hub_paired_found)
+        } else if (!seenAny && baseusSession == null && edifierSession == null) status.setText(R.string.device_hub_none)
         scanButton.isEnabled = true
         scanButton.setText(R.string.device_hub_scan)
     }
@@ -311,6 +320,8 @@ class DeviceHubActivity : Activity() {
         foundDevice = null
         ready = false
         seenAny = false
+        pairedFallback = null
+        edifierProtocol = EdifierBleProtocol()
         deviceRow.visibility = View.GONE
         controls.visibility = View.GONE
         battery.visibility = View.GONE
@@ -354,7 +365,7 @@ class DeviceHubActivity : Activity() {
             getSystemService(BluetoothManager::class.java)?.adapter?.bondedDevices.orEmpty()
                 .firstOrNull { device -> profile.matchesName(runCatching { device.name }.getOrNull()) }
         }.getOrNull()
-        if (paired != null) {
+        if (paired != null && selectedDevice != DeviceKind.EDIFIER_W820NB_PLUS) {
             seenAny = true
             foundDevice = paired
             val name = runCatching { paired.name }.getOrNull() ?: profile.displayName
@@ -365,11 +376,20 @@ class DeviceHubActivity : Activity() {
             scanButton.setText(R.string.device_hub_scan)
             return
         }
+        pairedFallback = paired
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
-            override fun onDevice(device: BluetoothDevice, profile: com.spizganed.quickbuds.bluetooth.DeviceGattProfile) {
+            override fun onDevice(
+                device: BluetoothDevice,
+                profile: com.spizganed.quickbuds.bluetooth.DeviceGattProfile,
+                manufacturerId: Int?,
+                manufacturerData: ByteArray?,
+            ) {
                 if (foundDevice != null) return
                 seenAny = true
                 foundDevice = device
+                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
+                    edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
+                }
                 deviceRow.text = "${profile.displayName}  ·  ${getString(R.string.conn_action_connect)}"
                 deviceRow.visibility = View.VISIBLE
                 status.text = "Device found · tap its row to connect"
@@ -380,7 +400,13 @@ class DeviceHubActivity : Activity() {
             }
 
             override fun onScanError(message: String) {
-                status.text = message
+                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && pairedFallback != null && !seenAny) {
+                    foundDevice = pairedFallback
+                    seenAny = true
+                    deviceRow.text = "${runCatching { pairedFallback?.name }.getOrNull() ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
+                    deviceRow.visibility = View.VISIBLE
+                    status.setText(R.string.device_hub_paired_found)
+                } else status.text = message
                 scanButton.isEnabled = true
                 scanButton.setText(R.string.device_hub_scan)
             }
@@ -424,7 +450,7 @@ class DeviceHubActivity : Activity() {
     }
 
     private fun connectEdifier(device: BluetoothDevice) {
-        edifierSession = EdifierW820NbPlusSession(this, device, object : EdifierW820NbPlusSession.Listener {
+        edifierSession = EdifierW820NbPlusSession(this, device, edifierProtocol, object : EdifierW820NbPlusSession.Listener {
             override fun onState(state: EdifierW820NbPlusSession.State) {
                 edifierState = state
                 battery.text = state.batteryPercent?.let { "${getString(R.string.device_hub_battery)}  ·  $it%" } ?: getString(R.string.device_hub_battery)
@@ -512,6 +538,7 @@ class DeviceHubActivity : Activity() {
         scanner?.stop(); closeSessions()
         selectedDevice = kind
         foundDevice = null; ready = false
+        pairedFallback = null; edifierProtocol = EdifierBleProtocol()
         currentState = BaseusBowie30Session.State(); edifierState = EdifierW820NbPlusSession.State()
         blade2State = BaseusBlade2Session.State()
         sppState = BaseusSppSession.State()
