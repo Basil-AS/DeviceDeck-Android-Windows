@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Backport the compact Android battery-strip widget from QuickBuds upstream (`4add6186`) and make it resizable from a 3×1 strip to a 1×3 column.
+- Verify the reported ANC mode after quick repeated taps so the Android UI settles on the device-reported state.
+
 ## 0.1.0-alpha.28 — 2026-11-10
 
 - Update Android copy in all 27 locales so DeviceDeck describes supported earbuds and Bluetooth accessories across brands instead of claiming OnePlus/OPPO/realme-only support.
