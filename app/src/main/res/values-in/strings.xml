@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">Tentang earbud</string>
     <string name="row_firmware_title">Versi firmware</string>
     <string name="firmware_dialog_title">Pembaruan firmware</string>
-    <string name="firmware_dialog_body">DeviceDeck tidak memperbarui firmware earbud: pembaruan yang gagal dapat membuatnya tidak bisa digunakan. Perbarui dari HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck tidak memperbarui firmware: pembaruan yang gagal dapat membuat perangkat tidak bisa digunakan. Gunakan aplikasi asli perangkat.</string>
     <string name="settings_title">Pengaturan</string>
     <string name="row_wear_title">Deteksi pemakaian</string>
     <string name="row_wear_sub">Jeda saat earbud dilepas</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Terpasang %1$s</string>
     <string name="settings_about_title">Tentang</string>
     <string name="settings_about_sub">Versi, lisensi, GitHub</string>
-    <string name="about_tagline">Kendalikan earbud OnePlus, OPPO, dan realme langsung lewat Bluetooth. Alternatif untuk HeyMelody dan realme Link.</string>
+    <string name="about_tagline">Kendalikan earbud dan aksesori Bluetooth yang didukung di DeviceDeck.</string>
     <string name="about_version">Versi %1$s</string>
     <string name="about_kofi_desc">Dukung di Ko-fi</string>
     <string name="about_github_desc">Kode sumber di GitHub</string>
@@ -365,7 +365,7 @@
     <string name="model_auto">Otomatis</string>
     <string name="model_detected">Terdeteksi: %1$s</string>
     <string name="model_not_detected">Belum terdeteksi</string>
-    <string name="no_buds_paired">Tidak ada earbud OPPO, OnePlus, atau realme yang dipasangkan. Pasangkan dulu di pengaturan Bluetooth.</string>
+    <string name="no_buds_paired">Tidak ditemukan earbud didukung yang sudah dipasangkan. Pasangkan earbud terlebih dahulu di setelan Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Profil pendengaran</string>
     <string name="row_golden_sub">Suara yang disesuaikan dengan tes pendengaran Anda</string>
@@ -466,13 +466,13 @@
     <string name="problem_sending">Mengirim…</string>
     <string name="problem_sent">Masukan terkirim. Terima kasih!</string>
     <string name="problem_failed">Masukan tidak dapat dikirim. Periksa koneksi internet lalu coba lagi.</string>
-    <string name="problem_unsupported">DeviceDeck hanya mendukung earbud OnePlus, OPPO, dan realme. Pilih model Anda dari daftar.</string>
-    <string name="problem_supported_list">Lihat semua earbud yang didukung</string>
+    <string name="problem_unsupported">Perangkat ini tidak dikenali. Pilih model yang didukung dari daftar.</string>
+    <string name="problem_supported_list">Lihat perangkat yang didukung</string>
     <string name="problem_log_empty">Log kosong: earbud kamu belum terhubung. Hubungkan earbud dulu, lalu kirim masukan.</string>
-    <string name="problem_capture_hint">Fitur tidak berfungsi atau tidak ada? Log aplikasi tidak cukup. Buka issue GitHub dengan log snoop Bluetooth dari HeyMelody atau realme Link dan rekaman layar.</string>
+    <string name="problem_capture_hint">Ada fitur yang hilang atau tidak berfungsi? Buat issue GitHub dengan rekaman Bluetooth dari aplikasi produsen dan rekaman layar.</string>
     <string name="problem_capture_link">Cara membuat log snoop</string>
     <string name="capture_ask_title">Bantu perbaiki fitur ini</string>
-    <string name="capture_ask_body">Log aplikasi tidak cukup untuk memperbaiki fitur yang tidak berfungsi atau tidak ada. Buka issue GitHub dengan log snoop Bluetooth dari HeyMelody atau realme Link dan rekaman layar aplikasi itu. Formulir issue menunjukkan langkahnya.</string>
+    <string name="capture_ask_body">Log aplikasi saja tidak cukup untuk memperbaiki fitur yang hilang atau rusak. Buat issue GitHub dengan rekaman Bluetooth dari aplikasi produsen dan rekaman layar. Formulir menjelaskan caranya.</string>
     <string name="capture_ask_open">Buka issue GitHub</string>
     <string name="test_title">Uji earbud saya</string>
     <string name="test_sub">Coba setiap fitur dan kirim hasilnya</string>

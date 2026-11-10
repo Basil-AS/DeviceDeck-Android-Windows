@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">O słuchawkach</string>
     <string name="row_firmware_title">Wersja oprogramowania</string>
     <string name="firmware_dialog_title">Aktualizacje oprogramowania</string>
-    <string name="firmware_dialog_body">DeviceDeck nie aktualizuje oprogramowania słuchawek: nieudana aktualizacja może je unieruchomić. Zaktualizuj je w HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck nie aktualizuje oprogramowania sprzętowego: nieudana aktualizacja może uniemożliwić korzystanie z urządzenia. Użyj oryginalnej aplikacji urządzenia.</string>
     <string name="settings_title">Ustawienia</string>
     <string name="row_wear_title">Wykrywanie noszenia</string>
     <string name="row_wear_sub">Pauza po wyjęciu słuchawek</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Zainstalowana %1$s</string>
     <string name="settings_about_title">O aplikacji</string>
     <string name="settings_about_sub">Wersja, licencje, GitHub</string>
-    <string name="about_tagline">Steruj słuchawkami OnePlus, OPPO i realme bezpośrednio przez Bluetooth. Alternatywa dla HeyMelody i realme Link.</string>
+    <string name="about_tagline">Steruj obsługiwanymi słuchawkami i akcesoriami Bluetooth w DeviceDeck.</string>
     <string name="about_version">Wersja %1$s</string>
     <string name="about_kofi_desc">Wesprzyj na Ko-fi</string>
     <string name="about_github_desc">Kod źródłowy na GitHubie</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Automatycznie</string>
     <string name="model_detected">Wykryto: %1$s</string>
     <string name="model_not_detected">Jeszcze nie wykryto</string>
-    <string name="no_buds_paired">Nie znaleziono sparowanych słuchawek OPPO, OnePlus ani realme. Najpierw sparuj je w ustawieniach Bluetooth.</string>
+    <string name="no_buds_paired">Nie znaleziono obsługiwanych sparowanych słuchawek. Najpierw sparuj je w ustawieniach Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Profil słuchu</string>
     <string name="row_golden_sub">Dźwięk dopasowany do testu słuchu</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Wysyłanie…</string>
     <string name="problem_sent">Opinia wysłana. Dziękujemy!</string>
     <string name="problem_failed">Nie udało się wysłać opinii. Sprawdź połączenie z internetem i spróbuj ponownie.</string>
-    <string name="problem_unsupported">DeviceDeck obsługuje tylko słuchawki OnePlus, OPPO i realme. Wybierz swój model z listy.</string>
-    <string name="problem_supported_list">Zobacz wszystkie obsługiwane słuchawki</string>
+    <string name="problem_unsupported">To urządzenie nie jest rozpoznawane. Wybierz obsługiwany model z listy.</string>
+    <string name="problem_supported_list">Zobacz obsługiwane urządzenia</string>
     <string name="problem_log_empty">Dziennik jest pusty: słuchawki jeszcze się nie połączyły. Najpierw je połącz, potem wyślij opinię.</string>
-    <string name="problem_capture_hint">Funkcja nie działa albo jej brakuje? Log aplikacji nie wystarczy. Otwórz zgłoszenie na GitHubie z logiem Bluetooth HCI snoop z HeyMelody lub realme Link i nagraniem ekranu.</string>
+    <string name="problem_capture_hint">Brakuje funkcji albo nie działa? Otwórz zgłoszenie na GitHubie z przechwyceniem Bluetooth z aplikacji producenta i nagraniem ekranu.</string>
     <string name="problem_capture_link">Jak zrobić log snoop</string>
     <string name="capture_ask_title">Pomóż naprawić tę funkcję</string>
-    <string name="capture_ask_body">Log aplikacji nie wystarczy, aby naprawić funkcję, która nie działa albo której brakuje. Otwórz zgłoszenie na GitHubie z logiem Bluetooth snoop z HeyMelody lub realme Link i nagraniem ekranu tej aplikacji. Formularz zgłoszenia pokazuje kroki.</string>
+    <string name="capture_ask_body">Sam dziennik aplikacji nie wystarczy do naprawienia brakującej lub niedziałającej funkcji. Otwórz zgłoszenie na GitHubie z przechwyceniem Bluetooth z aplikacji producenta i nagraniem ekranu. Formularz wyjaśnia, jak to zrobić.</string>
     <string name="capture_ask_open">Otwórz zgłoszenie na GitHubie</string>
     <string name="test_title">Przetestuj słuchawki</string>
     <string name="test_sub">Wypróbuj każdą funkcję i wyślij wynik</string>

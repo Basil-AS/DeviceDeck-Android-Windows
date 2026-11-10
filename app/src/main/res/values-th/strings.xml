@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">เกี่ยวกับหูฟัง</string>
     <string name="row_firmware_title">เวอร์ชันเฟิร์มแวร์</string>
     <string name="firmware_dialog_title">อัปเดตเฟิร์มแวร์</string>
-    <string name="firmware_dialog_body">DeviceDeck ไม่อัปเดตเฟิร์มแวร์ของหูฟัง: การอัปเดตที่ล้มเหลวอาจทำให้ใช้งานไม่ได้ อัปเดตผ่าน HeyMelody</string>
+    <string name="firmware_dialog_body">DeviceDeck ไม่อัปเดตเฟิร์มแวร์ การอัปเดตที่ล้มเหลวอาจทำให้อุปกรณ์ใช้งานไม่ได้ โปรดใช้แอปดั้งเดิมของอุปกรณ์</string>
     <string name="settings_title">การตั้งค่า</string>
     <string name="row_wear_title">ตรวจจับการสวม</string>
     <string name="row_wear_sub">หยุดชั่วคราวเมื่อถอดหูฟัง</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">ติดตั้ง %1$s แล้ว</string>
     <string name="settings_about_title">เกี่ยวกับ</string>
     <string name="settings_about_sub">เวอร์ชัน สัญญาอนุญาต GitHub</string>
-    <string name="about_tagline">ควบคุมหูฟัง OnePlus, OPPO และ realme ผ่านบลูทูธโดยตรง ทางเลือกแทน HeyMelody และ realme Link</string>
+    <string name="about_tagline">ควบคุมหูฟังและอุปกรณ์เสริม Bluetooth ที่รองรับใน DeviceDeck</string>
     <string name="about_version">เวอร์ชัน %1$s</string>
     <string name="about_kofi_desc">สนับสนุนบน Ko-fi</string>
     <string name="about_github_desc">ซอร์สโค้ดบน GitHub</string>
@@ -365,7 +365,7 @@
     <string name="model_auto">อัตโนมัติ</string>
     <string name="model_detected">ตรวจพบ: %1$s</string>
     <string name="model_not_detected">ยังไม่พบ</string>
-    <string name="no_buds_paired">ไม่พบหูฟัง OPPO, OnePlus หรือ realme ที่จับคู่ไว้ โปรดจับคู่ในการตั้งค่าบลูทูธก่อน</string>
+    <string name="no_buds_paired">ไม่พบหูฟังที่รองรับและจับคู่ไว้ โปรดจับคู่หูฟังในการตั้งค่า Bluetooth ก่อน</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">โปรไฟล์การได้ยิน</string>
     <string name="row_golden_sub">เสียงที่ปรับตามผลทดสอบการได้ยินของคุณ</string>
@@ -466,13 +466,13 @@
     <string name="problem_sending">กำลังส่ง…</string>
     <string name="problem_sent">ส่งความคิดเห็นแล้ว ขอบคุณ</string>
     <string name="problem_failed">ส่งความคิดเห็นไม่ได้ ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง</string>
-    <string name="problem_unsupported">DeviceDeck รองรับเฉพาะหูฟัง OnePlus, OPPO และ realme เลือกรุ่นของคุณจากรายการ</string>
-    <string name="problem_supported_list">ดูหูฟังที่รองรับทั้งหมด</string>
+    <string name="problem_unsupported">ไม่รู้จักอุปกรณ์นี้ เลือกรุ่นที่รองรับจากรายการ</string>
+    <string name="problem_supported_list">ดูอุปกรณ์ที่รองรับ</string>
     <string name="problem_log_empty">บันทึกว่างเปล่า: หูฟังยังไม่เชื่อมต่อ เชื่อมต่อหูฟังก่อน แล้วค่อยส่งความคิดเห็น</string>
-    <string name="problem_capture_hint">ฟีเจอร์ไม่ทำงานหรือไม่มี? บันทึกของแอปไม่เพียงพอ เปิด issue ใน GitHub พร้อม Bluetooth snoop log ของ HeyMelody หรือ realme Link และวิดีโอบันทึกหน้าจอ</string>
+    <string name="problem_capture_hint">ฟีเจอร์หายไปหรือทำงานผิดปกติหรือไม่ เปิด issue บน GitHub พร้อมไฟล์ Bluetooth capture จากแอปผู้ผลิตและวิดีโอบันทึกหน้าจอ</string>
     <string name="problem_capture_link">วิธีสร้าง snoop log</string>
     <string name="capture_ask_title">ช่วยแก้ไขฟีเจอร์นี้</string>
-    <string name="capture_ask_body">บันทึกของแอปไม่เพียงพอสำหรับแก้ไขฟีเจอร์ที่ไม่ทำงานหรือไม่มี เปิด issue ใน GitHub พร้อม Bluetooth snoop log ของ HeyMelody หรือ realme Link และวิดีโอบันทึกหน้าจอของแอปนั้น แบบฟอร์มแสดงขั้นตอน</string>
+    <string name="capture_ask_body">บันทึกของแอปเพียงอย่างเดียวไม่เพียงพอสำหรับแก้ฟีเจอร์ที่หายไปหรือทำงานผิดปกติ เปิด issue บน GitHub พร้อมไฟล์ Bluetooth capture จากแอปผู้ผลิตและวิดีโอบันทึกหน้าจอ แบบฟอร์มมีขั้นตอนอธิบายไว้</string>
     <string name="capture_ask_open">เปิด issue ใน GitHub</string>
     <string name="test_title">ทดสอบหูฟัง</string>
     <string name="test_sub">ลองใช้ทุกฟีเจอร์แล้วส่งผลลัพธ์</string>

@@ -148,7 +148,7 @@
     <string name="earbuds_section_about">О наушниках</string>
     <string name="row_firmware_title">Версия прошивки</string>
     <string name="firmware_dialog_title">Обновления прошивки</string>
-    <string name="firmware_dialog_body">DeviceDeck не обновляет прошивку наушников: неудачное обновление может вывести их из строя. Обновляйте их через HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck не обновляет прошивку: ошибка при обновлении может вывести устройство из строя. Используйте оригинальное приложение для этой модели.</string>
     <string name="settings_title">Настройки</string>
     <string name="row_wear_title">Определение ношения</string>
     <string name="row_wear_sub">Пауза, когда вы снимаете наушники</string>
@@ -370,7 +370,7 @@
     <string name="settings_update_sub">Установлена %1$s</string>
     <string name="settings_about_title">О приложении</string>
     <string name="settings_about_sub">Версия, лицензии, GitHub</string>
-    <string name="about_tagline">Управляйте наушниками OnePlus, OPPO и realme напрямую по Bluetooth. Альтернатива HeyMelody и realme Link.</string>
+    <string name="about_tagline">Управляйте поддерживаемыми наушниками и Bluetooth-аксессуарами в DeviceDeck.</string>
     <string name="about_version">Версия %1$s</string>
     <string name="about_kofi_desc">Поддержать на Ko-fi</string>
     <string name="about_github_desc">Исходный код на GitHub</string>
@@ -444,7 +444,7 @@
     <string name="model_auto">Автоматически</string>
     <string name="model_detected">Определено: %1$s</string>
     <string name="model_not_detected">Пока не определено</string>
-    <string name="no_buds_paired">Сопряжённые наушники OPPO, OnePlus или realme не найдены. Сначала выполните сопряжение в настройках Bluetooth.</string>
+    <string name="no_buds_paired">Сопряжённые поддерживаемые наушники не найдены. Сначала выполните сопряжение в настройках Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Профиль слуха</string>
     <string name="row_golden_sub">Звук, настроенный по тесту слуха</string>
@@ -545,13 +545,13 @@
     <string name="problem_sending">Отправка…</string>
     <string name="problem_sent">Отзыв отправлен. Спасибо!</string>
     <string name="problem_failed">Не удалось отправить отзыв. Проверьте подключение к интернету и повторите попытку.</string>
-    <string name="problem_unsupported">DeviceDeck поддерживает только наушники OnePlus, OPPO и realme. Выберите свою модель из списка.</string>
-    <string name="problem_supported_list">Все поддерживаемые наушники</string>
+    <string name="problem_unsupported">Это устройство не распознано. Выберите поддерживаемую модель из списка.</string>
+    <string name="problem_supported_list">Список поддерживаемых устройств</string>
     <string name="problem_log_empty">Журнал пуст: наушники ещё не подключались. Сначала подключите их, затем отправьте отзыв.</string>
-    <string name="problem_capture_hint">Функция не работает или её нет? Лога приложения недостаточно. Создайте issue на GitHub с Bluetooth snoop-логом из HeyMelody или realme Link и записью экрана.</string>
+    <string name="problem_capture_hint">Не хватает функции или она не работает? Создайте issue на GitHub с Bluetooth-записью из приложения производителя и записью экрана.</string>
     <string name="problem_capture_link">Как сделать snoop-лог</string>
     <string name="capture_ask_title">Помогите исправить эту функцию</string>
-    <string name="capture_ask_body">Лога приложения недостаточно, чтобы исправить неработающую или отсутствующую функцию. Создайте issue на GitHub с Bluetooth snoop-логом из HeyMelody или realme Link и записью экрана этого приложения. В форме есть шаги.</string>
+    <string name="capture_ask_body">Одного журнала приложения недостаточно, чтобы исправить отсутствующую или неработающую функцию. Создайте issue на GitHub с Bluetooth-записью из приложения производителя и записью экрана. В форме описаны шаги.</string>
     <string name="capture_ask_open">Создать issue на GitHub</string>
     <string name="test_title">Проверить наушники</string>
     <string name="test_sub">Попробуйте каждую функцию и отправьте результат</string>

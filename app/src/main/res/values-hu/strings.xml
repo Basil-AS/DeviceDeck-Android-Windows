@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">A fülhallgatóról</string>
     <string name="row_firmware_title">Firmware-verzió</string>
     <string name="firmware_dialog_title">Firmware-frissítések</string>
-    <string name="firmware_dialog_body">A DeviceDeck nem frissíti a fülhallgató firmware-ét: egy sikertelen frissítés használhatatlanná teheti. Frissítsd a HeyMelody alkalmazásból.</string>
+    <string name="firmware_dialog_body">A DeviceDeck nem frissít firmware-t: egy sikertelen frissítés használhatatlanná teheti az eszközt. Használd az eszköz eredeti alkalmazását.</string>
     <string name="settings_title">Beállítások</string>
     <string name="row_wear_title">Viselésérzékelés</string>
     <string name="row_wear_sub">Szünet, ha kiveszi a fülhallgatót</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Telepítve: %1$s</string>
     <string name="settings_about_title">Névjegy</string>
     <string name="settings_about_sub">Verzió, licencek, GitHub</string>
-    <string name="about_tagline">Vezérelje OnePlus, OPPO és realme fülhallgatóit közvetlenül Bluetooth-on. Alternatíva a HeyMelody és a realme Link helyett.</string>
+    <string name="about_tagline">Vezéreld a támogatott fülhallgatókat és Bluetooth-kiegészítőket a DeviceDeckkel.</string>
     <string name="about_version">Verzió: %1$s</string>
     <string name="about_kofi_desc">Támogatás a Ko-fin</string>
     <string name="about_github_desc">Forráskód a GitHubon</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Automatikus</string>
     <string name="model_detected">Felismerve: %1$s</string>
     <string name="model_not_detected">Még nincs felismerve</string>
-    <string name="no_buds_paired">Nem található párosított OPPO, OnePlus vagy realme fülhallgató. Először párosítsd a Bluetooth-beállításokban.</string>
+    <string name="no_buds_paired">Nem található támogatott, párosított fülhallgató. Először párosítsd a Bluetooth-beállításokban.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Hallásprofil</string>
     <string name="row_golden_sub">A hallásteszthez hangolt hang</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Küldés…</string>
     <string name="problem_sent">A visszajelzés elment. Köszönjük!</string>
     <string name="problem_failed">A visszajelzést nem sikerült elküldeni. Ellenőrizd az internetkapcsolatot, és próbáld újra.</string>
-    <string name="problem_unsupported">A DeviceDeck csak OnePlus, OPPO és realme fülhallgatókat támogat. Válaszd ki a modelledet a listából.</string>
-    <string name="problem_supported_list">Az összes támogatott fülhallgató</string>
+    <string name="problem_unsupported">Az eszköz nem ismerhető fel. Válassz támogatott modellt a listából.</string>
+    <string name="problem_supported_list">Támogatott eszközök</string>
     <string name="problem_log_empty">A napló üres: a fülhallgatód még nem csatlakozott. Előbb csatlakoztasd, utána küldd el a visszajelzést.</string>
-    <string name="problem_capture_hint">Egy funkció nem működik vagy hiányzik? Az alkalmazás naplója nem elég. Nyiss egy GitHub issue-t a HeyMelody vagy a realme Link Bluetooth snoop naplójával és egy képernyőfelvétellel.</string>
+    <string name="problem_capture_hint">Hiányzik vagy nem működik egy funkció? Nyiss GitHub-issue-t az eszköz gyártói alkalmazásából készült Bluetooth-rögzítéssel és képernyőfelvétellel.</string>
     <string name="problem_capture_link">Hogyan készíts snoop logot</string>
     <string name="capture_ask_title">Segíts javítani ezt a funkciót</string>
-    <string name="capture_ask_body">Az alkalmazás naplója nem elég egy hibás vagy hiányzó funkció javításához. Nyiss egy GitHub issue-t a HeyMelody vagy a realme Link Bluetooth snoop naplójával és az alkalmazás képernyőfelvételével. Az űrlap mutatja a lépéseket.</string>
+    <string name="capture_ask_body">Az alkalmazás naplója önmagában nem elég egy hiányzó vagy hibás funkció javításához. Nyiss GitHub-issue-t az eszköz gyártói alkalmazásából készült Bluetooth-rögzítéssel és képernyőfelvétellel. Az űrlap leírja a lépéseket.</string>
     <string name="capture_ask_open">GitHub issue nyitása</string>
     <string name="test_title">Fülhallgató tesztelése</string>
     <string name="test_sub">Próbálj ki minden funkciót, és küldd el az eredményt</string>

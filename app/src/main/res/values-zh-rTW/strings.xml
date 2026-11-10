@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">關於耳機</string>
     <string name="row_firmware_title">韌體版本</string>
     <string name="firmware_dialog_title">韌體更新</string>
-    <string name="firmware_dialog_body">DeviceDeck 不會更新耳機韌體：更新失敗可能導致耳機無法使用。請在 HeyMelody 中更新。</string>
+    <string name="firmware_dialog_body">DeviceDeck 不會更新韌體：更新失敗可能導致裝置無法使用。請使用該裝置的原廠應用程式。</string>
     <string name="settings_title">設定</string>
     <string name="row_wear_title">配戴偵測</string>
     <string name="row_wear_sub">摘下耳機時暫停</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">已安裝 %1$s</string>
     <string name="settings_about_title">關於</string>
     <string name="settings_about_sub">版本、授權、GitHub</string>
-    <string name="about_tagline">直接透過藍牙控制 OnePlus、OPPO 和 realme 耳機。HeyMelody 和 realme Link 的替代方案。</string>
+    <string name="about_tagline">在 DeviceDeck 中控制支援的耳機和藍牙配件。</string>
     <string name="about_version">版本 %1$s</string>
     <string name="about_kofi_desc">在 Ko-fi 上支持</string>
     <string name="about_github_desc">GitHub 上的原始碼</string>
@@ -365,7 +365,7 @@
     <string name="model_auto">自動</string>
     <string name="model_detected">已識別：%1$s</string>
     <string name="model_not_detected">尚未識別</string>
-    <string name="no_buds_paired">找不到已配對的 OPPO、OnePlus 或 realme 耳機。請先在藍牙設定中配對。</string>
+    <string name="no_buds_paired">找不到已配對的支援耳機。請先在藍牙設定中配對。</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">聽力設定</string>
     <string name="row_golden_sub">依你的聽力測試調校聲音</string>
@@ -466,13 +466,13 @@
     <string name="problem_sending">傳送中…</string>
     <string name="problem_sent">意見回饋已傳送。謝謝！</string>
     <string name="problem_failed">無法傳送意見回饋。請檢查網路連線後再試。</string>
-    <string name="problem_unsupported">DeviceDeck 僅支援 OnePlus、OPPO 和 realme 耳機。請從清單中選擇你的型號。</string>
-    <string name="problem_supported_list">查看所有支援的耳機</string>
+    <string name="problem_unsupported">無法辨識此裝置。請從清單中選擇支援的型號。</string>
+    <string name="problem_supported_list">查看支援的裝置</string>
     <string name="problem_log_empty">記錄為空：你的耳機還沒有連線。請先連線耳機，再傳送意見回饋。</string>
-    <string name="problem_capture_hint">功能無效或缺少？只有應用程式記錄不夠。請在 GitHub 提交 issue，附上 HeyMelody 或 realme Link 的藍牙 HCI snoop 記錄和螢幕錄影。</string>
+    <string name="problem_capture_hint">功能缺少或無法運作？請提交 GitHub issue，並附上裝置製造商應用程式的藍牙記錄和螢幕錄影。</string>
     <string name="problem_capture_link">如何產生 snoop 記錄</string>
     <string name="capture_ask_title">協助修復此功能</string>
-    <string name="capture_ask_body">只有應用程式記錄無法修復無效或缺少的功能。請在 GitHub 提交 issue，附上 HeyMelody 或 realme Link 的藍牙 snoop 記錄，以及該應用程式的螢幕錄影。issue 表單中有步驟。</string>
+    <string name="capture_ask_body">僅有應用程式記錄不足以修復缺少或異常的功能。請提交 GitHub issue，並附上裝置製造商應用程式的藍牙記錄和螢幕錄影。表單中有操作步驟。</string>
     <string name="capture_ask_open">在 GitHub 提交 issue</string>
     <string name="test_title">測試我的耳機</string>
     <string name="test_sub">逐一試用各項功能並傳送結果</string>
