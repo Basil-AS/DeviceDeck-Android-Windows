@@ -45,6 +45,8 @@ class EdifierW820NbPlusSession(
         val firmwareVersion: String? = null,
         val bluetoothAddressSupported: Boolean = false,
         val bluetoothAddress: String? = null,
+        val audioDisconnectSupported: Boolean = false,
+        val pairingRepairSupported: Boolean = false,
         val touchSensitivitySupported: Boolean = false,
         val touchSensitivityIndex: Int? = null,
         val touchSensitivityValue: Int? = null,
@@ -106,6 +108,8 @@ class EdifierW820NbPlusSession(
                 val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
                 val bluetoothAddressSupported = payload.getOrNull(4)?.toInt()?.and(0xFF) == 1
                 val firmwareVersionSupported = payload.getOrNull(5)?.toInt()?.and(0xFF) == 1
+                val audioDisconnectSupported = payload.getOrNull(6)?.toInt()?.and(0xFF) == 1
+                val pairingRepairSupported = payload.getOrNull(7)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
                     1, 6 -> 24; 2, 5 -> 30; 3 -> 29; 4 -> 35; else -> 0
                 }
@@ -121,6 +125,8 @@ class EdifierW820NbPlusSession(
                     bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit,
                     firmwareVersionSupported = firmwareVersionSupported,
                     bluetoothAddressSupported = bluetoothAddressSupported,
+                    audioDisconnectSupported = audioDisconnectSupported,
+                    pairingRepairSupported = pairingRepairSupported,
                     touchSensitivitySupported = touchSensitivitySupported,
                     touchControlsSupported = touchControlsSupported)
                 listener.onState(state)
@@ -292,6 +298,28 @@ class EdifierW820NbPlusSession(
                 return@enqueue
             }
             readBluetoothName(expected = name)
+        }
+        pump()
+    }
+
+    /** D8 byte 6 advertises the vendor's 0xCD audio-disconnect operation. */
+    fun disconnectAudio() = sendBluetoothAction(0xCD, state.audioDisconnectSupported,
+        "Audio disconnect is not reported as supported by these headphones")
+
+    /** D8 byte 7 advertises the vendor's 0xCF Bluetooth repair/pairing operation. */
+    fun enterPairingMode() = sendBluetoothAction(0xCF, state.pairingRepairSupported,
+        "Bluetooth repair is not reported as supported by these headphones")
+
+    private fun sendBluetoothAction(command: Int, supported: Boolean, unsupportedMessage: String) {
+        if (!ready || !supported) {
+            listener.onStatus(unsupportedMessage)
+            return
+        }
+        enqueue(command) { ack ->
+            listener.onStatus(if (ack.header == EdifierFrame.Header.ACK) {
+                if (command == 0xCF) "Pairing mode command acknowledged; reconnect from Android Bluetooth settings"
+                else "Audio disconnect command acknowledged"
+            } else "The headphones did not acknowledge the Bluetooth action")
         }
         pump()
     }
