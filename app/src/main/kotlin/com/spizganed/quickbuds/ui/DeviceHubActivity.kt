@@ -88,6 +88,8 @@ class DeviceHubActivity : Activity() {
             deviceRow.text = "${pairedDeviceName(pairedFallback) ?: "EDIFIER W820NB Plus"}  ·  ${getString(R.string.conn_action_connect)}"
             deviceRow.visibility = View.VISIBLE
             status.setText(R.string.device_hub_paired_found)
+        } else if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && foundDevice != null && !edifierAdvertisementSeen) {
+            status.text = "Device found · no Edifier protocol advertisement; tap to connect and try protocol negotiation"
         } else if (!seenAny && baseusSession == null && edifierSession == null) status.setText(R.string.device_hub_none)
         scanButton.isEnabled = true
         scanButton.setText(R.string.device_hub_scan)
@@ -395,28 +397,28 @@ class DeviceHubActivity : Activity() {
                 manufacturerId: Int?,
                 manufacturerData: ByteArray?,
             ) {
-                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && pairedFallback?.address == device.address) {
-                    // A bonded device can be shown before its advertisement is observed.
-                    // Still consume the manufacturer record so the session uses the
-                    // headset's BLE version and Encryption10 setting when available.
-                    edifierAdvertisementSeen = manufacturerId == EdifierBleProtocol.EDIFIER_MANUFACTURER_ID && (manufacturerData?.size ?: 0) >= 2
-                    edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
+                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS && foundDevice?.address == device.address) {
+                    // A bonded W820 can be shown immediately, and an unpaired one can
+                    // appear by name/UUID first. Keep listening for this same address
+                    // until its manufacturer data selects the actual wire protocol.
+                    if (!edifierAdvertisementSeen) captureEdifierAdvertisement(manufacturerId, manufacturerData)
                     return
                 }
                 if (foundDevice != null) return
                 seenAny = true
                 foundDevice = device
-                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
-                    edifierAdvertisementSeen = manufacturerId == EdifierBleProtocol.EDIFIER_MANUFACTURER_ID && (manufacturerData?.size ?: 0) >= 2
-                    edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
-                }
                 deviceRow.text = "${profile.displayName}  ·  ${getString(R.string.conn_action_connect)}"
                 deviceRow.visibility = View.VISIBLE
-                status.text = "Device found · tap its row to connect"
-                scanner?.stop()
-                scanButton.isEnabled = true
-                scanButton.setText(R.string.device_hub_scan)
-                handler.removeCallbacks(scanTimeout)
+                if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
+                    status.text = "Device found · waiting for Edifier BLE protocol data; tap to connect now or wait briefly"
+                    captureEdifierAdvertisement(manufacturerId, manufacturerData)
+                } else {
+                    status.text = "Device found · tap its row to connect"
+                    scanner?.stop()
+                    scanButton.isEnabled = true
+                    scanButton.setText(R.string.device_hub_scan)
+                    handler.removeCallbacks(scanTimeout)
+                }
             }
 
             override fun onScanError(message: String) {
@@ -487,6 +489,18 @@ class DeviceHubActivity : Activity() {
             }
             override fun onClosed(reason: String) = disconnected(reason)
         })
+    }
+
+    private fun captureEdifierAdvertisement(manufacturerId: Int?, manufacturerData: ByteArray?): Boolean {
+        if (manufacturerId != EdifierBleProtocol.EDIFIER_MANUFACTURER_ID || (manufacturerData?.size ?: 0) < 2) return false
+        edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
+        edifierAdvertisementSeen = true
+        scanner?.stop()
+        handler.removeCallbacks(scanTimeout)
+        scanButton.isEnabled = true
+        scanButton.setText(R.string.device_hub_scan)
+        status.text = "Device found · BLE v${edifierProtocol.version}, ${if (edifierProtocol.encryptionKey == 0) "no encryption" else "Encryption10"}"
+        return true
     }
 
     @SuppressLint("MissingPermission")
