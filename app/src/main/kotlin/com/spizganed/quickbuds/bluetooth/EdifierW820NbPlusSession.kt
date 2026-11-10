@@ -18,7 +18,7 @@ internal fun decodeEdifierPromptLevel(parameters: ByteArray): Int? =
 class EdifierW820NbPlusSession(
     context: Context,
     device: BluetoothDevice,
-    private val protocol: EdifierBleProtocol = EdifierBleProtocol(),
+    protocol: EdifierBleProtocol = EdifierBleProtocol(),
     private val listener: Listener,
 ) {
     enum class Noise(val wireValue: Int, val title: String) {
@@ -70,7 +70,12 @@ class EdifierW820NbPlusSession(
     private data class Operation(val command: Int, val packet: ByteArray, val done: (EdifierFrame) -> Unit)
 
     private val handler = Handler(Looper.getMainLooper())
-    private val decoder = EdifierFrameDecoder(protocol)
+    private var activeProtocol = protocol
+    private var decoder = EdifierFrameDecoder(activeProtocol)
+    private val protocolFallbacks = ArrayDeque(
+        listOf(EdifierBleProtocol(2, 0xA5), EdifierBleProtocol(2, 0), EdifierBleProtocol(1, 0))
+            .filter { it != protocol }
+    )
     private val queue = ArrayDeque<Operation>()
     private var pending: Operation? = null
     private var ready = false
@@ -79,11 +84,21 @@ class EdifierW820NbPlusSession(
         val timedOut = pending
         pending = null
         if (timedOut?.command == 0xD8) {
-            // D8 is optional on older firmware. Continue with independently known
-            // battery/noise queries instead of making the whole session unusable.
-            listener.onStatus("Capability probe was not answered; trying basic controls")
-            refresh()
-            pump()
+            // A bonded-device fallback may connect without exposing the manufacturer
+            // advertisement that selects v1/v2 and Encryption10. Probe the known wire
+            // modes before giving up on capability discovery.
+            val fallback = protocolFallbacks.pollFirst()
+            if (fallback != null) {
+                activeProtocol = fallback
+                decoder = EdifierFrameDecoder(activeProtocol)
+                listener.onStatus("No capability reply; retrying BLE v${activeProtocol.version} (${if (activeProtocol.encryptionKey == 0) "plain" else "Encryption10"})")
+                enqueue(0xD8) { frame -> handleCapabilities(frame) }
+                pump()
+            } else {
+                listener.onStatus("Capability probe was not answered; trying basic controls")
+                refresh()
+                pump()
+            }
         } else if (timedOut?.command == 0xCE) {
             listener.onStatus("Power-off command sent; the headphones may disconnect without acknowledging it")
             pump()
@@ -98,11 +113,31 @@ class EdifierW820NbPlusSession(
     private val link = BleGattLink.connect(context, device, DeviceGattProfiles.edifierW820NbPlus, object : BleGattLink.Listener {
         override fun onReady(mtu: Int) {
             ready = true
-            val encryption = if (protocol.encryptionKey == 0) "no encryption" else "encrypted"
-            listener.onStatus("Connected · BLE v${protocol.version}, $encryption · MTU $mtu")
+            val encryption = if (activeProtocol.encryptionKey == 0) "no encryption" else "Encryption10"
+            listener.onStatus("Connected · BLE v${activeProtocol.version}, $encryption · MTU $mtu")
             // D8 is a capability probe. Its layout is firmware-sensitive; retain it as
             // evidence but do not enable commands from an unvalidated interpretation.
-            enqueue(0xD8) { frame ->
+            enqueue(0xD8) { frame -> handleCapabilities(frame) }
+            pump()
+            listener.onReady()
+        }
+
+        override fun onBytes(bytes: ByteArray) {
+            decoder.feed(bytes).forEach { frame ->
+                val operation = pending ?: return@forEach
+                if (frame.commandId() != operation.command) return@forEach
+                pending = null
+                handler.removeCallbacks(responseTimeout)
+                operation.done(frame)
+                pump()
+            }
+        }
+
+        override fun onDisconnected(status: Int) = closed("Disconnected")
+        override fun onError(message: String) = closed(message)
+    })
+
+    private fun handleCapabilities(frame: EdifierFrame) {
                 val payload = frame.parameters()
                 val presets = if (payload.size >= 14) EdifierEqualizer.presets(payload[13].toInt() and 0xFF) else emptyList()
                 val timerProfile = payload.getOrNull(9)?.toInt()?.and(0xFF) ?: 0
@@ -139,27 +174,9 @@ class EdifierW820NbPlusSession(
                     touchSensitivitySupported = touchSensitivitySupported,
                     touchControlsSupported = touchControlsSupported)
                 listener.onState(state)
-                listener.onStatus(if (presets.isEmpty()) "Capabilities received · no supported EQ profile" else "Capabilities received · ${presets.size} EQ presets")
+                listener.onStatus("Capabilities received · BLE v${activeProtocol.version}${if (activeProtocol.encryptionKey == 0) "" else " · Encryption10"}" + if (presets.isEmpty()) " · no supported EQ profile" else " · ${presets.size} EQ presets")
                 refresh()
-            }
-            pump()
-            listener.onReady()
-        }
-
-        override fun onBytes(bytes: ByteArray) {
-            decoder.feed(bytes).forEach { frame ->
-                val operation = pending ?: return@forEach
-                if (frame.commandId() != operation.command) return@forEach
-                pending = null
-                handler.removeCallbacks(responseTimeout)
-                operation.done(frame)
-                pump()
-            }
-        }
-
-        override fun onDisconnected(status: Int) = closed("Disconnected")
-        override fun onError(message: String) = closed(message)
-    })
+    }
 
     fun refresh() {
         if (!ready) return
@@ -590,7 +607,7 @@ class EdifierW820NbPlusSession(
 
     private fun enqueue(command: Int, parameters: ByteArray = byteArrayOf(), done: (EdifierFrame) -> Unit = {}) {
         val payload = byteArrayOf(command.toByte()) + parameters
-        queue.addLast(Operation(command, EdifierFrameCodec.encodeHost(payload, protocol), done))
+        queue.addLast(Operation(command, EdifierFrameCodec.encodeHost(payload, activeProtocol), done))
     }
 
     private fun pump() {
