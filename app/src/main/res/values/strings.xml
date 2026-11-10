@@ -25,6 +25,8 @@
     <string name="device_hub_prompt_volume" translatable="false">Voice prompt volume</string>
     <string name="device_hub_auto_power_off" translatable="false">Auto power-off without audio</string>
     <string name="device_hub_auto_power_off_confirm" translatable="false">When enabled, the headphones may turn off automatically during silence. Turn it on?</string>
+    <string name="device_hub_firmware_version" translatable="false">Firmware version</string>
+    <string name="device_hub_bluetooth_address" translatable="false">Bluetooth address</string>
     <string name="device_hub_bluetooth_name" translatable="false">Bluetooth name</string>
     <string name="device_hub_bluetooth_name_limit" translatable="false">Maximum %1$d UTF-8 bytes</string>
     <string name="device_hub_touch_sensitivity" translatable="false">Touch sensitivity</string>
