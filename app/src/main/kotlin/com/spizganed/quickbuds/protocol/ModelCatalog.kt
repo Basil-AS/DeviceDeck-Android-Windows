@@ -78,9 +78,9 @@ object ModelCatalog {
 
     fun matchesName(model: Model, name: String?): Boolean {
         if (name == null) return false
-        if (model.name.equals(name, ignoreCase = true)) return true
-        val aliases = model.json.optJSONArray("aliases") ?: return false
-        return (0 until aliases.length()).any { aliases.optString(it).equals(name, ignoreCase = true) }
+        val normalized = squash(name)
+        if (squash(model.name) == normalized) return true
+        return aliases(model).any { squash(it) == normalized }
     }
 
     fun find(models: List<Model>, id: String?, name: String?): Model? {
