@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.34 — 2026-11-10
+
+- Implement the previously advertised EDIFIER W820NB Plus audio disconnect (`0xCD`), Bluetooth repair (`0xCF`) and power-off (`0xCE`) actions in the Windows/Linux accessory hub. Each action is capability-gated, requires confirmation, and is reported as one-way because the protocol has no state readback.
+- Android and Windows/Linux version synchronized to 0.1.0-alpha.34. Physical device behavior remains unverified.
+
 ## 0.1.0-alpha.33 — 2026-11-10
 
 - Discover Baseus Bowie 30 and Blade 2 by normalized advertised name without requiring the Baseus GATT service UUID to be present in the advertisement; retain the verified Edifier W820NB Plus service UUID filter.

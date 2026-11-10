@@ -410,6 +410,7 @@ function buildWindow(){
       <div id="accessoryPromptToneSection" hidden><div class="lbl">${$t('device_hub_prompt_tone')}</div><div class="group" id="accessoryPromptToneControl"></div></div>
       <div id="accessoryPromptVolumeSection" hidden><div class="lbl">Voice prompt volume</div><div class="group"><input id="accessoryPromptVolume" type="range" min="0" max="15"><span class="v" id="accessoryPromptVolumeValue"></span><button class="btn press" data-act="accpromptvolume">Save</button></div></div>
       <div id="accessoryAutoPowerOffSection" hidden><div class="lbl">${$t('device_hub_auto_power_off')}</div><div class="group" id="accessoryAutoPowerOffControl"></div></div>
+      <div id="accessoryEdifierActionsSection" hidden><div class="lbl">Bluetooth &amp; power actions</div><div class="group" id="accessoryEdifierActions"></div></div>
       <div id="accessoryBluetoothNameSection" hidden><div class="lbl">${$t('device_hub_bluetooth_name')}</div><div class="group"><input class="field" id="accessoryBluetoothName" type="text" aria-label="${$t('device_hub_bluetooth_name')}"><button class="btn press" data-act="accsetbtname">${$t('device_hub_save')}</button></div><div class="s" id="accessoryBluetoothNameLimit"></div></div>
       <div id="accessoryTouchSensitivitySection" hidden><div class="lbl">Touch sensitivity</div><div class="group"><input id="accessoryTouchSensitivity" type="range" min="0" max="31"><span class="v" id="accessoryTouchSensitivityValue"></span><button class="btn press" data-act="accsetsensitivity">Save</button></div></div>
       <div id="accessoryTouchControlSection" hidden><div class="lbl">Touch controls</div><div class="group" id="accessoryTouchControls"></div></div>
@@ -756,6 +757,11 @@ document.addEventListener('click',ev=>{
   if(a==='accprompttone'){window.QBLIVE&&QBLIVE.accessoryPromptTone(v==='true');return;}
   if(a==='accpromptvolume'){const value=Number(byId('accessoryPromptVolume').value);if(Number.isInteger(value)&&value>=0&&value<=15)QBLIVE.accessoryPromptVolume(value);return;}
   if(a==='accautopoweroff'){window.QBLIVE&&QBLIVE.accessoryAutoPowerOff(v==='true');return;}
+  if(a==='accedifieraction'){
+    const actions={disconnectAudio:['Disconnect audio','The headset may drop its audio link. DeviceDeck receives no state readback.','Disconnect audio'],repairBluetooth:['Enter pairing mode','The headset may disconnect and become available for pairing. DeviceDeck receives no state readback.','Continue'],powerOff:['Power off headphones','The headset may disconnect immediately. DeviceDeck receives no power-state readback.','Power off']};
+    const item=actions[v];if(!item||!window.QBLIVE)return;
+    confirmDialog(item[0],item[1],item[2],()=>QBLIVE.accessoryEdifierAction(v));return;
+  }
   if(a==='accsetbtname'){const name=byId('accessoryBluetoothName').value;if(name.trim())QBLIVE.accessoryBluetoothName(name);return;}
   if(a==='accsetsensitivity'){const value=Number(byId('accessoryTouchSensitivity').value);if(Number.isInteger(value))QBLIVE.accessoryTouchSensitivity(value);return;}
   if(a==='acctouchsave'){const index=Number(v),row=byId('accessoryTouchControls').querySelector(`[data-touch-index="${index}"]`);if(!row)return;const action=Number(row.querySelector('select').value);const modes=[...row.querySelectorAll('[data-touch-mode]:checked')].map(x=>Number(x.value));QBLIVE.accessoryTouchControl(index,action,modes);return;}
@@ -929,6 +935,7 @@ if(window.__TAURI__){
     accessoryPromptTone(enabled){T.core.invoke('accessory_set_prompt_tone',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryPromptVolume(level){T.core.invoke('accessory_set_prompt_volume',{level}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryAutoPowerOff(enabled){T.core.invoke('accessory_set_auto_power_off',{enabled}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
+    accessoryEdifierAction(action){T.core.invoke('accessory_edifier_action',{action}).then(r=>{if(r.message)toast(r.message);}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryBluetoothName(name){T.core.invoke('accessory_set_bluetooth_name',{name}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryTouchSensitivity(value){T.core.invoke('accessory_set_touch_sensitivity',{value}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
     accessoryTouchControl(index,action,modes){T.core.invoke('accessory_set_touch_control',{index,action,modes}).catch(e=>renderAccessory({status:'error',error:String(e)}));},
@@ -999,6 +1006,13 @@ if(window.__TAURI__){
     const autoOffVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.autoPowerOffSupported===true&&typeof autoOff==='boolean';
     byId('accessoryAutoPowerOffSection').hidden=!autoOffVisible;
     byId('accessoryAutoPowerOffControl').innerHTML=autoOffVisible?`<button class="row press" role="switch" aria-checked="${autoOff}" data-act="accautopoweroff" data-v="${!autoOff}"><div class="txt"><div class="t">${$t('device_hub_auto_power_off')}</div></div><span class="v">${$t(autoOff?'device_hub_mode_on':'device_hub_mode_off')}</span>${ic(autoOff?'check':'chev','ch')}</button>`:'';
+    const edifierActions=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.status==='connected';
+    const actionRows=[];
+    if(edifierActions&&accessoryState.disconnectAudioSupported===true)actionRows.push(`<button class="row press" data-act="accedifieraction" data-v="disconnectAudio"><div class="txt"><div class="t">Disconnect audio</div></div>${ic('chev','ch')}</button>`);
+    if(edifierActions&&accessoryState.repairBluetoothSupported===true)actionRows.push(`<button class="row press" data-act="accedifieraction" data-v="repairBluetooth"><div class="txt"><div class="t">Enter pairing mode</div></div>${ic('chev','ch')}</button>`);
+    if(edifierActions&&accessoryState.powerOffSupported===true)actionRows.push(`<button class="row press" data-act="accedifieraction" data-v="powerOff"><div class="txt"><div class="t">Power off headphones</div></div>${ic('power','ch')}</button>`);
+    byId('accessoryEdifierActionsSection').hidden=actionRows.length===0;
+    byId('accessoryEdifierActions').innerHTML=actionRows.join('');
     const nameVisible=accessoryState.model==='edifier-w820nb-plus'&&accessoryState.bluetoothNameSupported===true&&Number(accessoryState.bluetoothNameLimitBytes)>0;
     byId('accessoryBluetoothNameSection').hidden=!nameVisible;
     if(nameVisible){const field=byId('accessoryBluetoothName');if(document.activeElement!==field)field.value=accessoryState.bluetoothName||'';byId('accessoryBluetoothNameLimit').textContent=$t('device_hub_bluetooth_name_limit',`${accessoryState.bluetoothNameLimitBytes} UTF-8 bytes`);}
