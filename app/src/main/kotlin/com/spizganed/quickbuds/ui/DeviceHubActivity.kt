@@ -346,6 +346,25 @@ class DeviceHubActivity : Activity() {
             DeviceKind.EDIFIER_W820NB_PLUS -> DeviceGattProfiles.edifierW820NbPlus
             DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> error("SPP devices do not use BLE discovery")
         }
+        // A paired BLE device is already known to Android by its stable BluetoothDevice
+        // record. Try it directly before relying on advertisements: some firmware stops
+        // advertising its name/service UUID while connected to the phone, and OEM scan
+        // filters can omit a device that is still reachable by GATT.
+        val paired = runCatching {
+            getSystemService(BluetoothManager::class.java)?.adapter?.bondedDevices.orEmpty()
+                .firstOrNull { device -> profile.matchesName(runCatching { device.name }.getOrNull()) }
+        }.getOrNull()
+        if (paired != null) {
+            seenAny = true
+            foundDevice = paired
+            val name = runCatching { paired.name }.getOrNull() ?: profile.displayName
+            deviceRow.text = "$name  ·  ${getString(R.string.conn_action_connect)}"
+            deviceRow.visibility = View.VISIBLE
+            status.setText(R.string.device_hub_paired_found)
+            scanButton.isEnabled = true
+            scanButton.setText(R.string.device_hub_scan)
+            return
+        }
         scanner = BleGattScanner.create(this, profile, object : BleGattScanner.Listener {
             override fun onDevice(device: BluetoothDevice, profile: com.spizganed.quickbuds.bluetooth.DeviceGattProfile) {
                 if (foundDevice != null) return
