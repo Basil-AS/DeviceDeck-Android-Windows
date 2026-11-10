@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">O sluchátkách</string>
     <string name="row_firmware_title">Verze firmwaru</string>
     <string name="firmware_dialog_title">Aktualizace firmwaru</string>
-    <string name="firmware_dialog_body">DeviceDeck neaktualizuje firmware sluchátek: nezdařená aktualizace je může učinit nepoužitelnými. Aktualizujte je v aplikaci HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck neaktualizuje firmware: neúspěšná aktualizace může zařízení vyřadit z provozu. Použijte původní aplikaci zařízení.</string>
     <string name="settings_title">Nastavení</string>
     <string name="row_wear_title">Detekce nošení</string>
     <string name="row_wear_sub">Pozastavit, když sluchátka vyndáte</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Nainstalováno %1$s</string>
     <string name="settings_about_title">O aplikaci</string>
     <string name="settings_about_sub">Verze, licence, GitHub</string>
-    <string name="about_tagline">Ovládejte sluchátka OnePlus, OPPO a realme přímo přes Bluetooth. Alternativa k HeyMelody a realme Link.</string>
+    <string name="about_tagline">Ovládejte podporovaná sluchátka a příslušenství Bluetooth v DeviceDecku.</string>
     <string name="about_version">Verze %1$s</string>
     <string name="about_kofi_desc">Podpořit na Ko-fi</string>
     <string name="about_github_desc">Zdrojový kód na GitHubu</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Automaticky</string>
     <string name="model_detected">Rozpoznáno: %1$s</string>
     <string name="model_not_detected">Zatím nerozpoznáno</string>
-    <string name="no_buds_paired">Nebyla nalezena žádná spárovaná sluchátka OPPO, OnePlus ani realme. Nejprve je spárujte v nastavení Bluetooth.</string>
+    <string name="no_buds_paired">Nenašla se žádná podporovaná spárovaná sluchátka. Nejprve je spárujte v nastavení Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Sluchový profil</string>
     <string name="row_golden_sub">Zvuk vyladěný podle testu sluchu</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Odesílání…</string>
     <string name="problem_sent">Zpětná vazba odeslána. Děkujeme!</string>
     <string name="problem_failed">Zpětnou vazbu se nepodařilo odeslat. Zkontrolujte připojení k internetu a zkuste to znovu.</string>
-    <string name="problem_unsupported">DeviceDeck podporuje pouze sluchátka OnePlus, OPPO a realme. Vyberte svůj model ze seznamu.</string>
-    <string name="problem_supported_list">Zobrazit všechna podporovaná sluchátka</string>
+    <string name="problem_unsupported">Toto zařízení nebylo rozpoznáno. Vyberte podporovaný model ze seznamu.</string>
+    <string name="problem_supported_list">Zobrazit podporovaná zařízení</string>
     <string name="problem_log_empty">Protokol je prázdný: sluchátka se zatím nepřipojila. Nejdřív sluchátka připojte, pak pošlete zpětnou vazbu.</string>
-    <string name="problem_capture_hint">Funkce nefunguje nebo chybí? Log aplikace nestačí. Založte issue na GitHubu s Bluetooth snoop logem z HeyMelody nebo realme Link a se záznamem obrazovky.</string>
+    <string name="problem_capture_hint">Chybí funkce nebo nefunguje? Otevřete issue na GitHubu s Bluetooth záznamem z aplikace výrobce zařízení a se záznamem obrazovky.</string>
     <string name="problem_capture_link">Jak vytvořit snoop log</string>
     <string name="capture_ask_title">Pomozte opravit tuto funkci</string>
-    <string name="capture_ask_body">Log aplikace nestačí k opravě funkce, která nefunguje nebo chybí. Založte issue na GitHubu s Bluetooth snoop logem z HeyMelody nebo realme Link a se záznamem obrazovky té aplikace. Formulář ukazuje postup.</string>
+    <string name="capture_ask_body">K opravě chybějící nebo nefunkční funkce nestačí samotný log aplikace. Otevřete issue na GitHubu s Bluetooth záznamem z aplikace výrobce zařízení a se záznamem obrazovky. Formulář popisuje postup.</string>
     <string name="capture_ask_open">Založit issue na GitHubu</string>
     <string name="test_title">Otestovat sluchátka</string>
     <string name="test_sub">Vyzkoušejte každou funkci a odešlete výsledek</string>

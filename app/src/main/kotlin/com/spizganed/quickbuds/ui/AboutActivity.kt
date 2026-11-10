@@ -125,6 +125,7 @@ class AboutActivity : Activity() {
 
     companion object {
         const val GITHUB_URL = "https://github.com/Basil-AS/DeviceDeck-Android-Windows"
+        const val SUPPORTED_DEVICES_URL = "https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md"
         const val DISCORD_URL = "https://github.com/Basil-AS/DeviceDeck-Android-Windows/discussions"
         /** Null hides the button (it was hidden until the page existed). */
         val KOFI_URL: String? = null

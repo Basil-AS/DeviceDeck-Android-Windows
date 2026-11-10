@@ -88,7 +88,7 @@ class ReportActivity : Activity() {
             addView(note(R.string.problem_supported_list, p.accent).apply {
                 append(" ›")
                 setOnClickListener {
-                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(AboutActivity.GITHUB_URL + "#supported-earbuds"))) }
+                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(AboutActivity.SUPPORTED_DEVICES_URL))) }
                 }
             })
         }

@@ -16,11 +16,13 @@ Android · Windows · Linux
 
 DeviceDeck is one application per platform. Edifier, realme, Baseus and other vendor devices appear as profiles in the same app and release channel. Device features vary by model and firmware; the umbrella [support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md) tracks what is implemented and what still needs device testing.
 
-## Supported earbuds
+## Supported device profiles
 
-The Android app runs on Android 8+. The inherited profile database covers many OnePlus, OPPO and realme models;
-profile presence does not prove that every listed control works on every firmware. DeviceDeck's additional target
-models and the per-platform evidence are tracked in the umbrella repository's support matrix.
+Android is DeviceDeck's primary platform; Windows and Linux are secondary. The Android app runs on Android 8+.
+Its inherited profile database covers many OnePlus, OPPO and realme earbuds. DeviceDeck also includes device
+profiles and controls for EDIFIER W820NB Plus, realme Buds Air7/Air7 Pro, Baseus EP10 Pro, Bowie 30, Bowie MF1,
+and Blade 2. Profile presence does not prove every control works on every firmware; the umbrella support matrix
+tracks model-by-model features and hardware evidence.
 
 On OnePlus, OPPO and realme phones (OxygenOS 12 and later, ColorOS, realme UI), the system's own
 earbud settings can hold the control link of the earbuds. DeviceDeck cannot connect in that case. Use
@@ -40,7 +42,7 @@ The app's log is not enough to add a missing feature. An issue for a missing fea
 
 ## Install
 
-Android and Windows/Linux 0.1.0-alpha.27 use the EDIFIER W820NB Plus control service and characteristics extracted from EDIFIER Connect 8.4.28; connection and command round-trip still need headset validation. Alpha.26 adds original realme Buds Air7/Air7 Pro illustrations to the Android model picker. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. See the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
+Android is the project priority; other platforms do not gate Android work or releases. Android and Windows/Linux 0.1.0-alpha.27 use the EDIFIER W820NB Plus control service and characteristics extracted from EDIFIER Connect 8.4.28; connection and command round-trip still need headset validation. Alpha.26 adds original realme Buds Air7/Air7 Pro illustrations to the Android model picker. DeviceDeck remains one app per platform; realme, Edifier and Baseus devices are profiles in the same app. The shared hub includes W820NB Plus controls, Baseus EP10 Pro and Bowie MF1 headset controls, Bowie 30 noise modes, and Blade 2 telemetry/display/timer/USB-C port settings. See the [DeviceDeck support matrix](https://github.com/Basil-AS/DeviceDeck/blob/develop/SUPPORT_MATRIX.md). Pair Baseus SPP headsets in system Bluetooth settings first; DeviceDeck connects to paired devices.
 
 | Platform | How |
 | --- | --- |

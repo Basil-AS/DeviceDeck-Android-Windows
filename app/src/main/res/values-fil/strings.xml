@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">Tungkol sa earbuds</string>
     <string name="row_firmware_title">Bersyon ng firmware</string>
     <string name="firmware_dialog_title">Mga update ng firmware</string>
-    <string name="firmware_dialog_body">Hindi ina-update ng DeviceDeck ang firmware ng earbuds: maaaring hindi na magamit ang mga ito kapag pumalya ang update. I-update ang mga ito mula sa HeyMelody.</string>
+    <string name="firmware_dialog_body">Hindi nag-a-update ng firmware ang DeviceDeck: maaaring hindi na magamit ang device kapag pumalya ang update. Gamitin ang orihinal na app ng device.</string>
     <string name="settings_title">Mga Setting</string>
     <string name="row_wear_title">Pagtukoy ng pagsuot</string>
     <string name="row_wear_sub">I-pause kapag inalis mo ang earbuds</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Naka-install ang %1$s</string>
     <string name="settings_about_title">Tungkol dito</string>
     <string name="settings_about_sub">Bersyon, mga lisensya, GitHub</string>
-    <string name="about_tagline">Kontrolin ang OnePlus, OPPO at realme earbuds nang direkta sa Bluetooth. Alternatibo sa HeyMelody at realme Link.</string>
+    <string name="about_tagline">Kontrolin ang mga suportadong earbud at Bluetooth accessory sa DeviceDeck.</string>
     <string name="about_version">Bersyon %1$s</string>
     <string name="about_kofi_desc">Suportahan sa Ko-fi</string>
     <string name="about_github_desc">Source code sa GitHub</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Awtomatiko</string>
     <string name="model_detected">Natukoy: %1$s</string>
     <string name="model_not_detected">Hindi pa natutukoy</string>
-    <string name="no_buds_paired">Walang nakapares na OPPO, OnePlus o realme buds. I-pair muna sila sa Bluetooth settings.</string>
+    <string name="no_buds_paired">Walang nakitang suportadong naka-pair na earbud. I-pair muna ang mga earbud sa mga setting ng Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Hearing profile</string>
     <string name="row_golden_sub">Tunog na inayon sa iyong hearing test</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Ipinapadala…</string>
     <string name="problem_sent">Naipadala ang feedback. Salamat!</string>
     <string name="problem_failed">Hindi naipadala ang feedback. Tingnan ang koneksyon sa internet at subukan ulit.</string>
-    <string name="problem_unsupported">Sinusuportahan lang ng DeviceDeck ang earbuds ng OnePlus, OPPO at realme. Piliin ang iyong modelo mula sa listahan.</string>
-    <string name="problem_supported_list">Tingnan ang lahat ng suportadong earbuds</string>
+    <string name="problem_unsupported">Hindi nakilala ang device na ito. Pumili ng suportadong modelo mula sa listahan.</string>
+    <string name="problem_supported_list">Tingnan ang mga suportadong device</string>
     <string name="problem_log_empty">Walang laman ang log: hindi pa nakakonekta ang iyong earbuds. Ikonekta muna ang earbuds, saka ipadala ang feedback.</string>
-    <string name="problem_capture_hint">May feature na hindi gumagana o wala? Hindi sapat ang log ng app. Magbukas ng GitHub issue na may Bluetooth snoop log ng HeyMelody o realme Link at screen recording.</string>
+    <string name="problem_capture_hint">May nawawala o hindi gumaganang feature? Magbukas ng GitHub issue na may Bluetooth capture mula sa app ng manufacturer at screen recording.</string>
     <string name="problem_capture_link">Paano gumawa ng snoop log</string>
     <string name="capture_ask_title">Tumulong ayusin ang feature na ito</string>
-    <string name="capture_ask_body">Hindi sapat ang log ng app para ayusin ang feature na hindi gumagana o wala. Magbukas ng GitHub issue na may Bluetooth snoop log ng HeyMelody o realme Link at screen recording ng app na iyon. Nasa issue form ang mga hakbang.</string>
+    <string name="capture_ask_body">Hindi sapat ang log ng app para ayusin ang nawawala o sirang feature. Magbukas ng GitHub issue na may Bluetooth capture mula sa app ng manufacturer at screen recording. Nasa form ang mga hakbang.</string>
     <string name="capture_ask_open">Magbukas ng GitHub issue</string>
     <string name="test_title">Subukan ang aking earbuds</string>
     <string name="test_sub">Subukan ang bawat feature at ipadala ang resulta</string>

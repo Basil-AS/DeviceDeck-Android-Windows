@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">关于耳机</string>
     <string name="row_firmware_title">固件版本</string>
     <string name="firmware_dialog_title">固件更新</string>
-    <string name="firmware_dialog_body">DeviceDeck 不更新耳机固件：更新失败可能导致耳机无法使用。请在 HeyMelody 中更新。</string>
+    <string name="firmware_dialog_body">DeviceDeck 不会更新固件：更新失败可能导致设备无法使用。请使用该设备的原厂应用。</string>
     <string name="settings_title">设置</string>
     <string name="row_wear_title">佩戴检测</string>
     <string name="row_wear_sub">摘下耳机时暂停</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">已安装 %1$s</string>
     <string name="settings_about_title">关于</string>
     <string name="settings_about_sub">版本、许可证、GitHub</string>
-    <string name="about_tagline">直接通过蓝牙控制一加、OPPO 和 realme 耳机。HeyMelody 和 realme Link 的替代品。</string>
+    <string name="about_tagline">在 DeviceDeck 中控制支持的耳机和蓝牙配件。</string>
     <string name="about_version">版本 %1$s</string>
     <string name="about_kofi_desc">在 Ko-fi 上支持</string>
     <string name="about_github_desc">GitHub 上的源代码</string>
@@ -365,7 +365,7 @@
     <string name="model_auto">自动</string>
     <string name="model_detected">已识别：%1$s</string>
     <string name="model_not_detected">尚未识别</string>
-    <string name="no_buds_paired">未找到已配对的 OPPO、OnePlus 或 realme 耳机。请先在蓝牙设置中配对。</string>
+    <string name="no_buds_paired">未找到已配对的受支持耳机。请先在蓝牙设置中配对。</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">听力配置</string>
     <string name="row_golden_sub">根据你的听力测试调校声音</string>
@@ -466,13 +466,13 @@
     <string name="problem_sending">正在发送…</string>
     <string name="problem_sent">反馈已发送。谢谢！</string>
     <string name="problem_failed">无法发送反馈。请检查网络连接后重试。</string>
-    <string name="problem_unsupported">DeviceDeck 仅支持 OnePlus、OPPO 和 realme 耳机。请从列表中选择你的型号。</string>
-    <string name="problem_supported_list">查看所有支持的耳机</string>
+    <string name="problem_unsupported">无法识别此设备。请从列表中选择受支持的型号。</string>
+    <string name="problem_supported_list">查看支持的设备</string>
     <string name="problem_log_empty">日志为空：你的耳机还没有连接。请先连接耳机，再发送反馈。</string>
-    <string name="problem_capture_hint">功能无效或缺失？仅靠应用日志不够。请在 GitHub 提交 issue，附上 HeyMelody 或 realme Link 的蓝牙 HCI snoop 日志和屏幕录像。</string>
+    <string name="problem_capture_hint">功能缺失或无法使用？请提交 GitHub issue，并附上设备厂商应用的蓝牙记录和屏幕录像。</string>
     <string name="problem_capture_link">如何生成 snoop 日志</string>
     <string name="capture_ask_title">帮助修复此功能</string>
-    <string name="capture_ask_body">仅靠应用日志无法修复无效或缺失的功能。请在 GitHub 提交 issue，附上 HeyMelody 或 realme Link 的蓝牙 snoop 日志，以及该应用的屏幕录像。issue 表单中有步骤。</string>
+    <string name="capture_ask_body">仅凭应用日志不足以修复缺失或异常的功能。请提交 GitHub issue，并附上设备厂商应用的蓝牙记录和屏幕录像。表单中有操作步骤。</string>
     <string name="capture_ask_open">在 GitHub 提交 issue</string>
     <string name="test_title">测试我的耳机</string>
     <string name="test_sub">逐一试用各项功能并发送结果</string>

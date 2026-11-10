@@ -173,7 +173,7 @@
     <string name="earbuds_section_about">About earbuds</string>
     <string name="row_firmware_title">Firmware version</string>
     <string name="firmware_dialog_title">Firmware updates</string>
-    <string name="firmware_dialog_body">DeviceDeck does not update the earbuds\' firmware: a failed update can leave them unusable. Update them from HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck does not update firmware: a failed update can leave a device unusable. Use the original app for that device.</string>
     <string name="settings_title">Settings</string>
     <string name="row_wear_title">Wear detection</string>
     <string name="row_wear_sub">Pause when you take the earbuds out</string>
@@ -451,7 +451,7 @@
     <string name="settings_update_sub">Installed %1$s</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_sub">Version, licenses, GitHub</string>
-    <string name="about_tagline">Control OnePlus, OPPO and realme earbuds directly over Bluetooth. An alternative to HeyMelody and realme Link.</string>
+    <string name="about_tagline">Control supported earbuds and Bluetooth accessories in DeviceDeck.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_kofi" translatable="false">Ko-fi</string>
     <string name="about_kofi_desc">Support on Ko-fi</string>
@@ -548,7 +548,7 @@
     <string name="model_auto">Automatic</string>
     <string name="model_detected">Detected: %1$s</string>
     <string name="model_not_detected">Not detected yet</string>
-    <string name="no_buds_paired">No paired OPPO, OnePlus or realme buds found. Pair them in Bluetooth settings first.</string>
+    <string name="no_buds_paired">No supported paired earbuds found. Pair your earbuds in Bluetooth settings first.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Hearing profile</string>
     <string name="row_golden_sub">Sound tuned to your hearing test</string>
@@ -649,13 +649,13 @@
     <string name="problem_sending">Sending…</string>
     <string name="problem_sent">Feedback sent. Thank you!</string>
     <string name="problem_failed">Could not send the feedback. Check the internet connection and try again.</string>
-    <string name="problem_unsupported">DeviceDeck supports OnePlus, OPPO and realme earbuds only. Pick your model from the list.</string>
-    <string name="problem_supported_list">See all supported earbuds</string>
+    <string name="problem_unsupported">This device is not recognized. Choose a supported model from the list.</string>
+    <string name="problem_supported_list">See supported devices</string>
     <string name="problem_log_empty">The log is empty: your buds did not connect yet. Connect your buds first, then send your feedback.</string>
-    <string name="problem_capture_hint">A feature does not work or is missing? The app log is not enough. Open a GitHub issue with a Bluetooth snoop log of HeyMelody or realme Link and a screen recording.</string>
+    <string name="problem_capture_hint">Is a feature missing or broken? Open a GitHub issue with a Bluetooth capture from the device\'s vendor app and a screen recording.</string>
     <string name="problem_capture_link">How to make a snoop log</string>
     <string name="capture_ask_title">Help fix this feature</string>
-    <string name="capture_ask_body">The app log is not enough to fix a feature that does not work or is missing. Open a GitHub issue with a Bluetooth snoop log of HeyMelody or realme Link, and a screen recording of that app. The issue form shows the steps.</string>
+    <string name="capture_ask_body">The app log alone is not enough to fix a missing or broken feature. Open a GitHub issue with a Bluetooth capture from the device\'s vendor app and a screen recording. The form explains how.</string>
     <string name="capture_ask_open">Open a GitHub issue</string>
     <string name="test_title">Test my earbuds</string>
     <string name="test_sub">Try each feature and send the result</string>

@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">イヤホンについて</string>
     <string name="row_firmware_title">ファームウェアバージョン</string>
     <string name="firmware_dialog_title">ファームウェアの更新</string>
-    <string name="firmware_dialog_body">DeviceDeck はイヤホンのファームウェアを更新しません。更新に失敗すると使用できなくなる場合があります。HeyMelody から更新してください。</string>
+    <string name="firmware_dialog_body">DeviceDeckはファームウェアを更新しません。更新に失敗すると端末が使えなくなる場合があります。端末の公式アプリをお使いください。</string>
     <string name="settings_title">設定</string>
     <string name="row_wear_title">装着検出</string>
     <string name="row_wear_sub">イヤホンを外すと一時停止</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">インストール済み %1$s</string>
     <string name="settings_about_title">このアプリについて</string>
     <string name="settings_about_sub">バージョン、ライセンス、GitHub</string>
-    <string name="about_tagline">OnePlus、OPPO、realme のイヤホンを Bluetooth で直接操作。HeyMelody と realme Link の代替アプリです。</string>
+    <string name="about_tagline">DeviceDeckで対応するイヤホンやBluetoothアクセサリーを操作できます。</string>
     <string name="about_version">バージョン %1$s</string>
     <string name="about_kofi_desc">Ko-fi で支援</string>
     <string name="about_github_desc">GitHub のソースコード</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">自動</string>
     <string name="model_detected">検出: %1$s</string>
     <string name="model_not_detected">まだ検出されていません</string>
-    <string name="no_buds_paired">ペアリング済みの OPPO、OnePlus、realme のイヤホンが見つかりません。先に Bluetooth 設定でペアリングしてください。</string>
+    <string name="no_buds_paired">ペアリング済みの対応イヤホンが見つかりません。先にBluetooth設定でペアリングしてください。</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">聴覚プロファイル</string>
     <string name="row_golden_sub">聴力テストに合わせて調整したサウンド</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">送信中…</string>
     <string name="problem_sent">フィードバックを送信しました。ありがとうございます。</string>
     <string name="problem_failed">フィードバックを送信できませんでした。インターネット接続を確認して、もう一度お試しください。</string>
-    <string name="problem_unsupported">DeviceDeck が対応するのは OnePlus、OPPO、realme のイヤホンのみです。リストからモデルを選んでください。</string>
-    <string name="problem_supported_list">対応イヤホンの一覧を見る</string>
+    <string name="problem_unsupported">このデバイスは認識されません。リストから対応モデルを選んでください。</string>
+    <string name="problem_supported_list">対応デバイスを見る</string>
     <string name="problem_log_empty">ログが空です。イヤホンがまだ接続されていません。先にイヤホンを接続してから、フィードバックを送ってください。</string>
-    <string name="problem_capture_hint">機能が動かない、または無い場合は、アプリのログだけでは足りません。HeyMelody または realme Link の Bluetooth スヌープログと画面録画を添えて GitHub に issue を作成してください。</string>
+    <string name="problem_capture_hint">機能がない、または動作しませんか？メーカーアプリのBluetoothキャプチャと画面録画を添えてGitHub issueを作成してください。</string>
     <string name="problem_capture_link">スヌープログの作り方</string>
     <string name="capture_ask_title">この機能の修正に協力してください</string>
-    <string name="capture_ask_body">動かない機能や無い機能を直すには、アプリのログだけでは足りません。HeyMelody または realme Link の Bluetooth スヌープログと、そのアプリの画面録画を添えて GitHub に issue を作成してください。手順は issue フォームにあります。</string>
+    <string name="capture_ask_body">機能の不足や不具合の修正にはアプリのログだけでは不十分です。メーカーアプリのBluetoothキャプチャと画面録画を添えてGitHub issueを作成してください。手順はフォームにあります。</string>
     <string name="capture_ask_open">GitHub で issue を作成</string>
     <string name="test_title">イヤホンをテスト</string>
     <string name="test_sub">各機能を試して結果を送信</string>
