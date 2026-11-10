@@ -52,6 +52,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var controls: LinearLayout
     private lateinit var sppGestureControls: LinearLayout
     private lateinit var edifierEqControls: LinearLayout
+    private lateinit var edifierDeviceInfo: TextView
     private lateinit var edifierTimerControls: LinearLayout
     private lateinit var edifierGameModeControl: TextView
     private lateinit var edifierAutoPowerOffControl: TextView
@@ -541,6 +542,14 @@ class DeviceHubActivity : Activity() {
             setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
         }
         controls.addView(edifierEqControls)
+        edifierDeviceInfo = TextView(this).apply {
+            textSize = 12f
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 10f), ThemeRes.dp(this@DeviceHubActivity, 14f), ThemeRes.dp(this@DeviceHubActivity, 10f))
+            setTextColor(ThemeRes.palette(this@DeviceHubActivity).textSecondary)
+            background = ThemeRes.card(this@DeviceHubActivity, 12f)
+        }
+        controls.addView(edifierDeviceInfo)
         edifierTimerControls = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(0, ThemeRes.dp(this@DeviceHubActivity, 10f), 0, 0)
@@ -735,6 +744,14 @@ class DeviceHubActivity : Activity() {
                         }, LinearLayout.LayoutParams(-1, -2).apply { if (index > 0) topMargin = ThemeRes.dp(this@DeviceHubActivity, 6f) })
                     }
                 }
+            }
+            if (::edifierDeviceInfo.isInitialized) {
+                val info = buildList {
+                    edifierState.firmwareVersion?.let { add("${getString(R.string.device_hub_firmware_version)} · $it") }
+                    edifierState.bluetoothAddress?.let { add("${getString(R.string.device_hub_bluetooth_address)} · $it") }
+                }
+                edifierDeviceInfo.text = info.joinToString("\n")
+                edifierDeviceInfo.visibility = if (info.isEmpty()) View.GONE else View.VISIBLE
             }
             if (::edifierTimerControls.isInitialized) {
                 edifierTimerControls.removeAllViews()
