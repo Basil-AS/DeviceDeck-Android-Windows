@@ -47,6 +47,7 @@ class EdifierW820NbPlusSession(
         val bluetoothAddress: String? = null,
         val audioDisconnectSupported: Boolean = false,
         val pairingRepairSupported: Boolean = false,
+        val devicePowerOffSupported: Boolean = false,
         val touchSensitivitySupported: Boolean = false,
         val touchSensitivityIndex: Int? = null,
         val touchSensitivityValue: Int? = null,
@@ -81,6 +82,9 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
+        } else if (timedOut?.command == 0xCE) {
+            listener.onStatus("Power-off command sent; the headphones may disconnect without acknowledging it")
+            pump()
         } else if (timedOut?.command == 0x05 || timedOut?.command == 0x06 || timedOut?.command == 0xC6 || timedOut?.command == 0xC8 || timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1 || timedOut?.command == 0xF9 || timedOut?.command == 0xFA) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
@@ -110,6 +114,7 @@ class EdifierW820NbPlusSession(
                 val firmwareVersionSupported = payload.getOrNull(5)?.toInt()?.and(0xFF) == 1
                 val audioDisconnectSupported = payload.getOrNull(6)?.toInt()?.and(0xFF) == 1
                 val pairingRepairSupported = payload.getOrNull(7)?.toInt()?.and(0xFF) == 1
+                val devicePowerOffSupported = payload.getOrNull(10)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
                     1, 6 -> 24; 2, 5 -> 30; 3 -> 29; 4 -> 35; else -> 0
                 }
@@ -127,6 +132,7 @@ class EdifierW820NbPlusSession(
                     bluetoothAddressSupported = bluetoothAddressSupported,
                     audioDisconnectSupported = audioDisconnectSupported,
                     pairingRepairSupported = pairingRepairSupported,
+                    devicePowerOffSupported = devicePowerOffSupported,
                     touchSensitivitySupported = touchSensitivitySupported,
                     touchControlsSupported = touchControlsSupported)
                 listener.onState(state)
@@ -309,6 +315,20 @@ class EdifierW820NbPlusSession(
     /** D8 byte 7 advertises the vendor's 0xCF Bluetooth repair/pairing operation. */
     fun enterPairingMode() = sendBluetoothAction(0xCF, state.pairingRepairSupported,
         "Bluetooth repair is not reported as supported by these headphones")
+
+    /** D8 byte 10 advertises the vendor's 0xCE device power-off operation. */
+    fun powerOffDevice() {
+        if (!ready || !state.devicePowerOffSupported) {
+            listener.onStatus("Device power-off is not reported as supported by these headphones")
+            return
+        }
+        enqueue(0xCE) { ack ->
+            listener.onStatus(if (ack.header == EdifierFrame.Header.ACK) {
+                "Power-off command acknowledged; the headphones may disconnect"
+            } else "Power-off command sent; the headphones may disconnect without acknowledging it")
+        }
+        pump()
+    }
 
     private fun sendBluetoothAction(command: Int, supported: Boolean, unsupportedMessage: String) {
         if (!ready || !supported) {

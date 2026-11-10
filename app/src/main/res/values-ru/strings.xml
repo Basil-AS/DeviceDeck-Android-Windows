@@ -32,6 +32,8 @@
     <string name="device_hub_edifier_disconnect_audio_confirm" translatable="false">Наушники отключат аудиосоединение. Управляющее соединение DeviceDeck может остаться активным.</string>
     <string name="device_hub_edifier_pairing_repair" translatable="false">Включить режим сопряжения</string>
     <string name="device_hub_edifier_pairing_repair_confirm" translatable="false">Наушники могут отключиться от текущего аудиосоединения и стать доступными для сопряжения. Продолжить?</string>
+    <string name="device_hub_edifier_power_off" translatable="false">Выключить наушники</string>
+    <string name="device_hub_edifier_power_off_confirm" translatable="false">Будет отправлена команда выключения. Управляющее соединение может закрыться; DeviceDeck не сможет проверить состояние питания. Продолжить?</string>
     <string name="device_hub_touch_sensitivity" translatable="false">Чувствительность сенсора</string>
     <string name="device_hub_touch_left_tap" translatable="false">Слева · одно касание</string>
     <string name="device_hub_touch_right_tap" translatable="false">Справа · одно касание</string>

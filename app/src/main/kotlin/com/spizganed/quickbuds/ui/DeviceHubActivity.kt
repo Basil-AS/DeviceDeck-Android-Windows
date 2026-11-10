@@ -61,6 +61,7 @@ class DeviceHubActivity : Activity() {
     private lateinit var edifierNameControl: TextView
     private lateinit var edifierAudioDisconnectControl: TextView
     private lateinit var edifierPairingRepairControl: TextView
+    private lateinit var edifierPowerOffControl: TextView
     private lateinit var edifierTouchSensitivityControl: TextView
     private lateinit var edifierTapControls: LinearLayout
     private lateinit var scanButton: TextView
@@ -685,6 +686,21 @@ class DeviceHubActivity : Activity() {
             }
         }
         controls.addView(edifierPairingRepairControl)
+        edifierPowerOffControl = TextView(this).apply {
+            textSize = 13f; gravity = Gravity.CENTER
+            setPadding(ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f), ThemeRes.dp(this@DeviceHubActivity, 8f), ThemeRes.dp(this@DeviceHubActivity, 12f))
+            isClickable = true; isFocusable = true
+            background = ThemeRes.ripple(this@DeviceHubActivity, ThemeRes.card(this@DeviceHubActivity, 14f))
+            setOnClickListener {
+                AlertDialog.Builder(this@DeviceHubActivity)
+                    .setTitle(R.string.device_hub_edifier_power_off)
+                    .setMessage(R.string.device_hub_edifier_power_off_confirm)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.device_hub_edifier_power_off) { _, _ -> edifierSession?.powerOffDevice() }
+                    .show()
+            }
+        }
+        controls.addView(edifierPowerOffControl)
     }
 
     private fun chooseEdifierNoiseCycle(mapping: EdifierW820NbPlusSession.TouchControl) {
@@ -933,6 +949,13 @@ class DeviceHubActivity : Activity() {
                 edifierPairingRepairControl.text = getString(R.string.device_hub_edifier_pairing_repair)
                 edifierPairingRepairControl.setTextColor(ThemeRes.palette(this).text)
                 edifierPairingRepairControl.isEnabled = ready && supported
+            }
+            if (::edifierPowerOffControl.isInitialized) {
+                val supported = edifierState.devicePowerOffSupported
+                edifierPowerOffControl.visibility = if (supported) View.VISIBLE else View.GONE
+                edifierPowerOffControl.text = getString(R.string.device_hub_edifier_power_off)
+                edifierPowerOffControl.setTextColor(ThemeRes.palette(this).text)
+                edifierPowerOffControl.isEnabled = ready && supported
             }
             return
         }
