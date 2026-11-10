@@ -359,6 +359,9 @@ struct AccessorySession {
     prompt_volume_level: Option<u8>,
     auto_power_off_supported: bool,
     auto_power_off: Option<bool>,
+    disconnect_audio_supported: bool,
+    repair_bluetooth_supported: bool,
+    power_off_supported: bool,
     bluetooth_name_supported: bool,
     bluetooth_name_limit_bytes: usize,
     bluetooth_name: Option<String>,
@@ -467,6 +470,9 @@ impl AccessorySession {
                     self.touch_sensitivity_supported = capabilities.payload.get(17).is_some_and(|value| *value & 0x08 != 0);
                     self.touch_controls_supported = capabilities.payload.get(16) == Some(&18);
                     self.auto_power_off_supported = capabilities.payload.get(8) == Some(&1);
+                    self.disconnect_audio_supported = capabilities.payload.get(6) == Some(&1);
+                    self.repair_bluetooth_supported = capabilities.payload.get(7) == Some(&1);
+                    self.power_off_supported = capabilities.payload.get(10) == Some(&1);
                     self.bluetooth_name_supported = capabilities.payload.get(2) == Some(&1);
                     self.bluetooth_name_limit_bytes = capabilities.payload.get(3).copied().map(edifier_name_limit).unwrap_or(0);
                 }
@@ -841,6 +847,22 @@ impl AccessorySession {
         if self.auto_power_off != Some(enabled) { return Err("Automatic power-off did not match device readback".into()); }
         Ok(())
     }
+    async fn edifier_bluetooth_action(&self, action: &str) -> Result<u8, String> {
+        if self.model != Model::EdifierW820NbPlus {
+            return Err("Bluetooth actions are available only for EDIFIER W820NB Plus".into());
+        }
+        let (command, supported) = match action {
+            "disconnectAudio" => (0xCD, self.disconnect_audio_supported),
+            "repairBluetooth" => (0xCF, self.repair_bluetooth_supported),
+            "powerOff" => (0xCE, self.power_off_supported),
+            _ => return Err("Unknown EDIFIER action".into()),
+        };
+        if !supported {
+            return Err("The connected headset did not report support for this action".into());
+        }
+        self.write(&encode_edifier(&[command])).await?;
+        Ok(command)
+    }
     async fn set_bluetooth_name(&mut self, name: &str) -> Result<(), String> {
         let bytes = name.as_bytes();
         if self.model != Model::EdifierW820NbPlus || !self.bluetooth_name_supported || self.bluetooth_name_limit_bytes == 0
@@ -946,7 +968,7 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action})).collect::<Vec<_>>(), "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action})).collect::<Vec<_>>(), "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "disconnectAudioSupported": self.disconnect_audio_supported, "repairBluetoothSupported": self.repair_bluetooth_supported, "powerOffSupported": self.power_off_supported, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
     }
 }
 
@@ -1369,6 +1391,9 @@ pub async fn accessory_connect(
         prompt_volume_level: None,
         auto_power_off_supported: false,
         auto_power_off: None,
+        disconnect_audio_supported: false,
+        repair_bluetooth_supported: false,
+        power_off_supported: false,
         bluetooth_name_supported: false,
         bluetooth_name_limit_bytes: 0,
         bluetooth_name: None,
@@ -1510,6 +1535,24 @@ pub async fn accessory_set_auto_power_off(app: AppHandle, hub: State<'_, Accesso
     let session = active.as_mut().ok_or("No BLE device is connected")?;
     session.set_auto_power_off(enabled).await?;
     let result = session.snapshot("connected");
+    emit(&app, result.clone());
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn accessory_edifier_action(
+    app: AppHandle,
+    hub: State<'_, AccessoryHub>,
+    action: String,
+) -> Result<Value, String> {
+    if hub.spp_session.lock().await.is_some() {
+        return Err("Connected device uses SPP, not the EDIFIER BLE profile".into());
+    }
+    let active = hub.session.lock().await;
+    let session = active.as_ref().ok_or("No BLE device is connected")?;
+    let command = session.edifier_bluetooth_action(&action).await?;
+    let mut result = session.snapshot("connected");
+    result["message"] = json!(format!("EDIFIER command 0x{command:02X} sent; the device provides no state readback"));
     emit(&app, result.clone());
     Ok(result)
 }
