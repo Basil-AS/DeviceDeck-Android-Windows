@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.29 — 2026-11-10
+
+- Add a compact Android home-screen battery strip, 3×1 and resizable to 1×3, in DeviceDeck branding across all 27 locales.
+- Re-read the reported ANC mode 900 ms after the final tap so quick mode changes settle on the device-reported state.
+- Synchronize the Android and Windows/Linux version to 0.1.0-alpha.29.
+
 ## 0.1.0-alpha.28 — 2026-11-10
 
 - Update Android copy in all 27 locales so DeviceDeck describes supported earbuds and Bluetooth accessories across brands instead of claiming OnePlus/OPPO/realme-only support.
