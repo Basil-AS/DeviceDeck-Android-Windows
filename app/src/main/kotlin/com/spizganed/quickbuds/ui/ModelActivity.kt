@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.TextView
 import com.spizganed.quickbuds.R
@@ -40,8 +41,15 @@ class ModelActivity : Activity() {
         selection = SelectionSlider(root)
         root.addView(SettingRowFactory.title(this, R.string.model_title))
 
-        fun row(id: String?, title: String, subtitle: String?, onPick: () -> Unit): View {
-            val r = SettingRowFactory.build(this, 0, 0, 0, null) {
+        fun row(id: String?, title: String, subtitle: String?, artRes: Int = 0, onPick: () -> Unit): View {
+            val art = if (artRes == 0) null else ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(ThemeRes.dp(this@ModelActivity, 44f), ThemeRes.dp(this@ModelActivity, 38f))
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                setImageResource(artRes)
+                // The model name beside it already provides the accessible label.
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            }
+            val r = SettingRowFactory.build(this, 0, 0, 0, null, leading = art) {
                 if (id == ModelCatalog.manual(this)) return@build
                 Haptics.commit(root)
                 onPick()
@@ -69,7 +77,12 @@ class ModelActivity : Activity() {
             root.addView(SettingRowFactory.sectionLabel(this, label))
             val card = SettingRowFactory.splitList(this)
             for (m in models.filter { it.name.startsWith("$brand ") }.sortedBy { it.name.lowercase() }) {
-                SettingRowFactory.addSplit(card, row(m.id, m.name, m.id.takeIf { nameCount[m.name]!! > 1 }) {
+                val art = when (m.id) {
+                    "064812" -> R.drawable.ic_device_realme_air7
+                    "064C12" -> R.drawable.ic_device_realme_air7_pro
+                    else -> 0
+                }
+                SettingRowFactory.addSplit(card, row(m.id, m.name, m.id.takeIf { nameCount[m.name]!! > 1 }, art) {
                     ModelCatalog.setManual(this, m.id)
                 })
             }
