@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.28 — 2026-11-10
+
+- Update Android copy in all 27 locales so DeviceDeck describes supported earbuds and Bluetooth accessories across brands instead of claiming OnePlus/OPPO/realme-only support.
+- Link Android feedback to the unified cross-platform support matrix; make firmware and missing-feature guidance work for every supported device brand.
+- Record Android as the primary platform in the Android/Windows/Linux repository documentation.
+
 ## 0.1.0-alpha.27 — 2026-11-10
 
 - Correct the EDIFIER W820NB Plus BLE profile using the control service and read/write characteristic UUIDs embedded in EDIFIER Connect 8.4.28. Physical connection and command round-trip remain unverified.
