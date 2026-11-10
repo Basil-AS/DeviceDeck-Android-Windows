@@ -294,7 +294,12 @@ class BleGattScanner private constructor(
     private val listener: Listener,
 ) {
     interface Listener {
-        fun onDevice(device: BluetoothDevice, profile: DeviceGattProfile)
+        fun onDevice(
+            device: BluetoothDevice,
+            profile: DeviceGattProfile,
+            manufacturerId: Int?,
+            manufacturerData: ByteArray?,
+        )
         fun onScanError(message: String)
     }
 
@@ -308,9 +313,15 @@ class BleGattScanner private constructor(
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device ?: return
             val advertisedName = result.scanRecord?.deviceName ?: runCatching { device.name }.getOrNull()
-            if (!profile.matchesName(advertisedName)) return
+            val advertisesProfileService = profile.discoveryService?.let { expected ->
+                result.scanRecord?.serviceUuids?.any { it.uuid == expected } == true
+            } == true
+            if (!profile.matchesName(advertisedName) && !advertisesProfileService) return
+            val manufacturerData = result.scanRecord?.manufacturerSpecificData
+            val manufacturerId = manufacturerData?.takeIf { it.size() > 0 }?.keyAt(0)
+            val manufacturerBytes = manufacturerData?.takeIf { it.size() > 0 }?.valueAt(0)?.copyOf()
             handler.post {
-                if (running && seen.add(device.address)) listener.onDevice(device, profile)
+                if (running && seen.add(device.address)) listener.onDevice(device, profile, manufacturerId, manufacturerBytes)
             }
         }
 

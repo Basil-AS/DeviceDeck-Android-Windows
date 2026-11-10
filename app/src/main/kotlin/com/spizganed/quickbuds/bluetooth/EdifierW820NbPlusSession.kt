@@ -7,6 +7,7 @@ import android.os.Looper
 import com.spizganed.quickbuds.protocol.edifier.EdifierFrame
 import com.spizganed.quickbuds.protocol.edifier.EdifierFrameCodec
 import com.spizganed.quickbuds.protocol.edifier.EdifierFrameDecoder
+import com.spizganed.quickbuds.protocol.edifier.EdifierBleProtocol
 import com.spizganed.quickbuds.protocol.edifier.EdifierEqualizer
 import java.util.ArrayDeque
 
@@ -17,6 +18,7 @@ internal fun decodeEdifierPromptLevel(parameters: ByteArray): Int? =
 class EdifierW820NbPlusSession(
     context: Context,
     device: BluetoothDevice,
+    private val protocol: EdifierBleProtocol = EdifierBleProtocol(),
     private val listener: Listener,
 ) {
     enum class Noise(val wireValue: Int, val title: String) {
@@ -68,7 +70,7 @@ class EdifierW820NbPlusSession(
     private data class Operation(val command: Int, val packet: ByteArray, val done: (EdifierFrame) -> Unit)
 
     private val handler = Handler(Looper.getMainLooper())
-    private val decoder = EdifierFrameDecoder()
+    private val decoder = EdifierFrameDecoder(protocol)
     private val queue = ArrayDeque<Operation>()
     private var pending: Operation? = null
     private var ready = false
@@ -96,7 +98,8 @@ class EdifierW820NbPlusSession(
     private val link = BleGattLink.connect(context, device, DeviceGattProfiles.edifierW820NbPlus, object : BleGattLink.Listener {
         override fun onReady(mtu: Int) {
             ready = true
-            listener.onStatus("Connected · BLE MTU $mtu")
+            val encryption = if (protocol.encryptionKey == 0) "no encryption" else "encrypted"
+            listener.onStatus("Connected · BLE v${protocol.version}, $encryption · MTU $mtu")
             // D8 is a capability probe. Its layout is firmware-sensitive; retain it as
             // evidence but do not enable commands from an unvalidated interpretation.
             enqueue(0xD8) { frame ->
@@ -587,7 +590,7 @@ class EdifierW820NbPlusSession(
 
     private fun enqueue(command: Int, parameters: ByteArray = byteArrayOf(), done: (EdifierFrame) -> Unit = {}) {
         val payload = byteArrayOf(command.toByte()) + parameters
-        queue.addLast(Operation(command, EdifierFrameCodec.encodeHost(payload), done))
+        queue.addLast(Operation(command, EdifierFrameCodec.encodeHost(payload, protocol), done))
     }
 
     private fun pump() {

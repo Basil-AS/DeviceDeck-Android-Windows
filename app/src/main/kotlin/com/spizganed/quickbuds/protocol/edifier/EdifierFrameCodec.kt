@@ -18,10 +18,10 @@ data class EdifierFrame(val header: Header, val payload: ByteArray) {
 }
 
 /**
- * Frame codec for the Edifier `AA|length|payload|checksum` protocol.
+ * Frame codec for the Edifier BLE v1 and v2 command protocols.
  *
- * The checksum is the vendor client's additive 16-bit sum (seed 0x2019); it is not a CRC.
- * This only handles framing. It does not imply that a command is supported by a particular model.
+ * V1 uses an additive 16-bit sum seeded with 0x2019. V2 uses the low byte of the
+ * additive sum and the app code. This does not imply that a command is supported by a model.
  */
 object EdifierFrameCodec {
     const val MAX_PAYLOAD_SIZE = 0xFF
@@ -34,10 +34,27 @@ object EdifierFrameCodec {
         return sum
     }
 
-    fun encodeHost(payload: ByteArray): ByteArray = encode(EdifierFrame.Header.HOST, payload)
+    fun encodeHost(payload: ByteArray, protocol: EdifierBleProtocol = EdifierBleProtocol()): ByteArray =
+        encode(EdifierFrame.Header.HOST, payload, protocol)
 
-    fun encode(header: EdifierFrame.Header, payload: ByteArray): ByteArray {
+    fun encode(
+        header: EdifierFrame.Header,
+        payload: ByteArray,
+        protocol: EdifierBleProtocol = EdifierBleProtocol(),
+    ): ByteArray {
         require(payload.size <= MAX_PAYLOAD_SIZE) { "Edifier payload exceeds the one-byte length limit" }
+        if (protocol.version == 2) {
+            val encryptedPayload = protocol.transformPayload(payload.drop(1).toByteArray())
+            val v2 = ByteArray(encryptedPayload.size + 6)
+            v2[0] = header.wire.toByte()
+            v2[1] = protocol.appCode.toByte()
+            v2[2] = payload.firstOrNull() ?: 0.toByte()
+            v2[3] = ((encryptedPayload.size ushr 8) and 0xFF).toByte()
+            v2[4] = (encryptedPayload.size and 0xFF).toByte()
+            encryptedPayload.copyInto(v2, destinationOffset = 5)
+            v2[v2.lastIndex] = checksumV2(v2, v2.lastIndex).toByte()
+            return v2
+        }
         val frame = ByteArray(payload.size + 4)
         frame[0] = header.wire.toByte()
         frame[1] = payload.size.toByte()
@@ -49,9 +66,16 @@ object EdifierFrameCodec {
     }
 
     /** Parse one complete frame. Returns null for truncation, invalid headers, or bad checksums. */
-    fun parse(raw: ByteArray): EdifierFrame? {
+    fun parse(raw: ByteArray, protocol: EdifierBleProtocol = EdifierBleProtocol()): EdifierFrame? {
         if (raw.size < 4) return null
         val header = EdifierFrame.Header.fromWire(raw[0].toInt() and 0xFF) ?: return null
+        if (protocol.version == 2) {
+            if (raw.size < 6 || (raw[1].toInt() and 0xFF) != protocol.appCode) return null
+            val parameterSize = ((raw[3].toInt() and 0xFF) shl 8) or (raw[4].toInt() and 0xFF)
+            if (raw.size != parameterSize + 6 || checksumV2(raw, raw.lastIndex) != (raw.last().toInt() and 0xFF)) return null
+            val parameters = protocol.transformPayload(raw.copyOfRange(5, raw.lastIndex))
+            return EdifierFrame(header, byteArrayOf(raw[2]) + parameters)
+        }
         val payloadSize = raw[1].toInt() and 0xFF
         if (raw.size != payloadSize + 4) return null
         val expected = checksum(raw, raw.size - 2)
@@ -59,10 +83,19 @@ object EdifierFrameCodec {
         if (expected != received) return null
         return EdifierFrame(header, raw.copyOfRange(2, raw.size - 2))
     }
+
+    private fun checksumV2(bytes: ByteArray, length: Int): Int {
+        var sum = 0
+        for (index in 0 until length) sum = (sum + (bytes[index].toInt() and 0xFF)) and 0xFF
+        return sum
+    }
 }
 
 /** Incremental decoder; BLE notifications may split or concatenate protocol frames. */
-class EdifierFrameDecoder(private val maximumBufferedBytes: Int = 8192) {
+class EdifierFrameDecoder(
+    private val protocol: EdifierBleProtocol = EdifierBleProtocol(),
+    private val maximumBufferedBytes: Int = 8192,
+) {
     init { require(maximumBufferedBytes >= 4) }
 
     private var buffer = ByteArray(0)
@@ -88,11 +121,14 @@ class EdifierFrameDecoder(private val maximumBufferedBytes: Int = 8192) {
             if (headerIndex > 0) buffer = buffer.copyOfRange(headerIndex, buffer.size)
             if (buffer.size < 2) break
 
-            val totalSize = (buffer[1].toInt() and 0xFF) + 4
+            val totalSize = if (protocol.version == 2) {
+                if (buffer.size < 5) break
+                (((buffer[3].toInt() and 0xFF) shl 8) or (buffer[4].toInt() and 0xFF)) + 6
+            } else (buffer[1].toInt() and 0xFF) + 4
             if (buffer.size < totalSize) break
 
             val candidate = buffer.copyOfRange(0, totalSize)
-            val frame = EdifierFrameCodec.parse(candidate)
+            val frame = EdifierFrameCodec.parse(candidate, protocol)
             if (frame == null) {
                 // Advance one byte so a damaged or false header cannot consume a valid next frame.
                 buffer = buffer.copyOfRange(1, buffer.size)
