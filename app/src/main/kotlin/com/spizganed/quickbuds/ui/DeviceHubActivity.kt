@@ -460,7 +460,11 @@ class DeviceHubActivity : Activity() {
                 renderModes()
             }
             override fun onStatus(text: String) { status.text = text }
-            override fun onReady() = connected()
+            override fun onReady() {
+                connected()
+                val encryption = if (edifierProtocol.encryptionKey == 0) "no encryption" else "encrypted"
+                status.text = "Connected · BLE v${edifierProtocol.version}, $encryption"
+            }
             override fun onClosed(reason: String) = disconnected(reason)
         })
     }
