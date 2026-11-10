@@ -13,6 +13,8 @@ data class DeviceGattProfile(
     // Null means local-name discovery. Some devices use this GATT service only after connection
     // and do not include it in advertisements, so a mandatory UUID filter hides them entirely.
     val discoveryService: UUID? = service,
+    // Prefer this company ID when an advertisement contains several manufacturer records.
+    val manufacturerId: Int? = null,
 ) {
     fun matchesName(name: String?): Boolean {
         if (name.isNullOrBlank()) return false
@@ -36,6 +38,7 @@ object DeviceGattProfiles {
         // Edifier Connect uses this model-search UUID in advertisements; it is
         // distinct from the GATT service and endpoints above.
         discoveryService = UUID.fromString("0000A500-0000-1000-8000-00805F9B34FB"),
+        manufacturerId = 0x07E0,
     )
 
     // Baseus Intelligent EU app_device_ble_config group 4. The models share
