@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.40 — 2026-11-10
+
+- Android: discover supported BLE devices by either their product search UUID or advertised local name. This fixes W820NB Plus discovery when its advertisement omits the Edifier search UUID.
+- Android version code 39; Android and Windows/Linux version synchronized to 0.1.0-alpha.40. Physical W820NB Plus validation remains outstanding.
+
 ## 0.1.0-alpha.39 — 2026-11-10
 
 - Android: select EDIFIER manufacturer data by company ID `0x07E0` when advertisements contain multiple manufacturer records, ensuring BLE v1/v2 negotiation uses the headset record.
