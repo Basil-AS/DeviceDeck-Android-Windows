@@ -19,6 +19,7 @@ class EdifierW820NbPlusSession(
     context: Context,
     device: BluetoothDevice,
     protocol: EdifierBleProtocol = EdifierBleProtocol(),
+    allowProtocolFallback: Boolean = true,
     private val listener: Listener,
 ) {
     enum class Noise(val wireValue: Int, val title: String) {
@@ -73,8 +74,10 @@ class EdifierW820NbPlusSession(
     private var activeProtocol = protocol
     private var decoder = EdifierFrameDecoder(activeProtocol)
     private val protocolFallbacks = ArrayDeque(
-        listOf(EdifierBleProtocol(2, 0xA5), EdifierBleProtocol(2, 0), EdifierBleProtocol(1, 0))
-            .filter { it != protocol }
+        if (allowProtocolFallback) {
+            listOf(EdifierBleProtocol(2, 0xA5), EdifierBleProtocol(2, 0), EdifierBleProtocol(1, 0))
+                .filter { it != protocol }
+        } else emptyList()
     )
     private val queue = ArrayDeque<Operation>()
     private var pending: Operation? = null
@@ -96,6 +99,10 @@ class EdifierW820NbPlusSession(
                 pump()
             } else {
                 listener.onStatus("Capability probe was not answered; trying basic controls")
+                if (activeProtocol != protocol) {
+                    activeProtocol = protocol
+                    decoder = EdifierFrameDecoder(activeProtocol)
+                }
                 refresh()
                 pump()
             }

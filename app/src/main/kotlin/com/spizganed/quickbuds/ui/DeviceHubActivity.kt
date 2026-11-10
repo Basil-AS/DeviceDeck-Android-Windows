@@ -43,6 +43,7 @@ class DeviceHubActivity : Activity() {
     private var foundDevice: BluetoothDevice? = null
     private var pairedFallback: BluetoothDevice? = null
     private var edifierProtocol = EdifierBleProtocol()
+    private var edifierAdvertisementSeen = false
     private var ready = false
     private var currentState = BaseusBowie30Session.State()
     private var edifierState = EdifierW820NbPlusSession.State()
@@ -322,6 +323,7 @@ class DeviceHubActivity : Activity() {
         seenAny = false
         pairedFallback = null
         edifierProtocol = EdifierBleProtocol()
+        edifierAdvertisementSeen = false
         deviceRow.visibility = View.GONE
         controls.visibility = View.GONE
         battery.visibility = View.GONE
@@ -397,6 +399,7 @@ class DeviceHubActivity : Activity() {
                     // A bonded device can be shown before its advertisement is observed.
                     // Still consume the manufacturer record so the session uses the
                     // headset's BLE version and Encryption10 setting when available.
+                    edifierAdvertisementSeen = manufacturerId == EdifierBleProtocol.EDIFIER_MANUFACTURER_ID && (manufacturerData?.size ?: 0) >= 2
                     edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
                     return
                 }
@@ -404,6 +407,7 @@ class DeviceHubActivity : Activity() {
                 seenAny = true
                 foundDevice = device
                 if (selectedDevice == DeviceKind.EDIFIER_W820NB_PLUS) {
+                    edifierAdvertisementSeen = manufacturerId == EdifierBleProtocol.EDIFIER_MANUFACTURER_ID && (manufacturerData?.size ?: 0) >= 2
                     edifierProtocol = EdifierBleProtocol.fromAdvertisement(manufacturerId, manufacturerData)
                 }
                 deviceRow.text = "${profile.displayName}  ·  ${getString(R.string.conn_action_connect)}"
@@ -466,7 +470,7 @@ class DeviceHubActivity : Activity() {
     }
 
     private fun connectEdifier(device: BluetoothDevice) {
-        edifierSession = EdifierW820NbPlusSession(this, device, edifierProtocol, object : EdifierW820NbPlusSession.Listener {
+        edifierSession = EdifierW820NbPlusSession(this, device, edifierProtocol, !edifierAdvertisementSeen, object : EdifierW820NbPlusSession.Listener {
             override fun onState(state: EdifierW820NbPlusSession.State) {
                 edifierState = state
                 battery.text = state.batteryPercent?.let { "${getString(R.string.device_hub_battery)}  ·  $it%" } ?: getString(R.string.device_hub_battery)
@@ -562,7 +566,7 @@ class DeviceHubActivity : Activity() {
         scanner?.stop(); closeSessions()
         selectedDevice = kind
         foundDevice = null; ready = false
-        pairedFallback = null; edifierProtocol = EdifierBleProtocol()
+        pairedFallback = null; edifierProtocol = EdifierBleProtocol(); edifierAdvertisementSeen = false
         currentState = BaseusBowie30Session.State(); edifierState = EdifierW820NbPlusSession.State()
         blade2State = BaseusBlade2Session.State()
         sppState = BaseusSppSession.State()
