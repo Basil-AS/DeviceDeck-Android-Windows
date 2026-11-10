@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.29 — 2026-11-10
 
-- Backport the compact Android battery-strip widget from QuickBuds upstream (`4add6186`) and make it resizable from a 3×1 strip to a 1×3 column.
-- Verify the reported ANC mode after quick repeated taps so the Android UI settles on the device-reported state.
+- Add a compact Android home-screen battery strip, 3×1 and resizable to 1×3, in DeviceDeck branding across all 27 locales.
+- Re-read the reported ANC mode 900 ms after the final tap so quick mode changes settle on the device-reported state.
+- Synchronize the Android and Windows/Linux version to 0.1.0-alpha.29.
 
 ## 0.1.0-alpha.28 — 2026-11-10
 
