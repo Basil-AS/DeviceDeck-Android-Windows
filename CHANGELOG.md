@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.30 — 2026-11-10
 
 - Query the W820NB Plus firmware version (`C6`) and Bluetooth address (`C8`) when the D8 profile reports those read-only features, and show the returned values in the DeviceDeck device panel.
+- Synchronize the Android and Windows/Linux version to 0.1.0-alpha.30.
 
 ## 0.1.0-alpha.29 — 2026-11-10
 
