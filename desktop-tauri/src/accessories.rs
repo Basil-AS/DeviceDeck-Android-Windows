@@ -344,6 +344,7 @@ struct AccessorySession {
     write: btleplug::api::Characteristic,
     rx: tokio::sync::mpsc::UnboundedReceiver<Vec<u8>>,
     decoder: Decoder,
+    edifier_protocol: EdifierBLEProtocol,
     battery: Option<u8>,
     noise: Option<String>,
     gestures: Vec<(u8, u8, u8)>,
@@ -399,9 +400,29 @@ fn edifier_eq_presets(profile: u8) -> Vec<EdifierEqPreset> {
 }
 
 enum Decoder {
-    Edifier(Vec<u8>),
+    Edifier(Vec<u8>, EdifierBLEProtocol),
     Baseus(Vec<u8>),
     BaseusPower(Vec<u8>),
+}
+
+#[derive(Clone, Copy, Debug)]
+struct EdifierBLEProtocol {
+    version: u8,
+    xor_key: u8,
+}
+
+impl Default for EdifierBLEProtocol {
+    fn default() -> Self { Self { version: 1, xor_key: 0 } }
+}
+
+impl EdifierBLEProtocol {
+    fn from_manufacturer_data(data: Option<&HashMap<u16, Vec<u8>>>) -> Self {
+        let Some(bytes) = data.and_then(|records| records.get(&0x07E0)) else { return Self::default() };
+        if bytes.len() < 2 { return Self::default(); }
+        let version = if bytes[bytes.len() - 2] > 1 { 2 } else { 1 };
+        let xor_key = if bytes[bytes.len() - 1] == 16 { 0xA5 } else { 0 };
+        Self { version, xor_key }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -418,6 +439,10 @@ struct Frame {
 }
 
 impl AccessorySession {
+    fn encode_edifier(&self, payload: &[u8]) -> Vec<u8> {
+        encode_edifier(payload, self.edifier_protocol)
+    }
+
     async fn write(&self, bytes: &[u8]) -> Result<(), String> {
         self.peripheral
             .write(&self.write, bytes, WriteType::WithResponse)
@@ -426,8 +451,8 @@ impl AccessorySession {
     }
     fn feed(&mut self, bytes: &[u8]) -> Vec<Frame> {
         match (&mut self.decoder, self.model) {
-            (Decoder::Edifier(buffer), Model::EdifierW820NbPlus) => {
-                decode_edifier_stream(buffer, bytes)
+            (Decoder::Edifier(buffer, protocol), Model::EdifierW820NbPlus) => {
+                decode_edifier_stream(buffer, bytes, *protocol)
             }
             (Decoder::Baseus(buffer), Model::BaseusBowie30) => decode_baseus_stream(buffer, bytes),
             (Decoder::BaseusPower(buffer), Model::BaseusBlade2) => {
@@ -455,7 +480,7 @@ impl AccessorySession {
         match self.model {
             Model::EdifierW820NbPlus => {
                 let d8 = [0xD8];
-                if let Ok(capabilities) = self.request(&encode_edifier(&d8), 0xD8).await {
+                if let Ok(capabilities) = self.request(&self.encode_edifier(&d8), 0xD8).await {
                     if let Some(profile) = capabilities.payload.get(13).copied() {
                         self.eq_presets = edifier_eq_presets(profile);
                     }
@@ -477,14 +502,14 @@ impl AccessorySession {
                     self.bluetooth_name_limit_bytes = capabilities.payload.get(3).copied().map(edifier_name_limit).unwrap_or(0);
                 }
                 if !self.eq_presets.is_empty() {
-                    if let Ok(eq) = self.request(&encode_edifier(&[0xD5]), 0xD5).await {
+                    if let Ok(eq) = self.request(&self.encode_edifier(&[0xD5]), 0xD5).await {
                         if let Some(selected) = eq.payload.first().copied().filter(|id| self.eq_presets.iter().any(|p| p.id == *id)) {
                             self.selected_eq = Some(selected);
                         }
                     }
                 }
                 if !self.sleep_timer_options.is_empty() {
-                    if let Ok(timer) = self.request(&encode_edifier(&[0xD3]), 0xD3).await {
+                    if let Ok(timer) = self.request(&self.encode_edifier(&[0xD3]), 0xD3).await {
                         if timer.payload.len() >= 2 {
                             let minutes = u16::from_be_bytes([timer.payload[0], timer.payload[1]]);
                             if self.sleep_timer_options.contains(&minutes) { self.sleep_timer_minutes = Some(minutes); }
@@ -492,32 +517,32 @@ impl AccessorySession {
                     }
                 }
                 if self.game_mode_supported {
-                    if let Ok(game) = self.request(&encode_edifier(&[0x08]), 0x08).await {
+                    if let Ok(game) = self.request(&self.encode_edifier(&[0x08]), 0x08).await {
                         self.game_mode = match game.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
                     }
                 }
                 if self.prompt_tone_supported {
-                    if let Ok(state) = self.request(&encode_edifier(&[0xF9]), 0xF9).await {
+                    if let Ok(state) = self.request(&self.encode_edifier(&[0xF9]), 0xF9).await {
                         self.prompt_tone_enabled = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
                     }
                 }
                 if self.prompt_volume_supported {
-                    if let Ok(level) = self.request(&encode_edifier(&[0x05]), 0x05).await {
+                    if let Ok(level) = self.request(&self.encode_edifier(&[0x05]), 0x05).await {
                         self.prompt_volume_level = decode_edifier_prompt_level(&level.payload);
                     }
                 }
                 if self.auto_power_off_supported {
-                    if let Ok(state) = self.request(&encode_edifier(&[0xD7]), 0xD7).await {
+                    if let Ok(state) = self.request(&self.encode_edifier(&[0xD7]), 0xD7).await {
                         self.auto_power_off = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
                     }
                 }
                 if self.bluetooth_name_supported {
-                    if let Ok(name) = self.request(&encode_edifier(&[0xC9]), 0xC9).await {
+                    if let Ok(name) = self.request(&self.encode_edifier(&[0xC9]), 0xC9).await {
                         self.bluetooth_name = decode_edifier_name(&name.payload);
                     }
                 }
                 if self.touch_sensitivity_supported {
-                    if let Ok(sensitivity) = self.request(&encode_edifier(&[0xFD]), 0xFD).await {
+                    if let Ok(sensitivity) = self.request(&self.encode_edifier(&[0xFD]), 0xFD).await {
                         if sensitivity.payload.len() >= 2 {
                             let index = sensitivity.payload[0];
                             let value = sensitivity.payload[1];
@@ -537,7 +562,7 @@ impl AccessorySession {
                     }
                 }
                 let d0 = [0xD0];
-                let battery = self.request(&encode_edifier(&d0), 0xD0).await?;
+                let battery = self.request(&self.encode_edifier(&d0), 0xD0).await?;
                 let level = battery
                     .payload
                     .first()
@@ -548,7 +573,7 @@ impl AccessorySession {
                 }
                 self.battery = Some(level);
                 let cc = [0xCC];
-                let noise = self.request(&encode_edifier(&cc), 0xCC).await?;
+                let noise = self.request(&self.encode_edifier(&cc), 0xCC).await?;
                 self.noise = Some(
                     match noise.payload.first() {
                         Some(1) => "off",
@@ -657,13 +682,13 @@ impl AccessorySession {
                     "transparency" => 3,
                     _ => return Err("Unsupported EDIFIER mode".into()),
                 };
-                let packet = encode_edifier(&[0xC1, wire]);
+                let packet = self.encode_edifier(&[0xC1, wire]);
                 let ack = self.request(&packet, 0xC1).await?;
                 if ack.header != 0xCC {
                     return Err("EDIFIER did not acknowledge the mode".into());
                 }
                 let cc = [0xCC];
-                let state = self.request(&encode_edifier(&cc), 0xCC).await?;
+                let state = self.request(&self.encode_edifier(&cc), 0xCC).await?;
                 let actual = match state.payload.first() {
                     Some(1) => "off",
                     Some(2) => "anc",
@@ -718,9 +743,9 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || self.eq_presets.iter().all(|preset| preset.id != id) || self.selected_eq.is_none() {
             return Err("No supported Edifier EQ profile has been read".into());
         }
-        let ack = self.request(&encode_edifier(&[0xC4, id]), 0xC4).await?;
+        let ack = self.request(&self.encode_edifier(&[0xC4, id]), 0xC4).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge the EQ preset".into()); }
-        let state = self.request(&encode_edifier(&[0xD5]), 0xD5).await?;
+        let state = self.request(&self.encode_edifier(&[0xD5]), 0xD5).await?;
         let actual = state.payload.first().copied().filter(|value| self.eq_presets.iter().any(|preset| preset.id == *value));
         self.selected_eq = actual;
         if actual != Some(id) { return Err("Edifier EQ preset did not match device readback".into()); }
@@ -731,9 +756,9 @@ impl AccessorySession {
             return Err("Sleep timer value is not supported by this firmware".into());
         }
         let packet = if minutes == 0 { vec![0xD2] } else { vec![0xD1, (minutes >> 8) as u8, minutes as u8] };
-        let ack = self.request(&encode_edifier(&packet), if minutes == 0 { 0xD2 } else { 0xD1 }).await?;
+        let ack = self.request(&self.encode_edifier(&packet), if minutes == 0 { 0xD2 } else { 0xD1 }).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge the sleep timer".into()); }
-        let state = self.request(&encode_edifier(&[0xD3]), 0xD3).await?;
+        let state = self.request(&self.encode_edifier(&[0xD3]), 0xD3).await?;
         if state.payload.len() < 2 { return Err("Invalid sleep timer readback".into()); }
         let actual = u16::from_be_bytes([state.payload[0], state.payload[1]]);
         self.sleep_timer_minutes = Some(actual);
@@ -744,9 +769,9 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || !self.game_mode_supported || self.game_mode.is_none() {
             return Err("Game mode is not available in the reported Edifier profile".into());
         }
-        let ack = self.request(&encode_edifier(&[0x09, u8::from(enabled)]), 0x09).await?;
+        let ack = self.request(&self.encode_edifier(&[0x09, u8::from(enabled)]), 0x09).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge game mode".into()); }
-        let state = self.request(&encode_edifier(&[0x08]), 0x08).await?;
+        let state = self.request(&self.encode_edifier(&[0x08]), 0x08).await?;
         self.game_mode = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
         if self.game_mode != Some(enabled) { return Err("Edifier game mode did not match device readback".into()); }
         Ok(())
@@ -756,9 +781,9 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || !self.prompt_tone_supported || self.prompt_tone_enabled.is_none() {
             return Err("Prompt tones are not available in the reported Edifier profile".into());
         }
-        let ack = self.request(&encode_edifier(&[0xFA, u8::from(enabled)]), 0xFA).await?;
+        let ack = self.request(&self.encode_edifier(&[0xFA, u8::from(enabled)]), 0xFA).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge prompt tones".into()); }
-        let state = self.request(&encode_edifier(&[0xF9]), 0xF9).await?;
+        let state = self.request(&self.encode_edifier(&[0xF9]), 0xF9).await?;
         self.prompt_tone_enabled = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
         if self.prompt_tone_enabled != Some(enabled) { return Err("Prompt tone setting did not match device readback".into()); }
         Ok(())
@@ -768,9 +793,9 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || !self.prompt_volume_supported || self.prompt_volume_level.is_none() || level > 15 {
             return Err("Voice prompt volume is not available in the reported Edifier profile".into());
         }
-        let ack = self.request(&encode_edifier(&[0x06, level]), 0x06).await?;
+        let ack = self.request(&self.encode_edifier(&[0x06, level]), 0x06).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge voice prompt volume".into()); }
-        let state = self.request(&encode_edifier(&[0x05]), 0x05).await?;
+        let state = self.request(&self.encode_edifier(&[0x05]), 0x05).await?;
         self.prompt_volume_level = decode_edifier_prompt_level(&state.payload);
         if self.prompt_volume_level != Some(level) { return Err("Voice prompt volume did not match device readback".into()); }
         Ok(())
@@ -782,9 +807,9 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || !self.touch_sensitivity_supported || self.touch_sensitivity_value.is_none() || value > max {
             return Err("Touch sensitivity is unavailable in the reported Edifier profile".into());
         }
-        let ack = self.request(&encode_edifier(&[0xFE, index, value]), 0xFE).await?;
+        let ack = self.request(&self.encode_edifier(&[0xFE, index, value]), 0xFE).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge touch sensitivity".into()); }
-        let state = self.request(&encode_edifier(&[0xFD]), 0xFD).await?;
+        let state = self.request(&self.encode_edifier(&[0xFD]), 0xFD).await?;
         if state.payload.len() < 2 || state.payload[0] != index || state.payload[1] != value {
             return Err("Edifier touch sensitivity did not match device readback".into());
         }
@@ -795,7 +820,7 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || !self.touch_controls_supported || !(1..=4).contains(&index) {
             return Err("Touch control is not supported by the reported W820NB Plus profile".into());
         }
-        let frame = self.request(&encode_edifier(&[0xF0, index]), 0xF0).await?;
+        let frame = self.request(&self.encode_edifier(&[0xF0, index]), 0xF0).await?;
         let p = &frame.payload;
         if p.len() < 2 || p[0] != index || !(1..=6).contains(&p[1])
             || (p[1] == 6 && p.len() != 3) || (p[1] != 6 && p.len() != 2) {
@@ -828,7 +853,7 @@ impl AccessorySession {
             payload.push(action);
             None
         };
-        let ack = self.request(&encode_edifier(&payload), 0xF1).await?;
+        let ack = self.request(&self.encode_edifier(&payload), 0xF1).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge the touch control".into()); }
         let actual = self.read_touch_control(index).await?;
         if actual.action != action || actual.noise_mask != expected_mask { return Err("Edifier touch control did not match device readback".into()); }
@@ -840,9 +865,9 @@ impl AccessorySession {
         if self.model != Model::EdifierW820NbPlus || !self.auto_power_off_supported || self.auto_power_off.is_none() {
             return Err("Automatic power-off is not available in the reported Edifier profile".into());
         }
-        let ack = self.request(&encode_edifier(&[0xD6, u8::from(enabled)]), 0xD6).await?;
+        let ack = self.request(&self.encode_edifier(&[0xD6, u8::from(enabled)]), 0xD6).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge automatic power-off".into()); }
-        let state = self.request(&encode_edifier(&[0xD7]), 0xD7).await?;
+        let state = self.request(&self.encode_edifier(&[0xD7]), 0xD7).await?;
         self.auto_power_off = match state.payload.first() { Some(0) => Some(false), Some(1) => Some(true), _ => None };
         if self.auto_power_off != Some(enabled) { return Err("Automatic power-off did not match device readback".into()); }
         Ok(())
@@ -860,7 +885,7 @@ impl AccessorySession {
         if !supported {
             return Err("The connected headset did not report support for this action".into());
         }
-        self.write(&encode_edifier(&[command])).await?;
+        self.write(&self.encode_edifier(&[command])).await?;
         Ok(command)
     }
     async fn set_bluetooth_name(&mut self, name: &str) -> Result<(), String> {
@@ -871,9 +896,9 @@ impl AccessorySession {
         }
         let mut payload = vec![0xCA];
         payload.extend_from_slice(bytes);
-        let ack = self.request(&encode_edifier(&payload), 0xCA).await?;
+        let ack = self.request(&self.encode_edifier(&payload), 0xCA).await?;
         if ack.header != 0xCC { return Err("Edifier did not acknowledge the Bluetooth name change".into()); }
-        let state = self.request(&encode_edifier(&[0xC9]), 0xC9).await?;
+        let state = self.request(&self.encode_edifier(&[0xC9]), 0xC9).await?;
         self.bluetooth_name = decode_edifier_name(&state.payload);
         if self.bluetooth_name.as_deref() != Some(name) { return Err("Bluetooth name did not match device readback".into()); }
         Ok(())
@@ -968,12 +993,22 @@ impl AccessorySession {
                 )
             })
             .collect();
-        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "battery": self.battery, "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action})).collect::<Vec<_>>(), "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "disconnectAudioSupported": self.disconnect_audio_supported, "repairBluetoothSupported": self.repair_bluetooth_supported, "powerOffSupported": self.power_off_supported, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
+        json!({ "status": status, "model": self.model.id(), "name": self.device_name, "edifierBleVersion": (self.model == Model::EdifierW820NbPlus).then_some(self.edifier_protocol.version), "edifierEncryption": (self.model == Model::EdifierW820NbPlus).then_some(if self.edifier_protocol.xor_key == 0 { "none" } else { "Encryption10" }), "battery": self.battery, "noise": self.noise, "gestures": self.gestures.iter().map(|(button, layout, action)| json!({"button":button,"layout":layout,"action":action})).collect::<Vec<_>>(), "eqPresets": self.eq_presets, "selectedEq": self.selected_eq, "sleepTimerOptions": self.sleep_timer_options, "sleepTimerMinutes": self.sleep_timer_minutes, "gameModeSupported": self.game_mode_supported, "gameMode": self.game_mode, "promptToneSupported": self.prompt_tone_supported, "promptToneEnabled": self.prompt_tone_enabled, "promptVolumeSupported": self.prompt_volume_supported, "promptVolumeLevel": self.prompt_volume_level, "autoPowerOffSupported": self.auto_power_off_supported, "autoPowerOff": self.auto_power_off, "disconnectAudioSupported": self.disconnect_audio_supported, "repairBluetoothSupported": self.repair_bluetooth_supported, "powerOffSupported": self.power_off_supported, "bluetoothNameSupported": self.bluetooth_name_supported, "bluetoothNameLimitBytes": self.bluetooth_name_limit_bytes, "bluetoothName": self.bluetooth_name, "touchSensitivitySupported": self.touch_sensitivity_supported, "touchSensitivityIndex": self.touch_sensitivity_index, "touchSensitivity": self.touch_sensitivity_value, "touchControlsSupported": self.touch_controls_supported, "touchControls": self.touch_controls, "power": power })
     }
 }
 
-fn encode_edifier(payload: &[u8]) -> Vec<u8> {
-    encode_edifier_header(0xAA, payload)
+fn encode_edifier(payload: &[u8], protocol: EdifierBLEProtocol) -> Vec<u8> {
+    if protocol.version == 2 {
+        let command = payload.first().copied().unwrap_or(0);
+        let parameters = payload.get(1..).unwrap_or_default();
+        let mut frame = vec![0xAA, 0xEC, command, (parameters.len() >> 8) as u8, parameters.len() as u8];
+        frame.extend(parameters.iter().map(|byte| *byte ^ protocol.xor_key));
+        let checksum = frame.iter().fold(0u8, |sum, byte| sum.wrapping_add(*byte));
+        frame.push(checksum);
+        frame
+    } else {
+        encode_edifier_header(0xAA, payload)
+    }
 }
 
 fn edifier_name_limit(mode: u8) -> usize {
@@ -1005,7 +1040,7 @@ fn encode_edifier_header(header: u8, payload: &[u8]) -> Vec<u8> {
     out
 }
 
-fn decode_edifier_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
+fn decode_edifier_stream(buffer: &mut Vec<u8>, input: &[u8], protocol: EdifierBLEProtocol) -> Vec<Frame> {
     if buffer.len().saturating_add(input.len()) > MAX_RX_BUFFER {
         buffer.clear();
     }
@@ -1022,19 +1057,34 @@ fn decode_edifier_stream(buffer: &mut Vec<u8>, input: &[u8]) -> Vec<Frame> {
         if buffer.len() < 2 {
             break;
         }
-        let size = buffer[1] as usize + 4;
+        let size = if protocol.version == 2 {
+            if buffer.len() < 5 { break; }
+            if buffer[1] != 0xEC { buffer.remove(0); continue; }
+            u16::from_be_bytes([buffer[3], buffer[4]]) as usize + 6
+        } else {
+            buffer[1] as usize + 4
+        };
         if buffer.len() < size {
             break;
         }
         let raw = &buffer[..size];
-        let sum = raw[..size - 2]
-            .iter()
-            .fold(0x2019u16, |s, b| s.wrapping_add(*b as u16));
-        if u16::from_be_bytes([raw[size - 2], raw[size - 1]]) == sum && raw[1] >= 1 {
+        let valid = if protocol.version == 2 {
+            raw[..size - 1].iter().fold(0u8, |sum, byte| sum.wrapping_add(*byte)) == raw[size - 1]
+        } else {
+            let sum = raw[..size - 2]
+                .iter()
+                .fold(0x2019u16, |s, b| s.wrapping_add(*b as u16));
+            u16::from_be_bytes([raw[size - 2], raw[size - 1]]) == sum && raw[1] >= 1
+        };
+        if valid {
             frames.push(Frame {
                 header: raw[0],
                 command: raw[2] as u16,
-                payload: raw[3..size - 2].to_vec(),
+                payload: if protocol.version == 2 {
+                    raw[5..size - 1].iter().map(|byte| *byte ^ protocol.xor_key).collect()
+                } else {
+                    raw[3..size - 2].to_vec()
+                },
             });
             buffer.drain(..size);
         } else {
@@ -1364,18 +1414,25 @@ pub async fn accessory_connect(
             }
         }
     });
+    let edifier_protocol = if model == Model::EdifierW820NbPlus {
+        let properties = peripheral.properties().await.ok().flatten();
+        EdifierBLEProtocol::from_manufacturer_data(properties.as_ref().map(|p| &p.manufacturer_data))
+    } else {
+        EdifierBLEProtocol::default()
+    };
     let mut session = AccessorySession {
         model,
         peripheral,
         write,
         rx,
         decoder: if model == Model::EdifierW820NbPlus {
-            Decoder::Edifier(Vec::new())
+            Decoder::Edifier(Vec::new(), edifier_protocol)
         } else if model == Model::BaseusBlade2 {
             Decoder::BaseusPower(Vec::new())
         } else {
             Decoder::Baseus(Vec::new())
         },
+        edifier_protocol,
         battery: None,
         noise: None,
         gestures: Vec::new(),
@@ -1748,7 +1805,7 @@ mod tests {
         let a = encode_edifier_header(0xBB, &[0xD0]);
         let b = encode_edifier_header(0xCC, &[0xCC, 2]);
         let input = [a, b].concat();
-        let frames = decode_edifier_stream(&mut Vec::new(), &input);
+        let frames = decode_edifier_stream(&mut Vec::new(), &input, EdifierBLEProtocol::default());
         assert_eq!(
             frames.iter().map(|f| f.command).collect::<Vec<_>>(),
             [0xD0, 0xCC]
