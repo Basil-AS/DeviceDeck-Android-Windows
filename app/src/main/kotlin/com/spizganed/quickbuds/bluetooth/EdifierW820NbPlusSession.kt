@@ -41,6 +41,10 @@ class EdifierW820NbPlusSession(
         val bluetoothNameSupported: Boolean = false,
         val bluetoothNameLimitBytes: Int = 0,
         val bluetoothName: String? = null,
+        val firmwareVersionSupported: Boolean = false,
+        val firmwareVersion: String? = null,
+        val bluetoothAddressSupported: Boolean = false,
+        val bluetoothAddress: String? = null,
         val touchSensitivitySupported: Boolean = false,
         val touchSensitivityIndex: Int? = null,
         val touchSensitivityValue: Int? = null,
@@ -75,7 +79,7 @@ class EdifierW820NbPlusSession(
             listener.onStatus("Capability probe was not answered; trying basic controls")
             refresh()
             pump()
-        } else if (timedOut?.command == 0x05 || timedOut?.command == 0x06 || timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1 || timedOut?.command == 0xF9 || timedOut?.command == 0xFA) {
+        } else if (timedOut?.command == 0x05 || timedOut?.command == 0x06 || timedOut?.command == 0xC6 || timedOut?.command == 0xC8 || timedOut?.command == 0xD3 || timedOut?.command == 0x08 || timedOut?.command == 0xD7 || timedOut?.command == 0xC9 || timedOut?.command == 0xFD || timedOut?.command == 0xFE || timedOut?.command == 0xF0 || timedOut?.command == 0xF1 || timedOut?.command == 0xF9 || timedOut?.command == 0xFA) {
             listener.onStatus("Optional Edifier status was not answered; other controls remain available")
             pump()
         } else {
@@ -100,6 +104,8 @@ class EdifierW820NbPlusSession(
                 val promptToneSwitchSupported = (payload.getOrNull(17)?.toInt()?.and(0x02) ?: 0) != 0
                 val promptVolumeSupported = (payload.getOrNull(17)?.toInt()?.and(0x10) ?: 0) != 0
                 val nameSupported = payload.getOrNull(2)?.toInt()?.and(0xFF) == 1
+                val bluetoothAddressSupported = payload.getOrNull(4)?.toInt()?.and(0xFF) == 1
+                val firmwareVersionSupported = payload.getOrNull(5)?.toInt()?.and(0xFF) == 1
                 val nameLimit = when (payload.getOrNull(3)?.toInt()?.and(0xFF)) {
                     1, 6 -> 24; 2, 5 -> 30; 3 -> 29; 4 -> 35; else -> 0
                 }
@@ -113,6 +119,8 @@ class EdifierW820NbPlusSession(
                     promptToneSwitchSupported = promptToneSwitchSupported,
                     promptVolumeSupported = promptVolumeSupported,
                     bluetoothNameSupported = nameSupported, bluetoothNameLimitBytes = nameLimit,
+                    firmwareVersionSupported = firmwareVersionSupported,
+                    bluetoothAddressSupported = bluetoothAddressSupported,
                     touchSensitivitySupported = touchSensitivitySupported,
                     touchControlsSupported = touchControlsSupported)
                 listener.onState(state)
@@ -156,6 +164,8 @@ class EdifierW820NbPlusSession(
             if (state.promptToneSwitchSupported) readPromptToneSwitch()
             if (state.promptVolumeSupported) readPromptVolume()
             if (state.bluetoothNameSupported) readBluetoothName()
+            if (state.firmwareVersionSupported) readFirmwareVersion()
+            if (state.bluetoothAddressSupported) readBluetoothAddress()
             if (state.touchSensitivitySupported) readTouchSensitivity()
             if (state.touchControlsSupported) readTouchControls()
         }
@@ -383,6 +393,34 @@ class EdifierW820NbPlusSession(
             state = state.copy(bluetoothName = name)
             listener.onState(state)
             if (expected != null && expected != name) listener.onStatus("Bluetooth name was not confirmed by device readback")
+        }
+        pump()
+    }
+
+    private fun readFirmwareVersion() {
+        enqueue(0xC6) { frame ->
+            val versionBytes = frame.parameters()
+            if (versionBytes.isEmpty()) {
+                listener.onStatus("Firmware version response was empty")
+                return@enqueue
+            }
+            val version = versionBytes.joinToString(".") { (it.toInt() and 0xFF).toString() }
+            state = state.copy(firmwareVersion = version)
+            listener.onState(state)
+        }
+        pump()
+    }
+
+    private fun readBluetoothAddress() {
+        enqueue(0xC8) { frame ->
+            val addressBytes = frame.parameters()
+            if (addressBytes.size != 6) {
+                listener.onStatus("Bluetooth address response was not recognized")
+                return@enqueue
+            }
+            val address = addressBytes.joinToString(":") { "%02X".format(it.toInt() and 0xFF) }
+            state = state.copy(bluetoothAddress = address)
+            listener.onState(state)
         }
         pump()
     }
