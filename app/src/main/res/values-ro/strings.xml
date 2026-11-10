@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">Despre căști</string>
     <string name="row_firmware_title">Versiune firmware</string>
     <string name="firmware_dialog_title">Actualizări firmware</string>
-    <string name="firmware_dialog_body">DeviceDeck nu actualizează firmware-ul căștilor: o actualizare eșuată le poate face inutilizabile. Actualizează-le din HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck nu actualizează firmware-ul: o actualizare eșuată poate face dispozitivul inutilizabil. Folosește aplicația originală a dispozitivului.</string>
     <string name="settings_title">Setări</string>
     <string name="row_wear_title">Detectare purtare</string>
     <string name="row_wear_sub">Pauză când scoți căștile</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Instalată %1$s</string>
     <string name="settings_about_title">Despre</string>
     <string name="settings_about_sub">Versiune, licențe, GitHub</string>
-    <string name="about_tagline">Controlează căștile OnePlus, OPPO și realme direct prin Bluetooth. O alternativă la HeyMelody și realme Link.</string>
+    <string name="about_tagline">Controlează căștile și accesoriile Bluetooth compatibile în DeviceDeck.</string>
     <string name="about_version">Versiunea %1$s</string>
     <string name="about_kofi_desc">Susține pe Ko-fi</string>
     <string name="about_github_desc">Cod sursă pe GitHub</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Automat</string>
     <string name="model_detected">Detectat: %1$s</string>
     <string name="model_not_detected">Nedetectat încă</string>
-    <string name="no_buds_paired">Nu s-au găsit căști OPPO, OnePlus sau realme asociate. Asociază-le mai întâi din setările Bluetooth.</string>
+    <string name="no_buds_paired">Nu au fost găsite căști compatibile asociate. Asociază-le mai întâi din setările Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Profil auditiv</string>
     <string name="row_golden_sub">Sunet reglat după testul tău de auz</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Se trimite…</string>
     <string name="problem_sent">Feedback trimis. Mulțumim!</string>
     <string name="problem_failed">Feedbackul nu a putut fi trimis. Verifică conexiunea la internet și încearcă din nou.</string>
-    <string name="problem_unsupported">DeviceDeck acceptă doar căștile OnePlus, OPPO și realme. Alege modelul tău din listă.</string>
-    <string name="problem_supported_list">Vezi toate căștile acceptate</string>
+    <string name="problem_unsupported">Acest dispozitiv nu este recunoscut. Alege un model compatibil din listă.</string>
+    <string name="problem_supported_list">Vezi dispozitivele compatibile</string>
     <string name="problem_log_empty">Jurnalul e gol: căștile nu s-au conectat încă. Conectează-le mai întâi, apoi trimite feedback.</string>
-    <string name="problem_capture_hint">O funcție nu merge sau lipsește? Jurnalul aplicației nu ajunge. Deschide un issue pe GitHub cu un jurnal snoop Bluetooth din HeyMelody sau realme Link și o înregistrare a ecranului.</string>
+    <string name="problem_capture_hint">Lipsește o funcție sau nu funcționează? Deschide un issue pe GitHub cu o captură Bluetooth din aplicația producătorului și o înregistrare a ecranului.</string>
     <string name="problem_capture_link">Cum faci un jurnal snoop</string>
     <string name="capture_ask_title">Ajută la repararea acestei funcții</string>
-    <string name="capture_ask_body">Jurnalul aplicației nu ajunge pentru a repara o funcție care nu merge sau lipsește. Deschide un issue pe GitHub cu un jurnal snoop Bluetooth din HeyMelody sau realme Link și o înregistrare a ecranului acelei aplicații. Formularul arată pașii.</string>
+    <string name="capture_ask_body">Jurnalul aplicației nu este suficient pentru a remedia o funcție lipsă sau defectă. Deschide un issue pe GitHub cu o captură Bluetooth din aplicația producătorului și o înregistrare a ecranului. Formularul explică pașii.</string>
     <string name="capture_ask_open">Deschide un issue pe GitHub</string>
     <string name="test_title">Testează căștile</string>
     <string name="test_sub">Încearcă fiecare funcție și trimite rezultatul</string>

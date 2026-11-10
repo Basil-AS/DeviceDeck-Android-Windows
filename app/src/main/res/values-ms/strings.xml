@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">Perihal fon telinga</string>
     <string name="row_firmware_title">Versi perisian tegar</string>
     <string name="firmware_dialog_title">Kemas kini perisian tegar</string>
-    <string name="firmware_dialog_body">DeviceDeck tidak mengemas kini perisian tegar fon telinga: kemas kini yang gagal boleh menyebabkannya tidak boleh digunakan. Kemas kini melalui HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck tidak mengemas kini perisian tegar: kemas kini yang gagal boleh menyebabkan peranti tidak boleh digunakan. Gunakan aplikasi asal peranti.</string>
     <string name="settings_title">Tetapan</string>
     <string name="row_wear_title">Pengesanan pemakaian</string>
     <string name="row_wear_sub">Jeda apabila anda menanggalkan fon telinga</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Dipasang %1$s</string>
     <string name="settings_about_title">Perihal</string>
     <string name="settings_about_sub">Versi, lesen, GitHub</string>
-    <string name="about_tagline">Kawal fon telinga OnePlus, OPPO dan realme terus melalui Bluetooth. Alternatif kepada HeyMelody dan realme Link.</string>
+    <string name="about_tagline">Kawal fon telinga dan aksesori Bluetooth yang disokong dalam DeviceDeck.</string>
     <string name="about_version">Versi %1$s</string>
     <string name="about_kofi_desc">Sokong di Ko-fi</string>
     <string name="about_github_desc">Kod sumber di GitHub</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Automatik</string>
     <string name="model_detected">Dikesan: %1$s</string>
     <string name="model_not_detected">Belum dikesan</string>
-    <string name="no_buds_paired">Tiada earbud OPPO, OnePlus atau realme yang dipasangkan. Pasangkan dahulu dalam tetapan Bluetooth.</string>
+    <string name="no_buds_paired">Tiada fon telinga disokong yang berpasangan ditemui. Pasangkan fon telinga dalam tetapan Bluetooth dahulu.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Profil pendengaran</string>
     <string name="row_golden_sub">Bunyi ditala mengikut ujian pendengaran anda</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Menghantar…</string>
     <string name="problem_sent">Maklum balas dihantar. Terima kasih!</string>
     <string name="problem_failed">Maklum balas tidak dapat dihantar. Semak sambungan internet dan cuba lagi.</string>
-    <string name="problem_unsupported">DeviceDeck hanya menyokong earbud OnePlus, OPPO dan realme. Pilih model anda daripada senarai.</string>
-    <string name="problem_supported_list">Lihat semua earbud yang disokong</string>
+    <string name="problem_unsupported">Peranti ini tidak dikenali. Pilih model yang disokong daripada senarai.</string>
+    <string name="problem_supported_list">Lihat peranti yang disokong</string>
     <string name="problem_log_empty">Log kosong: fon telinga anda belum bersambung. Sambungkan fon telinga dahulu, kemudian hantar maklum balas.</string>
-    <string name="problem_capture_hint">Ciri tidak berfungsi atau tiada? Log apl tidak mencukupi. Buka isu GitHub dengan log snoop Bluetooth daripada HeyMelody atau realme Link dan rakaman skrin.</string>
+    <string name="problem_capture_hint">Ciri tiada atau tidak berfungsi? Buka isu GitHub dengan tangkapan Bluetooth daripada aplikasi pengeluar dan rakaman skrin.</string>
     <string name="problem_capture_link">Cara membuat log snoop</string>
     <string name="capture_ask_title">Bantu baiki ciri ini</string>
-    <string name="capture_ask_body">Log apl tidak mencukupi untuk membaiki ciri yang tidak berfungsi atau tiada. Buka isu GitHub dengan log snoop Bluetooth daripada HeyMelody atau realme Link dan rakaman skrin apl itu. Borang isu menunjukkan langkahnya.</string>
+    <string name="capture_ask_body">Log aplikasi sahaja tidak mencukupi untuk membaiki ciri yang tiada atau rosak. Buka isu GitHub dengan tangkapan Bluetooth daripada aplikasi pengeluar dan rakaman skrin. Borang menerangkan caranya.</string>
     <string name="capture_ask_open">Buka isu GitHub</string>
     <string name="test_title">Uji fon telinga saya</string>
     <string name="test_sub">Cuba setiap ciri dan hantar hasilnya</string>

@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">ईयरबड्स के बारे में</string>
     <string name="row_firmware_title">फ़र्मवेयर संस्करण</string>
     <string name="firmware_dialog_title">फ़र्मवेयर अपडेट</string>
-    <string name="firmware_dialog_body">DeviceDeck ईयरबड्स का फ़र्मवेयर अपडेट नहीं करता: विफल अपडेट उन्हें बेकार कर सकता है। उन्हें HeyMelody से अपडेट करें।</string>
+    <string name="firmware_dialog_body">DeviceDeck फ़र्मवेयर अपडेट नहीं करता: अपडेट विफल होने पर डिवाइस काम करना बंद कर सकता है। डिवाइस का मूल ऐप इस्तेमाल करें।</string>
     <string name="settings_title">सेटिंग्स</string>
     <string name="row_wear_title">वियर डिटेक्शन</string>
     <string name="row_wear_sub">ईयरबड्स निकालने पर रोकें</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">%1$s इंस्टॉल है</string>
     <string name="settings_about_title">परिचय</string>
     <string name="settings_about_sub">संस्करण, लाइसेंस, GitHub</string>
-    <string name="about_tagline">OnePlus, OPPO और realme ईयरबड्स को सीधे ब्लूटूथ से नियंत्रित करें। HeyMelody और realme Link का विकल्प।</string>
+    <string name="about_tagline">DeviceDeck में समर्थित ईयरबड और Bluetooth एक्सेसरी नियंत्रित करें।</string>
     <string name="about_version">संस्करण %1$s</string>
     <string name="about_kofi_desc">Ko-fi पर सहयोग करें</string>
     <string name="about_github_desc">GitHub पर सोर्स कोड</string>
@@ -365,7 +365,7 @@
     <string name="model_auto">स्वचालित</string>
     <string name="model_detected">पहचाना गया: %1$s</string>
     <string name="model_not_detected">अभी पहचाना नहीं गया</string>
-    <string name="no_buds_paired">कोई पेयर किए गए OPPO, OnePlus या realme बड्स नहीं मिले। पहले ब्लूटूथ सेटिंग्स में पेयर करें।</string>
+    <string name="no_buds_paired">कोई समर्थित पेयर किया हुआ ईयरबड नहीं मिला। पहले Bluetooth सेटिंग में ईयरबड पेयर करें।</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">सुनने की प्रोफ़ाइल</string>
     <string name="row_golden_sub">आपके हियरिंग टेस्ट के अनुसार ट्यून की गई ध्वनि</string>
@@ -466,13 +466,13 @@
     <string name="problem_sending">भेजा जा रहा है…</string>
     <string name="problem_sent">फ़ीडबैक भेज दिया गया। धन्यवाद!</string>
     <string name="problem_failed">फ़ीडबैक नहीं भेजा जा सका। इंटरनेट कनेक्शन जाँचें और फिर कोशिश करें।</string>
-    <string name="problem_unsupported">DeviceDeck केवल OnePlus, OPPO और realme ईयरबड्स को सपोर्ट करता है। सूची से अपना मॉडल चुनें।</string>
-    <string name="problem_supported_list">सभी सपोर्टेड ईयरबड्स देखें</string>
+    <string name="problem_unsupported">यह डिवाइस पहचाना नहीं गया। सूची से समर्थित मॉडल चुनें।</string>
+    <string name="problem_supported_list">समर्थित डिवाइस देखें</string>
     <string name="problem_log_empty">लॉग खाली है: आपके बड्स अभी जुड़े नहीं। पहले बड्स जोड़ें, फिर अपना फ़ीडबैक भेजें।</string>
-    <string name="problem_capture_hint">कोई फ़ीचर काम नहीं करता या नहीं है? ऐप का लॉग काफ़ी नहीं है। HeyMelody या realme Link के Bluetooth snoop log और स्क्रीन रिकॉर्डिंग के साथ GitHub issue खोलें।</string>
+    <string name="problem_capture_hint">कोई फ़ीचर गायब है या काम नहीं करता? निर्माता के ऐप से Bluetooth कैप्चर और स्क्रीन रिकॉर्डिंग के साथ GitHub issue खोलें।</string>
     <string name="problem_capture_link">snoop log कैसे बनाएँ</string>
     <string name="capture_ask_title">इस फ़ीचर को ठीक करने में मदद करें</string>
-    <string name="capture_ask_body">काम न करने वाले या न होने वाले फ़ीचर को ठीक करने के लिए ऐप का लॉग काफ़ी नहीं है। HeyMelody या realme Link के Bluetooth snoop log और उस ऐप की स्क्रीन रिकॉर्डिंग के साथ GitHub issue खोलें। issue फ़ॉर्म में चरण दिए हैं।</string>
+    <string name="capture_ask_body">गायब या खराब फ़ीचर ठीक करने के लिए ऐप लॉग काफ़ी नहीं है। निर्माता के ऐप से Bluetooth कैप्चर और स्क्रीन रिकॉर्डिंग के साथ GitHub issue खोलें। फ़ॉर्म में तरीका दिया है।</string>
     <string name="capture_ask_open">GitHub issue खोलें</string>
     <string name="test_title">मेरे ईयरबड्स जांचें</string>
     <string name="test_sub">हर फ़ीचर आज़माएँ और नतीजा भेजें</string>

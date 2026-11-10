@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">À propos des écouteurs</string>
     <string name="row_firmware_title">Version du firmware</string>
     <string name="firmware_dialog_title">Mises à jour du firmware</string>
-    <string name="firmware_dialog_body">DeviceDeck ne met pas à jour le firmware des écouteurs : une mise à jour ratée peut les rendre inutilisables. Mettez-les à jour depuis HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck ne met pas à jour le firmware : une mise à jour échouée peut rendre l’appareil inutilisable. Utilisez l’application d’origine de l’appareil.</string>
     <string name="settings_title">Paramètres</string>
     <string name="row_wear_title">Détection du port</string>
     <string name="row_wear_sub">Pause quand vous retirez les écouteurs</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Installée : %1$s</string>
     <string name="settings_about_title">À propos</string>
     <string name="settings_about_sub">Version, licences, GitHub</string>
-    <string name="about_tagline">Contrôlez les écouteurs OnePlus, OPPO et realme directement en Bluetooth. Une alternative à HeyMelody et realme Link.</string>
+    <string name="about_tagline">Contrôlez les écouteurs et accessoires Bluetooth compatibles avec DeviceDeck.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_kofi_desc">Soutenir sur Ko-fi</string>
     <string name="about_github_desc">Code source sur GitHub</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">Automatique</string>
     <string name="model_detected">Détecté : %1$s</string>
     <string name="model_not_detected">Pas encore détecté</string>
-    <string name="no_buds_paired">Aucun écouteur OPPO, OnePlus ou realme associé. Associez-les d\'abord dans les paramètres Bluetooth.</string>
+    <string name="no_buds_paired">Aucun écouteur compatible associé n’a été trouvé. Associez-les d’abord dans les paramètres Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Profil auditif</string>
     <string name="row_golden_sub">Son adapté à votre test auditif</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">Envoi…</string>
     <string name="problem_sent">Commentaires envoyés. Merci !</string>
     <string name="problem_failed">Impossible d’envoyer les commentaires. Vérifiez la connexion internet et réessayez.</string>
-    <string name="problem_unsupported">DeviceDeck prend en charge uniquement les écouteurs OnePlus, OPPO et realme. Choisissez votre modèle dans la liste.</string>
-    <string name="problem_supported_list">Voir tous les écouteurs pris en charge</string>
+    <string name="problem_unsupported">Cet appareil n’est pas reconnu. Choisissez un modèle compatible dans la liste.</string>
+    <string name="problem_supported_list">Voir les appareils compatibles</string>
     <string name="problem_log_empty">Le journal est vide : vos écouteurs ne se sont pas encore connectés. Connectez-les d’abord, puis envoyez vos commentaires.</string>
-    <string name="problem_capture_hint">Une fonction ne marche pas ou manque ? Le journal de l\'app ne suffit pas. Ouvrez une issue GitHub avec un journal snoop Bluetooth de HeyMelody ou realme Link et un enregistrement d\'écran.</string>
+    <string name="problem_capture_hint">Une fonction manque ou ne marche pas ? Ouvrez une issue GitHub avec une capture Bluetooth de l’application du fabricant et un enregistrement d’écran.</string>
     <string name="problem_capture_link">Comment créer un journal snoop</string>
     <string name="capture_ask_title">Aidez à corriger cette fonction</string>
-    <string name="capture_ask_body">Le journal de l\'app ne suffit pas pour corriger une fonction qui ne marche pas ou qui manque. Ouvrez une issue GitHub avec un journal snoop Bluetooth de HeyMelody ou realme Link et un enregistrement d\'écran de cette app. Le formulaire montre les étapes.</string>
+    <string name="capture_ask_body">Le journal de l’application ne suffit pas pour corriger une fonction manquante ou défaillante. Ouvrez une issue GitHub avec une capture Bluetooth de l’application du fabricant et un enregistrement d’écran. Le formulaire explique la marche à suivre.</string>
     <string name="capture_ask_open">Ouvrir une issue GitHub</string>
     <string name="test_title">Tester mes écouteurs</string>
     <string name="test_sub">Essayez chaque fonction et envoyez le résultat</string>

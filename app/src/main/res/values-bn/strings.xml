@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">ইয়ারবাড সম্পর্কে</string>
     <string name="row_firmware_title">ফার্মওয়্যার সংস্করণ</string>
     <string name="firmware_dialog_title">ফার্মওয়্যার আপডেট</string>
-    <string name="firmware_dialog_body">DeviceDeck ইয়ারবাডের ফার্মওয়্যার আপডেট করে না: ব্যর্থ আপডেট সেগুলিকে অকেজো করে দিতে পারে। HeyMelody থেকে আপডেট করুন।</string>
+    <string name="firmware_dialog_body">DeviceDeck ফার্মওয়্যার আপডেট করে না: ব্যর্থ আপডেটে ডিভাইসটি অচল হতে পারে। সেই ডিভাইসের মূল অ্যাপ ব্যবহার করুন।</string>
     <string name="settings_title">সেটিংস</string>
     <string name="row_wear_title">পরিধান শনাক্তকরণ</string>
     <string name="row_wear_sub">ইয়ারবাড খুলে নিলে পজ করুন</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">ইনস্টল করা %1$s</string>
     <string name="settings_about_title">সম্পর্কে</string>
     <string name="settings_about_sub">সংস্করণ, লাইসেন্স, GitHub</string>
-    <string name="about_tagline">OnePlus, OPPO ও realme ইয়ারবাড সরাসরি Bluetooth-এ নিয়ন্ত্রণ করুন। HeyMelody ও realme Link-এর বিকল্প।</string>
+    <string name="about_tagline">DeviceDeck-এ সমর্থিত ইয়ারবাড ও Bluetooth আনুষঙ্গিক নিয়ন্ত্রণ করুন।</string>
     <string name="about_version">সংস্করণ %1$s</string>
     <string name="about_kofi_desc">Ko-fi-তে সমর্থন করুন</string>
     <string name="about_github_desc">GitHub-এ সোর্স কোড</string>
@@ -363,7 +363,7 @@
     <string name="model_auto">স্বয়ংক্রিয়</string>
     <string name="model_detected">শনাক্ত হয়েছে: %1$s</string>
     <string name="model_not_detected">এখনও শনাক্ত হয়নি</string>
-    <string name="no_buds_paired">কোনো পেয়ার করা OPPO, OnePlus বা realme বাডস পাওয়া যায়নি। আগে ব্লুটুথ সেটিংসে পেয়ার করুন।</string>
+    <string name="no_buds_paired">কোনো সমর্থিত পেয়ার করা ইয়ারবাড পাওয়া যায়নি। আগে Bluetooth সেটিংসে ইয়ারবাড পেয়ার করুন।</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">শ্রবণ প্রোফাইল</string>
     <string name="row_golden_sub">আপনার শ্রবণ পরীক্ষা অনুযায়ী টিউন করা শব্দ</string>
@@ -464,13 +464,13 @@
     <string name="problem_sending">পাঠানো হচ্ছে…</string>
     <string name="problem_sent">মতামত পাঠানো হয়েছে। ধন্যবাদ!</string>
     <string name="problem_failed">মতামত পাঠানো যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।</string>
-    <string name="problem_unsupported">DeviceDeck শুধু OnePlus, OPPO ও realme ইয়ারবাড সমর্থন করে। তালিকা থেকে আপনার মডেল বেছে নিন।</string>
-    <string name="problem_supported_list">সব সমর্থিত ইয়ারবাড দেখুন</string>
+    <string name="problem_unsupported">এই ডিভাইসটি শনাক্ত করা যায়নি। তালিকা থেকে সমর্থিত মডেল বেছে নিন।</string>
+    <string name="problem_supported_list">সমর্থিত ডিভাইস দেখুন</string>
     <string name="problem_log_empty">লগ খালি: আপনার বাড এখনও সংযুক্ত হয়নি। আগে বাড সংযুক্ত করুন, তারপর মতামত পাঠান।</string>
-    <string name="problem_capture_hint">কোনো ফিচার কাজ করে না বা নেই? অ্যাপের লগ যথেষ্ট নয়। HeyMelody বা realme Link-এর Bluetooth snoop log ও একটি স্ক্রিন রেকর্ডিং সহ GitHub-এ একটি issue খুলুন।</string>
+    <string name="problem_capture_hint">কোনো ফিচার নেই বা কাজ করছে না? ডিভাইসের নির্মাতার অ্যাপ থেকে Bluetooth ক্যাপচার ও স্ক্রিন রেকর্ডিংসহ GitHub issue খুলুন।</string>
     <string name="problem_capture_link">কীভাবে snoop log তৈরি করবেন</string>
     <string name="capture_ask_title">এই ফিচার ঠিক করতে সাহায্য করুন</string>
-    <string name="capture_ask_body">কাজ না করা বা না থাকা ফিচার ঠিক করতে অ্যাপের লগ যথেষ্ট নয়। HeyMelody বা realme Link-এর Bluetooth snoop log এবং সেই অ্যাপের একটি স্ক্রিন রেকর্ডিং সহ GitHub-এ একটি issue খুলুন। issue ফর্মে ধাপগুলো আছে।</string>
+    <string name="capture_ask_body">কোনো ফিচার নেই বা কাজ করছে না তা ঠিক করতে অ্যাপের লগই যথেষ্ট নয়। ডিভাইসের নির্মাতার অ্যাপ থেকে Bluetooth ক্যাপচার ও স্ক্রিন রেকর্ডিংসহ GitHub issue খুলুন। ফর্মে পদ্ধতি দেওয়া আছে।</string>
     <string name="capture_ask_open">GitHub-এ issue খুলুন</string>
     <string name="test_title">আমার ইয়ারবাড পরীক্ষা করুন</string>
     <string name="test_sub">প্রতিটি ফিচার চেষ্টা করে ফলাফল পাঠান</string>

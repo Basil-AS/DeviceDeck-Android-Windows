@@ -67,7 +67,7 @@
     <string name="earbuds_section_about">Giới thiệu tai nghe</string>
     <string name="row_firmware_title">Phiên bản firmware</string>
     <string name="firmware_dialog_title">Cập nhật firmware</string>
-    <string name="firmware_dialog_body">DeviceDeck không cập nhật firmware của tai nghe: cập nhật thất bại có thể khiến tai nghe không dùng được. Hãy cập nhật từ HeyMelody.</string>
+    <string name="firmware_dialog_body">DeviceDeck không cập nhật chương trình cơ sở: cập nhật thất bại có thể khiến thiết bị không sử dụng được. Hãy dùng ứng dụng gốc của thiết bị.</string>
     <string name="settings_title">Cài đặt</string>
     <string name="row_wear_title">Phát hiện đeo</string>
     <string name="row_wear_sub">Tạm dừng khi tháo tai nghe</string>
@@ -289,7 +289,7 @@
     <string name="settings_update_sub">Đã cài %1$s</string>
     <string name="settings_about_title">Giới thiệu</string>
     <string name="settings_about_sub">Phiên bản, giấy phép, GitHub</string>
-    <string name="about_tagline">Điều khiển tai nghe OnePlus, OPPO và realme trực tiếp qua Bluetooth. Một lựa chọn thay thế cho HeyMelody và realme Link.</string>
+    <string name="about_tagline">Điều khiển tai nghe và phụ kiện Bluetooth được hỗ trợ trong DeviceDeck.</string>
     <string name="about_version">Phiên bản %1$s</string>
     <string name="about_kofi_desc">Ủng hộ trên Ko-fi</string>
     <string name="about_github_desc">Mã nguồn trên GitHub</string>
@@ -365,7 +365,7 @@
     <string name="model_auto">Tự động</string>
     <string name="model_detected">Đã nhận diện: %1$s</string>
     <string name="model_not_detected">Chưa nhận diện</string>
-    <string name="no_buds_paired">Không tìm thấy tai nghe OPPO, OnePlus hoặc realme đã ghép nối. Hãy ghép nối trong cài đặt Bluetooth trước.</string>
+    <string name="no_buds_paired">Không tìm thấy tai nghe được hỗ trợ đã ghép nối. Trước tiên, hãy ghép nối trong cài đặt Bluetooth.</string>
     <!-- Hearing profile (HeyMelody's "Golden Sound", renamed: not our trademark) and the earbud fit test ([VENDOR] wording where HeyMelody has it) -->
     <string name="row_golden_title">Hồ sơ thính lực</string>
     <string name="row_golden_sub">Âm thanh điều chỉnh theo bài kiểm tra thính lực của bạn</string>
@@ -466,13 +466,13 @@
     <string name="problem_sending">Đang gửi…</string>
     <string name="problem_sent">Đã gửi phản hồi. Cảm ơn bạn!</string>
     <string name="problem_failed">Không thể gửi phản hồi. Hãy kiểm tra kết nối internet rồi thử lại.</string>
-    <string name="problem_unsupported">DeviceDeck chỉ hỗ trợ tai nghe OnePlus, OPPO và realme. Hãy chọn mẫu của bạn trong danh sách.</string>
-    <string name="problem_supported_list">Xem tất cả tai nghe được hỗ trợ</string>
+    <string name="problem_unsupported">Không nhận diện được thiết bị này. Hãy chọn mẫu được hỗ trợ trong danh sách.</string>
+    <string name="problem_supported_list">Xem thiết bị được hỗ trợ</string>
     <string name="problem_log_empty">Nhật ký trống: tai nghe của bạn chưa kết nối. Hãy kết nối tai nghe trước, rồi gửi phản hồi.</string>
-    <string name="problem_capture_hint">Một tính năng không chạy hoặc bị thiếu? Nhật ký ứng dụng là chưa đủ. Hãy mở issue trên GitHub kèm nhật ký snoop Bluetooth của HeyMelody hoặc realme Link và một video quay màn hình.</string>
+    <string name="problem_capture_hint">Thiếu hoặc có tính năng không hoạt động? Hãy tạo issue GitHub kèm bản ghi Bluetooth từ ứng dụng của nhà sản xuất và video quay màn hình.</string>
     <string name="problem_capture_link">Cách tạo nhật ký snoop</string>
     <string name="capture_ask_title">Giúp sửa tính năng này</string>
-    <string name="capture_ask_body">Nhật ký ứng dụng là chưa đủ để sửa một tính năng không chạy hoặc bị thiếu. Hãy mở issue trên GitHub kèm nhật ký snoop Bluetooth của HeyMelody hoặc realme Link và video quay màn hình của ứng dụng đó. Biểu mẫu có các bước.</string>
+    <string name="capture_ask_body">Chỉ nhật ký ứng dụng không đủ để sửa tính năng bị thiếu hoặc lỗi. Hãy tạo issue GitHub kèm bản ghi Bluetooth từ ứng dụng của nhà sản xuất và video quay màn hình. Biểu mẫu có hướng dẫn.</string>
     <string name="capture_ask_open">Mở issue trên GitHub</string>
     <string name="test_title">Kiểm tra tai nghe</string>
     <string name="test_sub">Thử từng tính năng và gửi kết quả</string>
