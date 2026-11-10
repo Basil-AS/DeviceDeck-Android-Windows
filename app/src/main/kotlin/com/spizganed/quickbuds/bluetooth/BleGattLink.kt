@@ -333,8 +333,11 @@ class BleGattScanner private constructor(
         return try {
             scanner = bleScanner
             seen.clear()
+            val filters = profile.discoveryService?.let { uuid ->
+                listOf(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(uuid)).build())
+            }
             bleScanner.startScan(
-                listOf(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(profile.discoveryService)).build()),
+                filters,
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),
                 callback,
             )

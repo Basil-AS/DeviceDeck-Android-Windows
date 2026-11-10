@@ -321,12 +321,12 @@ class DeviceHubActivity : Activity() {
         scanButton.setText(R.string.device_hub_scanning)
         if (selectedDevice == DeviceKind.BASEUS_EP10_PRO || selectedDevice == DeviceKind.BASEUS_BOWIE_MF1) {
             val expected = if (selectedDevice == DeviceKind.BASEUS_EP10_PRO)
-                listOf("baseus bass ep10 pro", "bass ep10 pro", "baseus ep10 pro", "ep10 pro")
-            else listOf("baseus bowie mf1", "bowie mf1")
+                listOf("ep10pro") else listOf("bowiemf1")
             val adapter = getSystemService(BluetoothManager::class.java)?.adapter
             val paired = runCatching { adapter?.bondedDevices.orEmpty().firstOrNull { device ->
-                val name = runCatching { device.name }.getOrNull()?.trim()?.lowercase() ?: return@firstOrNull false
-                expected.any { name == it }
+                val name = runCatching { device.name }.getOrNull()
+                    ?.filter(Char::isLetterOrDigit)?.lowercase() ?: return@firstOrNull false
+                expected.any { name.contains(it) }
             } }.getOrNull()
             scanButton.isEnabled = true; scanButton.setText(R.string.device_hub_scan)
             if (paired == null) {
@@ -341,7 +341,7 @@ class DeviceHubActivity : Activity() {
         }
         val profile = when (selectedDevice) {
             DeviceKind.BASEUS_BOWIE_30 -> DeviceGattProfiles.baseusShared.copy(
-                displayName = "Baseus Bowie 30", acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"))
+                displayName = "Baseus Bowie 30", acceptedNames = setOf("Baseus Bowie 30", "Bowie 30"), discoveryService = null)
             DeviceKind.BASEUS_BLADE_2 -> DeviceGattProfiles.baseusBlade2
             DeviceKind.EDIFIER_W820NB_PLUS -> DeviceGattProfiles.edifierW820NbPlus
             DeviceKind.BASEUS_EP10_PRO, DeviceKind.BASEUS_BOWIE_MF1 -> error("SPP devices do not use BLE discovery")
