@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.35 — 2026-11-10
+
+- Fix Android EDIFIER W820NB Plus BLE v2 discovery and control framing. Select the protocol version and encryption mode from the headset's manufacturer advertisement, support encrypted v2 packets, and find paired headsets when their advertisement is unavailable.
+- Keep the actual BLE protocol mode visible in the connected-device status to help diagnose hardware compatibility.
+- Android version code 34; Android and Windows/Linux version synchronized to 0.1.0-alpha.35. This build passed CI; headset command round-trip still requires physical-device validation.
+
 ## 0.1.0-alpha.34 — 2026-11-10
 
 - Implement the previously advertised EDIFIER W820NB Plus audio disconnect (`0xCD`), Bluetooth repair (`0xCF`) and power-off (`0xCE`) actions in the Windows/Linux accessory hub. Each action is capability-gated, requires confirmation, and is reported as one-way because the protocol has no state readback.
