@@ -322,7 +322,15 @@ class BleGattScanner private constructor(
                 ?: manufacturerData?.takeIf { it.size() > 0 }?.keyAt(0)
             val manufacturerBytes = manufacturerId?.let { manufacturerData?.get(it)?.copyOf() }
             handler.post {
-                if (running && seen.add(device.address)) listener.onDevice(device, profile, manufacturerId, manufacturerBytes)
+                // Edifier advertisements may expose the local name/search UUID
+                // before the manufacturer record used to select BLE v1/v2 and
+                // Encryption10. Keep delivering matching W820 packets during its
+                // short scan so the caller can replace the fallback protocol with
+                // the actual advertised mode. Other models remain deduplicated.
+                val needsEdifierAdvertisementRefresh = profile.id == DeviceGattProfiles.edifierW820NbPlus.id
+                if (running && (needsEdifierAdvertisementRefresh || seen.add(device.address))) {
+                    listener.onDevice(device, profile, manufacturerId, manufacturerBytes)
+                }
             }
         }
 
