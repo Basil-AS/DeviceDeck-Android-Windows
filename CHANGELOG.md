@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.41 — 2026-11-10
+
+- Android: scan W820NB Plus advertisements without controller-side filters and validate the model name or Edifier search UUID in the app callback, so accepted name variants are not discarded by exact Bluetooth name filtering.
+- Android version code 40; Android and Windows/Linux version synchronized to 0.1.0-alpha.41. Physical W820NB Plus discovery and control validation remains outstanding.
+
 ## 0.1.0-alpha.40 — 2026-11-10
 
 - Android: discover supported BLE devices by either their product search UUID or advertised local name. This fixes W820NB Plus discovery when its advertisement omits the Edifier search UUID.
