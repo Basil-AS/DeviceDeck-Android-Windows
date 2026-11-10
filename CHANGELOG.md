@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.36 — 2026-11-10
+
+- Add EDIFIER W820NB Plus BLE v2 protocol negotiation and Encryption10 framing to Windows/Linux, matching Android's advertisement-driven v1/v2 selection.
+- Show the selected Edifier BLE version and encryption mode in desktop device diagnostics.
+- Android version code 35; Android and Windows/Linux version synchronized to 0.1.0-alpha.36. Physical headset command round-trip remains to be verified.
+
 ## 0.1.0-alpha.35 — 2026-11-10
 
 - Fix Android EDIFIER W820NB Plus BLE v2 discovery and control framing. Select the protocol version and encryption mode from the headset's manufacturer advertisement, support encrypted v2 packets, and find paired headsets when their advertisement is unavailable.
