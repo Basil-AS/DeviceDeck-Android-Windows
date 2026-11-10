@@ -3037,7 +3037,7 @@ dependencies = [
 
 [[package]]
 name = "quickbuds-tauri"
-version = "0.1.0-alpha.32"
+version = "0.1.0-alpha.33"
 dependencies = [
  "btleplug",
  "buds-core",

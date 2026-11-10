@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.33 — 2026-11-10
+
+- Discover Baseus Bowie 30 and Blade 2 by normalized advertised name without requiring the Baseus GATT service UUID to be present in the advertisement; retain the verified Edifier W820NB Plus service UUID filter.
+- Normalize paired Baseus EP10 Pro and Bowie MF1 names for SPP device selection.
+- Normalize realme model names and aliases so punctuation and spacing variants are recognized during device discovery and model selection.
+- Android and Windows/Linux version synchronized to 0.1.0-alpha.33. These discovery corrections still need physical-device verification.
+
 ## 0.1.0-alpha.32 — 2026-11-10
 
 - Add the EDIFIER W820NB Plus power-off action (`0xCE`) when D8 byte 10 reports support. Require confirmation and report the request as sent when the headphones disconnect before acknowledging it; the power state has no readback. Static EDIFIER app evidence; physical-headset behavior remains unverified.
