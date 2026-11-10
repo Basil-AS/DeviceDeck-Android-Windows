@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.37 — 2026-11-10
+
+- Android: show an already-paired EDIFIER W820NB Plus immediately, continue scanning for its BLE advertisement, and retry capability discovery with known BLE v2 framing modes when protocol data is unavailable.
+- Show the selected protocol mode during negotiation. Real-headset operation still needs confirmation on hardware.
+
+
 ## 0.1.0-alpha.36 — 2026-11-10
 
 - Add EDIFIER W820NB Plus BLE v2 protocol negotiation and Encryption10 framing to Windows/Linux, matching Android's advertisement-driven v1/v2 selection.
