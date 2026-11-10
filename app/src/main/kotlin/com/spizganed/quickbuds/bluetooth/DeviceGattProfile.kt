@@ -10,10 +10,16 @@ data class DeviceGattProfile(
     val write: UUID,
     val notify: UUID,
     val acceptedNames: Set<String>,
-    val discoveryService: UUID = service,
+    // Null means local-name discovery. Some devices use this GATT service only after connection
+    // and do not include it in advertisements, so a mandatory UUID filter hides them entirely.
+    val discoveryService: UUID? = service,
 ) {
-    fun matchesName(name: String?): Boolean = name != null &&
-        acceptedNames.any { it.equals(name.trim(), ignoreCase = true) }
+    fun matchesName(name: String?): Boolean {
+        if (name.isNullOrBlank()) return false
+        fun normalize(value: String) = value.filter(Char::isLetterOrDigit).lowercase()
+        val candidate = normalize(name)
+        return acceptedNames.any { normalize(it) == candidate }
+    }
 }
 
 /** Static profiles are discovery hints, not proof that a model accepts every command. */
@@ -47,5 +53,6 @@ object DeviceGattProfiles {
         id = "baseus:blade-2",
         displayName = "Baseus Blade 2",
         acceptedNames = setOf("Baseus Blade 2", "Blade 2", "Blade 2-140", "Baseus Blade 2-140"),
+        discoveryService = null,
     )
 }
