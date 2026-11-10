@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.27 — 2026-11-10
+
+- Correct the EDIFIER W820NB Plus BLE profile using the control service and read/write characteristic UUIDs embedded in EDIFIER Connect 8.4.28. Physical connection and command round-trip remain unverified.
+
 ## 0.1.0-alpha.26 — 2026-11-10
 
 - Add original, model-specific vector illustrations to the Android realme Buds Air7 and Air7 Pro model-picker rows.
